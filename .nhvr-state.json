@@ -2,7 +2,7 @@
   "schemaVersion": "1.0",
   "appVersion": "2.0-complete",
   "lastUpdated": "2026-03-26T16:00:00Z",
-  "lastSession": "Session 4 — P11 Multi-jurisdiction RBAC + P12 Standards Adapter + P13 IoT Sensors + P14 AI Defect Classification",
+  "lastSession": "Session 4 — P11 Multi-jurisdiction RBAC + P12 Standards Adapter + P13 IoT Sensors + P14 Defect Classification",
   "currentPromptRef": "14",
   "currentPromptPart": "COMPLETE",
   "partsCompleted": [
@@ -53,13 +53,13 @@
     "P11: JurisdictionAccess entity — userRef + jurisdiction + accessLevel + expiresAt; grantJurisdictionAccess/revokeJurisdictionAccess actions",
     "P12: StandardsAdapter.js — 4 profiles (AU/NZ/EU/US) with field labels + units + rating scales; localStorage persistence",
     "P13: SensorDevice + SensorReading entities; ingestSensorReading with threshold-based alertLevel (LOAD_CELL/WATER_LEVEL/CRACK_MONITOR); BridgeForm Section 13 panel",
-    "P14: DefectClassification entity; classifyDefect mock AI (keyword matching → aiCategory/aiSeverity/confidence); Defects screen AI Classify button + result dialog",
+    "P14: DefectClassification entity; classifyDefect mock classifier (keyword matching → aiCategory/aiSeverity/confidence); Defects screen Classify button + result dialog",
     "Mirror strategy: all files rsync'd to app-router/resources/nhvr.bridgemanagement/"
   ],
   "openIssues": [
     "11 pre-existing test failures in bridge-service.test.js (BridgeManagementService config) — unchanged from baseline",
     "FreightRouteBridge seed data not yet created — routes exist but no bridges assigned to routes yet",
     "predictCondition uses OData function call syntax — may need bridgeId wrapped in guid'' for HANA production",
-    "AI classify in production: replace mock keyword engine with Claude Vision / Azure AI Vision API call"
+    "AI classify in production: replace mock keyword engine with a vision API call"
   ]
 }

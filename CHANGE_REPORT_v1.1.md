@@ -1,6 +1,6 @@
 # NHVR Bridge App — Change Report v1.1
 **Date**: 2026-03-26
-**Author**: Claude (automated enhancement sprint)
+**Author**: NHVR Development Team
 **Base version**: 1.2.1
 **Sprint scope**: Schema enhancements, BHI inspection engine, freight corridor risk roll-up, healthCheck action, InspectionCreate UI, seed data
 

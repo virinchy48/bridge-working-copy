@@ -226,7 +226,7 @@ resolved or documented with a mitigation rationale. The system demonstrates:
 
 ---
 
-*Principal Architect: Claude (SuperTester ABSOLUTE)*
+*Principal Architect: NHVR Development Team*
 *Date: 2026-04-05*
 
 *"All findings resolved. All tests green. System cleared for production."*

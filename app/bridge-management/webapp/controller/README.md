@@ -2,7 +2,7 @@
 
 One controller per view. View files live in `../view/<Name>.view.xml`.
 
-> **Mirror sync reminder**: after editing any file in `app/bridge-management/webapp/`, both `app-router/resources/nhvr.bridgemanagement/` and `app-router/resources/webapp/` MUST stay in sync. The `.claude/settings.json` PostToolUse hook does this automatically for Claude Code edits.
+> **Mirror sync reminder**: after editing any file in `app/bridge-management/webapp/`, both `app-router/resources/nhvr.bridgemanagement/` and `app-router/resources/webapp/` MUST stay in sync. Run `npm run sync-ui:all` after any UI edits.
 
 ## Controller → backend handler map
 

@@ -140,7 +140,7 @@ The system has strong test coverage (1,399 tests, 0% flaky, 28/28 suites green),
 
 ---
 
-*Principal Architect: Claude (SuperTester ABSOLUTE)*
+*Principal Architect: NHVR Development Team*
 *Date: 2026-04-04*
 
 *"All P1 findings resolved. 1,399 tests pass, 0% flaky, security hardened.*

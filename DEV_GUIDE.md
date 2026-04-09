@@ -1,11 +1,11 @@
-# CLAUDE.md
+# DEV_GUIDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file is the developer reference guide for this repository.
 
 > **NHVR Bridge Asset & Restriction Management** — SAP BTP / CAP v9 / UI5 / HANA Cloud.
-> This file is the **operating manual**. It is loaded into every message, so it is kept dense.
+> This file is the **developer operating manual**.
 > For detail beyond what is here, read these *only when needed*: `docs/05-API-REFERENCE.md` (full OData + actions), `docs/03-IMPLEMENTATION-GUIDE.md` (CAP/UI5 impl), `docs/01-BTP-SETUP-GUIDE.md` (full BTP env), `docs/04-ADMIN-CONFIGURATION-GUIDE.md` (admin screens).
-> For current version, last deploy, and session-scoped state, check `~/.claude/projects/-Users-siddharthaampolu-21-NHVR-APP/memory/MEMORY.md`.
+
 
 ---
 
@@ -82,7 +82,7 @@ Browser ─HTTPS─> App Router (256MB, xs-app.json) ─JWT+OData─> CAP Backen
 
 ---
 
-## 4. MODULE MAP (Claude: jump here first — avoids globbing)
+## 4. MODULE MAP
 
 ### 4.1 UI modules (controller ↔ view 1:1 under `app/bridge-management/webapp/`)
 
@@ -298,9 +298,9 @@ Local mock users: `alice` (Admin), `bob` (BridgeMgr), `carol` (Viewer), `dave` (
 
 ---
 
-## 9. TOKEN DISCIPLINE (rules for Claude on this repo)
+## 9. DEVELOPER DISCIPLINE
 
-These keep sessions cheap and fast:
+These keep development efficient:
 
 1. **Start with this file + MEMORY.md + the MODULE MAP (§4)** — don't glob the repo unless the map doesn't cover your task.
 2. **Use Grep over Read** when looking for identifiers. Use Read only for files you're about to edit.
@@ -357,7 +357,7 @@ Pre-wired safety nets — trust them, don't reinvent:
 
 | Tool | Where | What it does |
 |---|---|---|
-| **Auto mirror-sync hook** | `.claude/settings.json` → `scripts/sync-ui-mirror.sh` | Claude's PostToolUse hook syncs `app/bridge-management/webapp/` → both `app-router/resources/*` paths after every Edit/Write. Kills gotcha §6.1#1. |
+| **Auto mirror-sync hook** | `.claude/settings.json` → `scripts/sync-ui-mirror.sh` | Auto-sync hook syncs `app/bridge-management/webapp/` → both `app-router/resources/*` paths after every Edit/Write. Kills gotcha §6.1#1. |
 | **CI drift check** | `.github/workflows/mirror-drift.yml` | Blocks PRs that touch UI without mirroring. |
 | **Pre-commit verify** | `scripts/verify-session.sh` (`npm run verify`) | <30s: mirror drift → lint → cds compile → unit tests. Bails on first failure. |
 | **Handler template** | `srv/handlers/_template.js` | Copy when adding a new domain handler. |

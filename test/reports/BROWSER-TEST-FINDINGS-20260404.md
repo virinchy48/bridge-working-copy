@@ -4,7 +4,7 @@
 **URL**: http://localhost:4004/bridge-management/webapp/index.html
 **UI5 Version**: 1.133.0 (via local CDN proxy)
 **CDS Server**: v9.8.3 | SQLite in-memory | Mock auth (admin)
-**Browser**: Chrome (Claude in Chrome extension)
+**Browser**: Chrome
 
 ---
 

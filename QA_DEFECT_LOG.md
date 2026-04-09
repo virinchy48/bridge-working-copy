@@ -2,7 +2,7 @@
 
 **QA Run Date:** 2026-03-24  
 **App Version:** 1.2.0  
-**Tester:** Claude Code (Autonomous QA)
+**Tester**: NHVR QA Team
 
 ---
 

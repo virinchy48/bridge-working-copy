@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================
-# NHVR UI mirror sync — called automatically by Claude Code
-# PostToolUse hook after any Edit/Write in app/bridge-management/webapp/.
+# NHVR UI mirror sync — run after any Edit/Write in app/bridge-management/webapp/.
 #
 # Source of truth:     app/bridge-management/webapp/
 # Mirror destination:  app-router/resources/nhvr.bridgemanagement/
@@ -27,7 +26,7 @@ if [ ! -d "$DEST1" ] && [ ! -d "$DEST2" ]; then
 fi
 
 # rsync with --checksum would be accurate but slow; --update is fast and correct for
-# this workflow (Claude is always the writer, no concurrent edits to destinations).
+# this workflow (source is always the writer, no concurrent edits to destinations).
 RSYNC_OPTS="-a --update --delete --exclude=*.test.js --exclude=test/ --exclude=.DS_Store"
 
 synced=0

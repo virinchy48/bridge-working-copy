@@ -236,4 +236,4 @@ These utilities are **created and functional** but need to be **wired into exist
 
 ---
 
-*Generated 2026-04-03 by Claude Opus 4.6*
+*Generated 2026-04-03*

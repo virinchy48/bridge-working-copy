@@ -39,6 +39,6 @@ Thumbs.db
 
 # Test coverage
 coverage/
-.claude/worktrees/
+.claude/
 node_modules
 infra/smoke-tester/.local/

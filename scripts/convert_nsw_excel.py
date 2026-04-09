@@ -13,12 +13,7 @@ import urllib.request
 import urllib.error
 import base64
 
-EXCEL_PATH = (
-    "/Users/siddharthaampolu/Library/Application Support/Claude/"
-    "local-agent-mode-sessions/d96d25e4-cca2-4988-8af5-9442f6253247/"
-    "7bc83155-15c9-43fa-aeaa-c99052f82684/"
-    "local_926ce473-f668-4b19-9573-448b1e621111/outputs/NSW_Bridge_Data_NHVR.xlsx"
-)
+EXCEL_PATH = "NSW_Bridge_Data_NHVR.xlsx"
 
 BRIDGE_ENDPOINT      = "http://localhost:4004/bridge-management/massUploadBridges"
 RESTRICTION_ENDPOINT = "http://localhost:4004/bridge-management/massUploadRestrictions"

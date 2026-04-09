@@ -7,7 +7,7 @@
 |  SUPERTESTER v8 BROWSER-FIRST FINDINGS REPORT                        |
 |  App: http://localhost:4004 (local) + BTP deployed                   |
 |  Date: 2026-04-03                                                    |
-|  Tester: Claude Code (Static + HTTP Analysis)                        |
+|  Tester: NHVR QA Team                        |
 +======================================================================+
 |  PHASES COMPLETED                                                    |
 |  Phase 0   : Reconnaissance (33 views, 30 controllers, 65 actions)  |
@@ -284,4 +284,4 @@ The P2/P3 findings are quality improvements that should be planned for subsequen
 ---
 
 *SuperTester v8 | Code-Level Analysis Mode | 2026-04-03*
-*Claude Code | NHVR Bridge Asset & Restriction Management*
+*NHVR Bridge Asset & Restriction Management*
