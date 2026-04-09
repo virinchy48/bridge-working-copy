@@ -85,8 +85,8 @@ cds.on('bootstrap', (app) => {
     // When sapui5.hana.ondemand.com is unreachable from the browser (503),
     // proxy requests through the CDS server where curl/https works fine.
     const https = require('https');
-    app.get('/ui5cdn/*', (req, res) => {
-        const path = req.params[0];
+    app.get('/ui5cdn/*path', (req, res) => {
+        const path = req.params.path;
         const cdnUrl = 'https://sapui5.hana.ondemand.com/1.133.0/resources/' + path;
         https.get(cdnUrl, (cdnRes) => {
             if (cdnRes.statusCode >= 400) {
