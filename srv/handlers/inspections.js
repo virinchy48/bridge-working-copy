@@ -2,8 +2,8 @@
 const cds = require('@sap/cds');
 const LOG = cds.log('nhvr-inspections');
 
-module.exports = function registerInspectionHandlers(srv, h) {
-    const { getBridge, getInspectionOrder, getBridgeDefect, logAudit } = h;
+module.exports = function registerInspectionHandlers(srv, helpers) {
+    const { getBridge, getInspectionOrder, getBridgeDefect, logAudit } = helpers;
 
     // ── InspectionRecord CRUD audit hooks ────────────────────────
     srv.after('CREATE', 'InspectionRecords', async (data, req) => {

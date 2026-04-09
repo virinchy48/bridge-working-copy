@@ -2,8 +2,8 @@
 const cds = require('@sap/cds');
 const LOG = cds.log('nhvr-reports');
 
-module.exports = function registerReportHandlers(srv, h) {
-    const { getBridge, getBridgeByKey } = h;
+module.exports = function registerReportHandlers(srv, helpers) {
+    const { getBridge, getBridgeByKey } = helpers;
 
     // ── bridgeComplianceReport ─────────────────────────────────
     srv.on('bridgeComplianceReport', async (req) => {

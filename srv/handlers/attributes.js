@@ -1,8 +1,8 @@
 'use strict';
 const cds = require('@sap/cds');
 
-module.exports = function registerAttributeHandlers(srv, h) {
-    const { logAudit } = h;
+module.exports = function registerAttributeHandlers(srv, helpers) {
+    const { logAudit } = helpers;
 
     srv.before(['CREATE', 'UPDATE'], 'BridgeAttributes', async (req) => {
         const data = req.data;

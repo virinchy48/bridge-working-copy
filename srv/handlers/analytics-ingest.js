@@ -166,7 +166,7 @@ function validateEvent(evt) {
 }
 
 // ── Handler Registration ────────────────────────────────────────
-module.exports = function registerAnalyticsIngestHandlers(srv, _h) {
+module.exports = function registerAnalyticsIngestHandlers(srv, _helpers) {
 
     srv.on('ingestEvents', async (req) => {
         // Environment kill switch
@@ -199,7 +199,7 @@ module.exports = function registerAnalyticsIngestHandlers(srv, _h) {
 
         // Determine role and tenant from JWT (server-authoritative)
         const knownRoles = ['Admin', 'BridgeManager', 'Viewer', 'Uploader', 'Executive', 'Inspector', 'Operator'];
-        const userRole = knownRoles.find(r => req.user && req.user.is(r)) || 'Unknown';
+        const userRole = knownRoles.find(roleName => req.user && req.user.is(roleName)) || 'Unknown';
         const tenantCode = (req.user && req.user.attr && req.user.attr.tenantCode) || 'DEFAULT';
         const environment = process.env.NODE_ENV || 'production';
 

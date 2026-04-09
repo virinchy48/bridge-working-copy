@@ -96,7 +96,7 @@ module.exports = function registerCommonHelpers(srv) {
         try {
             const db = await cds.connect.to('db');
             const knownRoles = ['Admin', 'BridgeManager', 'Viewer', 'Uploader', 'Executive', 'Inspector', 'Operator'];
-            const userRole = knownRoles.find(r => req && req.user && req.user.is(r)) || 'Unknown';
+            const userRole = knownRoles.find(roleName => req && req.user && req.user.is(roleName)) || 'Unknown';
             await db.run(INSERT.into('nhvr.AuditLog').entries({
                 timestamp  : new Date().toISOString(),
                 userId     : req && req.user ? req.user.id : 'system',
@@ -139,23 +139,23 @@ module.exports = function registerCommonHelpers(srv) {
 
     // Build parameterized WHERE clause from common filter params.
     // Returns { clause: 'WHERE ...', params: [...] } for safe SQL execution.
-    function buildAssetFilter(p) {
+    function buildAssetFilter(filterParams) {
         const conds = [];
         const params = [];
         // String filters: only apply if non-empty
-        if (p.assetClass)    { conds.push(`b.assetClass = ?`);    params.push(String(p.assetClass).slice(0, 200)); }
-        if (p.state)         { conds.push(`b.state = ?`);         params.push(String(p.state).slice(0, 200)); }
-        if (p.region)        { conds.push(`LOWER(b.region) LIKE LOWER(?)`); params.push('%' + String(p.region).slice(0, 200) + '%'); }
-        if (p.postingStatus) { conds.push(`b.postingStatus = ?`); params.push(String(p.postingStatus).slice(0, 200)); }
-        if (p.condition)     { conds.push(`b.condition = ?`);     params.push(String(p.condition).slice(0, 200)); }
-        if (p.criticality)   { conds.push(`b.criticality = ?`);  params.push(String(p.criticality).slice(0, 200)); }
+        if (filterParams.assetClass)    { conds.push(`b.assetClass = ?`);    params.push(String(filterParams.assetClass).slice(0, 200)); }
+        if (filterParams.state)         { conds.push(`b.state = ?`);         params.push(String(filterParams.state).slice(0, 200)); }
+        if (filterParams.region)        { conds.push(`LOWER(b.region) LIKE LOWER(?)`); params.push('%' + String(filterParams.region).slice(0, 200) + '%'); }
+        if (filterParams.postingStatus) { conds.push(`b.postingStatus = ?`); params.push(String(filterParams.postingStatus).slice(0, 200)); }
+        if (filterParams.condition)     { conds.push(`b.condition = ?`);     params.push(String(filterParams.condition).slice(0, 200)); }
+        if (filterParams.criticality)   { conds.push(`b.criticality = ?`);  params.push(String(filterParams.criticality).slice(0, 200)); }
         // Numeric range: OData passes null as 0, so only apply when > 0
-        if (p.conditionMin  && parseInt(p.conditionMin)  > 0) { conds.push(`b.conditionRating >= ?`); params.push(parseInt(p.conditionMin)); }
-        if (p.conditionMax  && parseInt(p.conditionMax)  > 0) { conds.push(`b.conditionRating <= ?`); params.push(parseInt(p.conditionMax)); }
-        if (p.yearBuiltFrom && parseInt(p.yearBuiltFrom) > 0) { conds.push(`b.yearBuilt >= ?`);      params.push(parseInt(p.yearBuiltFrom)); }
-        if (p.yearBuiltTo   && parseInt(p.yearBuiltTo)   > 0) { conds.push(`b.yearBuilt <= ?`);      params.push(parseInt(p.yearBuiltTo)); }
+        if (filterParams.conditionMin  && parseInt(filterParams.conditionMin)  > 0) { conds.push(`b.conditionRating >= ?`); params.push(parseInt(filterParams.conditionMin)); }
+        if (filterParams.conditionMax  && parseInt(filterParams.conditionMax)  > 0) { conds.push(`b.conditionRating <= ?`); params.push(parseInt(filterParams.conditionMax)); }
+        if (filterParams.yearBuiltFrom && parseInt(filterParams.yearBuiltFrom) > 0) { conds.push(`b.yearBuilt >= ?`);      params.push(parseInt(filterParams.yearBuiltFrom)); }
+        if (filterParams.yearBuiltTo   && parseInt(filterParams.yearBuiltTo)   > 0) { conds.push(`b.yearBuilt <= ?`);      params.push(parseInt(filterParams.yearBuiltTo)); }
         // Boolean: only apply if explicitly true (OData converts null boolean to false)
-        if (p.isActive === true) conds.push(`b.isActive = 1`);
+        if (filterParams.isActive === true) conds.push(`b.isActive = 1`);
         const clause = conds.length ? 'WHERE ' + conds.join(' AND ') : '';
         return { clause, params };
     }

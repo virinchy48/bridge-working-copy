@@ -2,7 +2,7 @@
 // NHVR Bridge Asset & Restriction Management
 // Type/enum declarations — extracted from db/schema.cds in v4.7.13
 // Entities + extend blocks remain in db/schema.cds.
-// See CLAUDE.md §12 for why the full bounded-context split is deferred.
+// Note: full bounded-context split deferred — entities and extend blocks remain in db/schema.cds.
 // ============================================================
 namespace nhvr;
 

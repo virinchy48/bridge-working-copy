@@ -8,7 +8,7 @@
 //   4. Add row to srv/handlers/README.md.
 //   5. Write test/unit/<domain>.unit.test.js.
 //
-// CONVENTIONS (enforced by CLAUDE.md §6.3):
+// CONVENTIONS:
 //   - Validation in BEFORE hooks — throw req.error(400, "...")
 //   - Audit in AFTER hooks — call writeAudit() from common.js
 //   - Never put business logic in srv/service.js (it is a 39-line loader)

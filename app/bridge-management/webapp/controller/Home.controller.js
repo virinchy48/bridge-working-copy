@@ -106,15 +106,15 @@ sap.ui.define([
 
         // ── Load current user info and adapt UI to role ───────────────
         _loadUserInfo: function () {
-            const h = { Accept: "application/json" };
+            const requestHeaders = { Accept: "application/json" };
 
-            fetch(`${BASE}/me()`, { headers: h })
-                .then(r => r.json())
+            fetch(`${BASE}/me()`, { headers: requestHeaders })
+                .then(response => response.json())
                 .then(info => {
                     const roles   = info.roles || [];
-                    const isAdmin = roles.some(r => r === "Admin" || r === "NHVR_Admin" || r === "admin");
+                    const isAdmin = roles.some(roleName => roleName === "Admin" || roleName === "NHVR_Admin" || roleName === "admin");
                     this._isAdmin = isAdmin; // stored for use in _applyCapabilitiesToHome
-                    const isMgr   = isAdmin || roles.some(r => r === "BridgeManager" || r === "NHVR_BridgeManager");
+                    const isMgr   = isAdmin || roles.some(roleName => roleName === "BridgeManager" || roleName === "NHVR_BridgeManager");
 
                     // Show role badge
                     const chip = this.byId("roleChip");
@@ -300,9 +300,9 @@ sap.ui.define([
                 { id: "tileVehicleAccess",   key: "vehicleaccess" },
                 { id: "tileRouteAssessment", key: "routeassessment" }
             ];
-            opsTiles.forEach(t => {
-                const tile = this.byId(t.id);
-                if (tile) tile.setVisible(RoleManager.isVisible(t.key));
+            opsTiles.forEach(tileConfig => {
+                const tile = this.byId(tileConfig.id);
+                if (tile) tile.setVisible(RoleManager.isVisible(tileConfig.key));
             });
 
             // Analytics section — Map View tile (visible to all roles)
@@ -326,9 +326,9 @@ sap.ui.define([
                 { id: "massEditTile",           key: "massedit" },
                 { id: "vehicleTypesTile",       key: "vehicletypes" }
             ];
-            adminTiles.forEach(t => {
-                const tile = this.byId(t.id);
-                if (tile) tile.setVisible(RoleManager.isVisible(t.key));
+            adminTiles.forEach(tileConfig => {
+                const tile = this.byId(tileConfig.id);
+                if (tile) tile.setVisible(RoleManager.isVisible(tileConfig.key));
             });
 
             // Inspector section — visible for Inspector, BridgeManager, Admin

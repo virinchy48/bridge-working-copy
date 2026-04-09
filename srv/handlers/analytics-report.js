@@ -40,7 +40,7 @@ function daysBetween(from, to) {
     return Math.max(1, Math.round((new Date(to) - new Date(from)) / 86400000));
 }
 
-module.exports = function registerAnalyticsReportHandlers(srv, _h) {
+module.exports = function registerAnalyticsReportHandlers(srv, _helpers) {
 
     // ────────────────────────────────────────────────────────────
     // 1. getAnalyticsSummary — headline KPIs + top routes/actions

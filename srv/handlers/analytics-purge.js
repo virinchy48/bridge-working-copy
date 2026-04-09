@@ -7,7 +7,7 @@
 const cds = require('@sap/cds');
 const LOG = cds.log('analytics-purge');
 
-module.exports = function registerAnalyticsPurgeHandlers(srv, _h) {
+module.exports = function registerAnalyticsPurgeHandlers(srv, _helpers) {
 
     // ────────────────────────────────────────────────────────────
     // runAnalyticsRollup — aggregate raw → daily → weekly → monthly

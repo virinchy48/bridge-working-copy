@@ -4,7 +4,7 @@
 // ============================================================
 'use strict';
 
-module.exports = function (srv, h) {
+module.exports = function registerRoutingEngineHandlers(srv, _helpers) {
     const cds = require('@sap/cds');
 
     srv.on('calculateRoute', async (req) => {
@@ -53,12 +53,12 @@ module.exports = function (srv, h) {
         var coords = points.map(function(p) { return p.lng + ',' + p.lat; }).join(';');
         var url = config.baseUrl + '/' + coords + '?overview=full&geometries=geojson&alternatives=true';
         var resp = await fetch(url, { signal: AbortSignal.timeout(10000) });
-        var j = await resp.json();
-        return (j.routes || []).map(function(r) {
+        var routingResult = await resp.json();
+        return (routingResult.routes || []).map(function(route) {
             return {
-                distance_km: Math.round(r.distance / 1000 * 10) / 10,
-                duration_min: Math.round(r.duration / 60 * 10) / 10,
-                geometry: r.geometry,
+                distance_km: Math.round(route.distance / 1000 * 10) / 10,
+                duration_min: Math.round(route.duration / 60 * 10) / 10,
+                geometry: route.geometry,
                 source: 'osrm'
             };
         });
@@ -78,10 +78,10 @@ module.exports = function (srv, h) {
             body: JSON.stringify(body),
             signal: AbortSignal.timeout(10000)
         });
-        var j = await resp.json();
-        return j.trip ? [{
-            distance_km: Math.round((j.trip.summary.length || 0) * 10) / 10,
-            duration_min: Math.round((j.trip.summary.time || 0) / 60 * 10) / 10,
+        var valhallaResult = await resp.json();
+        return valhallaResult.trip ? [{
+            distance_km: Math.round((valhallaResult.trip.summary.length || 0) * 10) / 10,
+            duration_min: Math.round((valhallaResult.trip.summary.time || 0) / 60 * 10) / 10,
             geometry: null,
             source: 'valhalla'
         }] : [];

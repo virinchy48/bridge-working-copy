@@ -2,8 +2,8 @@
 const cds = require('@sap/cds');
 const LOG = cds.log('nhvr-restrictions');
 
-module.exports = function registerRestrictionHandlers(srv, h) {
-    const { getBridgeByKey, getRestriction, logAudit, writeHistory, updateBridgePostingStatus, logRestrictionChange } = h;
+module.exports = function registerRestrictionHandlers(srv, helpers) {
+    const { getBridgeByKey, getRestriction, logAudit, writeHistory, updateBridgePostingStatus, logRestrictionChange } = helpers;
 
     // ─────────────────────────────────────────────────────────
     // BEFORE HOOKS - Validation

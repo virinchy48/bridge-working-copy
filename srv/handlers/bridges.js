@@ -2,8 +2,8 @@
 const cds = require('@sap/cds');
 const LOG = cds.log('nhvr-bridges');
 
-module.exports = function registerBridgeHandlers(srv, h) {
-    const { getBridge, getBridgeByKey, logAudit, writeHistory, updateBridgePostingStatus, validateEnum } = h;
+module.exports = function registerBridgeHandlers(srv, helpers) {
+    const { getBridge, getBridgeByKey, logAudit, writeHistory, updateBridgePostingStatus, validateEnum } = helpers;
 
     const SENSITIVE_BRIDGE_FIELDS = ['conditionRating', 'conditionScore'];
 
@@ -53,13 +53,13 @@ module.exports = function registerBridgeHandlers(srv, h) {
         }
         // conditionRating 1-10 (AS 5100 scale) — auto-derive condition label
         if (data.conditionRating !== undefined && data.conditionRating !== null) {
-            const r = parseInt(data.conditionRating);
-            if (!Number.isInteger(r) || r < 1 || r > 10)
+            const rating = parseInt(data.conditionRating);
+            if (!Number.isInteger(rating) || rating < 1 || rating > 10)
                 errors.push('Condition Rating must be an integer between 1 and 10');
             else if (!data.condition) {
                 const ratingMap = { 10:'EXCELLENT',9:'VERY_GOOD',8:'GOOD',7:'GOOD',
                                     6:'FAIR',5:'FAIR',4:'POOR',3:'POOR',2:'VERY_POOR',1:'FAILED' };
-                data.condition = ratingMap[r] || 'FAIR';
+                data.condition = ratingMap[rating] || 'FAIR';
             }
         }
         // Enum validation — condition and postingStatus

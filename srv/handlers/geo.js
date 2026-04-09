@@ -14,7 +14,7 @@ async function loadThresholds(db, jurisdiction) {
             .where({ isActive: true, jurisdiction: { '=': null } })
     );
     var thresholds = {};
-    for (const r of globalRows) { thresholds[r.thresholdKey] = parseFloat(r.value); }
+    for (const row of globalRows) { thresholds[row.thresholdKey] = parseFloat(row.value); }
 
     // If jurisdiction specified, overlay jurisdiction-specific values
     if (jurisdiction) {
@@ -22,7 +22,7 @@ async function loadThresholds(db, jurisdiction) {
             SELECT.from('nhvr.AssessmentThreshold')
                 .where({ isActive: true, jurisdiction: jurisdiction })
         );
-        for (const r of jurisRows) { thresholds[r.thresholdKey] = parseFloat(r.value); }
+        for (const row of jurisRows) { thresholds[row.thresholdKey] = parseFloat(row.value); }
     }
 
     // Provide defaults if not found in DB
@@ -37,8 +37,8 @@ async function loadThresholds(db, jurisdiction) {
     }, thresholds);
 }
 
-module.exports = function registerGeoHandlers(srv, h) {
-    const { logAudit } = h;
+module.exports = function registerGeoHandlers(srv, helpers) {
+    const { logAudit } = helpers;
 
     function getCorrelationId(req) {
         return (req.correlationId) ||

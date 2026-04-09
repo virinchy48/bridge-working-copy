@@ -4,7 +4,7 @@
 // ============================================================
 'use strict';
 
-module.exports = function (srv, h) {
+module.exports = function registerRestrictionFeedHandlers(srv, _helpers) {
     const cds = require('@sap/cds');
 
     srv.on('pollRestrictionFeed', async (req) => {

@@ -1,8 +1,8 @@
 'use strict';
 const cds = require('@sap/cds');
 
-module.exports = function registerUploadHandlers(srv, h) {
-    const { getBridgeByKey, logAudit, updateBridgePostingStatus } = h;
+module.exports = function registerUploadHandlers(srv, helpers) {
+    const { getBridgeByKey, logAudit, updateBridgePostingStatus } = helpers;
 
     // ── Shared CSV parser (handles quoted fields) ──────────────
     function parseCSVLine(line) {

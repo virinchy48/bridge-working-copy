@@ -2,7 +2,7 @@
 const cds = require('@sap/cds');
 const LOG = cds.log('nhvr-dq');
 
-module.exports = function registerDataQualityHandlers(srv, h) {
+module.exports = function registerDataQualityHandlers(srv, _helpers) {
 
     srv.on('calculateDataQuality', async (req) => {
         const db = await cds.connect.to('db');
