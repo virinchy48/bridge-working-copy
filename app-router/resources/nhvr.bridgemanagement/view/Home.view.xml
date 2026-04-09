@@ -236,15 +236,7 @@
                             </TileContent>
                         </GenericTile>
 
-                        <GenericTile id="tileLicenseConfig" class="nhvrLaunchTile tileBizAdmin sapUiTinyMargin"
-                            header="Client Licensing"
-                            subheader="Orgs, Features &amp; Usage"
-                            press="onNavToLicenseConfig"
-                            frameType="OneByOne">
-                            <TileContent>
-                                <ImageContent src="sap-icon://customer"/>
-                            </TileContent>
-                        </GenericTile>
+
 
                         <GenericTile id="restrictionTypesTile" class="nhvrLaunchTile sapUiTinyMargin"
                             header="Restriction Types" subheader="Configure Types"

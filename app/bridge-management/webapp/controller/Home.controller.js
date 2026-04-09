@@ -234,7 +234,6 @@ sap.ui.define([
         onNavToIntegrationHub:       function () { this._navTo("integrationHub"); },
         onNavToInspectionCreate:     function () { this._navTo("InspectionCreateNew"); },
         onNavToFreightRoutes:        function () { this._navTo("FreightRoutes"); },
-        onNavToLicenseConfig:        function () { this._navTo("LicenseConfig"); },
         onNavToAnalytics:            function () { this._navTo("AnalyticsDashboard"); },
 
         _navTo: function (routeName) {
@@ -349,8 +348,6 @@ sap.ui.define([
             if (this.byId("tileRecordInspection")) this.byId("tileRecordInspection").setVisible(RoleManager.isVisible("recordInspection"));
             if (this.byId("tileFreightCorridors")) this.byId("tileFreightCorridors").setVisible(RoleManager.isVisible("freightCorridors"));
 
-            // ── Admin section extra tiles ─────────────────────────────────
-            if (this.byId("tileLicenseConfig"))   this.byId("tileLicenseConfig").setVisible(RoleManager.isVisible("licenseConfig"));
 
         },
 
