@@ -112,36 +112,6 @@
 
 
 
-                <!-- ── Quick Access Rail (role-adaptive) ───────────── -->
-                <FlexBox id="quickAccessSection" wrap="Wrap" alignItems="Center"
-                    class="nhvrQuickAccessRail" visible="false">
-                    <!-- Populated dynamically by Home.controller.js onRoleChange/onInit -->
-                    <!-- Items rendered via _renderQuickAccessRail() -->
-                </FlexBox>
-
-                <!-- ── Command Palette Dialog ────────────────────────── -->
-                <Dialog id="cmdPaletteDialog" title="Quick Actions" contentWidth="480px"
-                    class="nhvrCommandPalette">
-                    <content>
-                        <VBox>
-                            <SearchField id="cmdPaletteSearch"
-                                placeholder="Search actions, bridges, screens..."
-                                liveChange="onCommandSearch"
-                                class="sapUiSmallMargin"/>
-                            <List id="cmdPaletteList"
-                                mode="None"
-                                noDataText="No matching actions"
-                                itemPress="onCommandSelect">
-                                <items>
-                                    <!-- Populated dynamically by _renderCommandPalette() -->
-                                </items>
-                            </List>
-                        </VBox>
-                    </content>
-                    <endButton>
-                        <Button text="Close" press="onCmdPaletteClose"/>
-                    </endButton>
-                </Dialog>
 
                 <!-- ── Section: Operations ───────────────────────────── -->
                 <VBox class="nhvrDashSection">

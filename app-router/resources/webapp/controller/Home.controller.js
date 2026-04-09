@@ -570,8 +570,6 @@ sap.ui.define([
             if (this.byId("integrationHubTile"))  this.byId("integrationHubTile").setVisible(RoleManager.isVisible("integrationHub"));
             if (this.byId("tileLicenseConfig"))   this.byId("tileLicenseConfig").setVisible(RoleManager.isVisible("licenseConfig"));
 
-            // Quick-access rail
-            this._renderQuickAccessRail();
         },
 
         // ── Quick Access Rail ─────────────────────────────────────
@@ -579,114 +577,6 @@ sap.ui.define([
          * Dynamically render role-specific quick-access buttons into the rail VBox.
          * Clears existing buttons before re-rendering to support role switching.
          */
-        _renderQuickAccessRail: function () {
-            const oSection = this.byId("quickAccessSection");
-            if (!oSection) return;
-
-            oSection.destroyItems();
-
-            const items = RoleManager.getQuickAccessItems();
-            if (!items || items.length === 0) {
-                oSection.setVisible(false);
-                return;
-            }
-
-            // "Quick Access:" label
-            oSection.addItem(new Text({ text: "Quick Access:" }).addStyleClass("nhvrStatCard__label sapUiSmallMarginEnd"));
-
-            items.forEach(item => {
-                const oBtn = new Button({
-                    text  : item.label,
-                    icon  : item.icon,
-                    type  : item.primary ? "Emphasized" : "Default",
-                    press : () => this._quickNav(item.route, item.params)
-                }).addStyleClass("nhvrQuickAccessBtn sapUiTinyMarginEnd");
-                oSection.addItem(oBtn);
-            });
-
-            // Add "Search actions" command palette trigger
-            oSection.addItem(new Button({
-                text    : "Search Actions",
-                icon    : "sap-icon://search",
-                type    : "Transparent",
-                tooltip : "Open command palette (search all actions)",
-                press   : () => this._openCommandPalette()
-            }).addStyleClass("nhvrQuickAccessBtn sapUiTinyMarginBegin"));
-
-            oSection.setVisible(true);
-        },
-
-        /** Navigate with optional query params */
-        _quickNav: function (routeName, params) {
-            const router = this.getOwnerComponent().getRouter();
-            if (params && Object.keys(params).length > 0) {
-                router.navTo(routeName, { "?query": params });
-            } else {
-                router.navTo(routeName);
-            }
-        },
-
-        // ── Command Palette ───────────────────────────────────────
-        _openCommandPalette: function () {
-            this._cmdActions = RoleManager.getCommandPaletteActions();
-            this._renderCommandResults(this._cmdActions);
-            const dlg = this.byId("cmdPaletteDialog");
-            if (dlg) dlg.open();
-            // Clear and focus search field
-            const search = this.byId("cmdPaletteSearch");
-            if (search) { search.setValue(""); }
-        },
-
-        onCmdPaletteClose: function () {
-            const dlg = this.byId("cmdPaletteDialog");
-            if (dlg) dlg.close();
-        },
-
-        onCommandSearch: function (oEvent) {
-            const query = (oEvent.getParameter("newValue") || "").toLowerCase().trim();
-            if (!this._cmdActions) return;
-            const filtered = query
-                ? this._cmdActions.filter(a =>
-                    a.label.toLowerCase().includes(query) ||
-                    a.category.toLowerCase().includes(query))
-                : this._cmdActions;
-            this._renderCommandResults(filtered);
-        },
-
-        _renderCommandResults: function (actions) {
-            const list = this.byId("cmdPaletteList");
-            if (!list) return;
-            list.destroyItems();
-            actions.forEach(action => {
-                const oItem = new CustomListItem({
-                    type: "Active",
-                    press: () => {
-                        this.onCmdPaletteClose();
-                        this._quickNav(action.route, action.params);
-                    }
-                });
-                const oHBox = new HBox({ alignItems: "Center" }).addStyleClass("nhvrCommandResult");
-                const oIconBox = new HBox({ alignItems: "Center", justifyContent: "Center" })
-                    .addStyleClass("nhvrCommandResult__icon");
-                oIconBox.addItem(new Icon({ src: action.icon, size: "1rem" }));
-
-                const oLabel = new Text({ text: action.label }).addStyleClass("nhvrCommandResult__label");
-                const oCat   = new Text({ text: action.category }).addStyleClass("nhvrCommandResult__category");
-                const oVB = new sap.m.VBox().addStyleClass("nhvrCommandResult__text");
-                oVB.addItem(oLabel);
-                oVB.addItem(oCat);
-
-                oHBox.addItem(oIconBox);
-                oHBox.addItem(oVB);
-                oItem.addContent(oHBox);
-                list.addItem(oItem);
-            });
-        },
-
-        onCommandSelect: function (oEvent) {
-            // Handled via individual item press callbacks above
-        },
-
         // ── Refresh ───────────────────────────────────────────────
         onRefresh: function () {
             this._loadKpis();
