@@ -68,13 +68,6 @@
                             press="onOpenRoleDialog"
                             type="Transparent"
                             class="nhvrShellBarBtn"/>
-                        <OverflowToolbarButton id="btnThemeToggle"
-                            icon="sap-icon://night-mode"
-                            text="{i18n>tooltip.toggleTheme}"
-                            tooltip="{i18n>tooltip.toggleTheme}"
-                            press="onThemeToggle"
-                            type="Transparent"
-                            class="nhvrShellBarBtn"/>
                         <OverflowToolbarButton icon="sap-icon://sys-help"
                             text="{i18n>tooltip.openHelp}"
                             tooltip="{i18n>tooltip.openHelp}"

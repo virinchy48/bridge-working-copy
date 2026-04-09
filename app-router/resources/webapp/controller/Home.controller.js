@@ -56,8 +56,6 @@ sap.ui.define([
                     this._applyLiteMode();
                 });
 
-            // Restore saved theme preference
-            this._restoreTheme();
 
             // ── P05: Offline resilience init ──────────────────────────────
             OfflineSync.init();
@@ -758,43 +756,6 @@ sap.ui.define([
                 var sCurrent = oUiModel.getProperty("/appSubtitle") || '';
                 oUiModel.setProperty("/appSubtitle", sCurrent + AppConfig.getModeLabel());
             }
-        },
-
-        // ── Day / Night Theme Toggle ──────────────────────────────
-        onThemeToggle: function () {
-            var oConfig = sap.ui.getCore().getConfiguration();
-            var sCurrentTheme = oConfig.getTheme();
-            var bNightMode = sCurrentTheme === "sap_horizon_dark";
-            var sNewTheme = bNightMode ? "sap_horizon" : "sap_horizon_dark";
-            var sLabel   = bNightMode ? "🌙 Night" : "☀️ Day";
-            var sToast   = bNightMode ? "Switched to Day (Light) theme" : "Switched to Night (Dark) theme";
-            sap.ui.getCore().applyTheme(sNewTheme);
-            // Persist preference across navigation
-            try { localStorage.setItem("nhvr_theme", sNewTheme); } catch(e) { /* localStorage unavailable */ }
-            // Update button label
-            var oBtn = this.byId("btnThemeToggle");
-            if (oBtn) {
-                oBtn.setText(sLabel);
-                oBtn.setIcon(bNightMode ? "sap-icon://night-mode" : "sap-icon://day-view");
-            }
-            MessageToast.show(sToast);
-        },
-
-        // ── Restore theme on init (from localStorage) ────────────
-        _restoreTheme: function () {
-            try {
-                var sSaved = localStorage.getItem("nhvr_theme");
-                var oConfig = sap.ui.getCore().getConfiguration();
-                if (sSaved && sSaved !== oConfig.getTheme()) {
-                    sap.ui.getCore().applyTheme(sSaved);
-                    var oBtn = this.byId("btnThemeToggle");
-                    if (oBtn) {
-                        var bDark = sSaved === "sap_horizon_dark";
-                        oBtn.setText(bDark ? "☀️ Day" : "🌙 Night");
-                        oBtn.setIcon(bDark ? "sap-icon://day-view" : "sap-icon://night-mode");
-                    }
-                }
-            } catch(e) { jQuery.sap.log.error("[NHVR] Theme restore failed", e && e.message || String(e)); }
         },
 
         // ── Info Popover ──────────────────────────────────────────
