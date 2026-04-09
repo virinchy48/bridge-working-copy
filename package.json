@@ -2,7 +2,7 @@
     "name": "nhvr-bridge-app",
     "version": "3.0.0",
     "description": "NHVR Bridge Asset & Restriction Management - SAP BTP CAP Application",
-    "repository": "https://github.com/your-org/nhvr-bridge-app",
+    "repository": "https://github.com/virinchy48/Bridge-prod-06April",
     "license": "SEE LICENSE IN LICENSE",
     "private": true,
     "scripts": {
@@ -45,8 +45,7 @@
         "@sap/xssec": "^4.0.0",
         "express": "^4.21.0",
         "hdb": "^2.0.0",
-        "passport": "^0.7.0",
-        "pptxgenjs": "^4.0.1"
+        "passport": "^0.7.0"
     },
     "devDependencies": {
         "@cap-js/cds-test": "^0.4.1",
