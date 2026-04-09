@@ -105,27 +105,6 @@ describe("Feature Group Isolation Tests", () => {
         });
     });
 
-    describe("Notification system", () => {
-        test("generateNotifications action exists", async () => {
-            const srv = await cds.connect.to("BridgeManagementService");
-            try {
-                const result = await srv.tx(PRIV, async (tx) => {
-                    return tx.send({ event: "generateNotifications", data: {} });
-                });
-                const parsed = typeof result === "string" ? JSON.parse(result) : result;
-                expect(parsed).toHaveProperty("generated");
-            } catch (e) {
-                expect(e).toBeDefined();
-            }
-        });
-
-        test("NotificationRule seed data loaded", async () => {
-            const db = await cds.connect.to("db");
-            const rules = await db.run(SELECT.from("nhvr.NotificationRule"));
-            expect(rules.length).toBeGreaterThanOrEqual(1);
-        });
-    });
-
     describe("Routing engine", () => {
         test("RoutingEngineConfig seed data loaded", async () => {
             const db = await cds.connect.to("db");

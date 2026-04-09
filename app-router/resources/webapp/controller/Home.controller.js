@@ -30,7 +30,6 @@ sap.ui.define([
             this._loadUserInfo();
             this._loadKpis();
             this._loadRecentRestrictions();
-            this._loadNotifications();
             this._loadMySavedViews();
             this._initHelpAssistant("home");
             this._loadVersionInfo();
@@ -41,7 +40,6 @@ sap.ui.define([
 
             // Initialize UI model for ShellBar bindings
             var oUiModel = new JSONModel({
-                notifCount   : "0",
                 userInitials : "US",
                 userName     : "Loading…",
                 appSubtitle  : new Date().toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric" })
@@ -836,90 +834,6 @@ sap.ui.define([
                 "• Overdue Inspections — bridges whose next inspection due date has passed"
             );
         },
-
-        // ── Notification Inbox ────────────────────────────────────
-        _loadNotifications: function () {
-            const h    = { Accept: "application/json" };
-            const today = new Date().toISOString().slice(0, 10);
-            const in30  = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-            const notifs = [];
-            const self = this;
-
-            Promise.all([
-                // Overdue inspections: orders not completed/cancelled and past planned date
-                fetch(`${BASE}/InspectionOrders?$top=20&$filter=status ne 'COMPLETED' and status ne 'CANCELLED' and plannedDate lt ${today}&$select=orderNumber,plannedDate,status`, { headers: h })
-                    .then(r => r.ok ? r.json() : { value: [] })
-                    .then(j => (j.value || []).forEach(o => notifs.push({
-                        title      : "Overdue Inspection: " + (o.orderNumber || "Order"),
-                        description: "Planned " + (o.plannedDate || "unknown date") + " — " + (o.status || "OPEN"),
-                        priority   : "High",
-                        icon       : "sap-icon://inspection"
-                    }))),
-                // Restrictions expiring within 30 days
-                fetch(`${BASE}/Restrictions?$top=20&$filter=status eq 'ACTIVE' and validToDate ne null and validToDate lt ${in30}&$select=restrictionType,value,unit,validToDate`, { headers: h })
-                    .then(r => r.ok ? r.json() : { value: [] })
-                    .then(j => (j.value || []).forEach(r => notifs.push({
-                        title      : "Restriction Expiring: " + (r.restrictionType || "Restriction") + " " + (r.value || "") + (r.unit || ""),
-                        description: "Expires " + (r.validToDate || "unknown date"),
-                        priority   : "Medium",
-                        icon       : "sap-icon://alert"
-                    })))
-            ]).then(function () {
-                self._notificationCount = notifs.length;
-                // Update ShellBar notification badge
-                var oUiModel = self.getView().getModel("ui");
-                if (oUiModel) oUiModel.setProperty("/notifCount", notifs.length > 0 ? String(notifs.length) : "");
-                self._renderNotifications(notifs);
-                const btn = self.byId("btnNotifications");
-                if (btn) {
-                    btn.setTooltip("Notifications (" + notifs.length + ")");
-                    // Inject/update badge count on the bell button
-                    const domRef = btn.getDomRef && btn.getDomRef();
-                    if (domRef) {
-                        let badge = domRef.querySelector(".nhvrNotifBadge");
-                        if (notifs.length > 0) {
-                            if (!badge) {
-                                badge = document.createElement("span");
-                                badge.className = "nhvrNotifBadge";
-                                domRef.style.position = "relative";
-                                domRef.appendChild(badge);
-                            }
-                            badge.textContent = notifs.length > 99 ? "99+" : String(notifs.length);
-                        } else if (badge) {
-                            badge.remove();
-                        }
-                    }
-                }
-            }).catch(function (err) {
-                console.warn("[NHVR] Notification load failed:", err);
-            });
-        },
-
-        _renderNotifications: function (notifs) {
-            const list = this.byId("notificationList");
-            if (!list) return;
-            list.destroyItems();
-            notifs.forEach(n => {
-                list.addItem(new StandardListItem({
-                    title      : n.title,
-                    description: n.description,
-                    icon       : n.icon,
-                    iconInset  : false,
-                    info       : n.priority,
-                    infoState  : n.priority === "High" ? "Error" : "Warning"
-                }));
-            });
-        },
-
-        onOpenNotifications: function () {
-            const dlg = this.byId("notificationDialog");
-            if (dlg) dlg.open();
-        },
-
-        onCloseNotifications: function () {
-            const dlg = this.byId("notificationDialog");
-            if (dlg) dlg.close();
-        }
 
     }, HelpAssistantMixin));
 });

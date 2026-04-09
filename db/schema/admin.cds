@@ -179,31 +179,6 @@ entity DataQualityScore : cuid, managed {
 }
 
 // ─────────────────────────────────────────────────────────────
-// NOTIFICATION BACKEND
-// ─────────────────────────────────────────────────────────────
-entity Notification : cuid, managed {
-    recipientRole  : String(50);
-    recipientUser  : String(200);
-    title          : String(200) @mandatory;
-    message        : LargeString;
-    category       : String(50);
-    severity       : String(20) default 'INFO';
-    relatedEntity  : String(100);
-    relatedId      : String(100);
-    isRead         : Boolean default false;
-    isDismissed    : Boolean default false;
-}
-
-entity NotificationRule : cuid, managed {
-    ruleCode       : String(50) @mandatory;
-    description    : String(200);
-    category       : String(50);
-    thresholdDays  : Integer;
-    recipientRoles : String(200);
-    isEnabled      : Boolean default true;
-}
-
-// ─────────────────────────────────────────────────────────────
 // ROUTING ENGINE ABSTRACTION
 // ─────────────────────────────────────────────────────────────
 entity RoutingEngineConfig : cuid, managed {

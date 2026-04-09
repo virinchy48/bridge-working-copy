@@ -26,9 +26,8 @@ module.exports = cds.service.impl(async function (srv) {
     require('./handlers/analytics-report')(srv, h);
     require('./handlers/analytics-purge')(srv, h);
 
-    // Data Quality + Notifications (Phase C11/C13)
+    // Data Quality (Phase C11)
     require('./handlers/data-quality')(srv, h);
-    require('./handlers/notifications')(srv, h);
 
     // Infrastructure — Routing Engine + Restriction Feeds (Phase D17/D18)
     require('./handlers/routing-engine')(srv, h);

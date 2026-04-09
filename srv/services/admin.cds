@@ -112,28 +112,4 @@ action calculateDataQuality(bridgeId: UUID) returns LargeString;
 @restrict: [{ to: ['Admin'] }]
 action calculateAllDataQuality() returns LargeString;
 
-// ── PHASE C13 — NOTIFICATIONS ────────────────────────────────
-@restrict: [
-    { grant: 'READ',                      to: 'authenticated-user' },
-    { grant: ['CREATE','UPDATE','DELETE'],  to: ['Admin'] }
-]
-entity Notifications as projection on nhvr.Notification;
-
-@restrict: [
-    { grant: 'READ',                      to: 'authenticated-user' },
-    { grant: ['CREATE','UPDATE','DELETE'],  to: ['Admin'] }
-]
-entity NotificationRules as projection on nhvr.NotificationRule;
-
-@restrict: [{ to: ['Admin'] }]
-action generateNotifications() returns LargeString;
-
-@restrict: [{ to: 'authenticated-user' }]
-function getMyNotifications() returns LargeString;
-
-@restrict: [{ to: 'authenticated-user' }]
-action markNotificationRead(notificationId: UUID) returns { status: String };
-
-@restrict: [{ to: 'authenticated-user' }]
-action dismissNotification(notificationId: UUID) returns { status: String };
 }

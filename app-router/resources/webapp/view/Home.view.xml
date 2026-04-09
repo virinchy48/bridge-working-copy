@@ -45,12 +45,9 @@
                     title="Bridge Management System (BMS)"
                     secondTitle="{ui>/appSubtitle}"
                     showNavButton="false"
-                    notificationsNumber="{ui>/notifCount}"
-                    showNotifications="true"
                     showSearch="false"
                     showProductSwitcher="false"
                     homeIconPressed="onNavHome"
-                    notificationsPressed="onOpenNotifications"
                     avatarPressed="onAvatarPress"
                     class="nhvrShellBar">
                     <f:profile>
@@ -120,15 +117,6 @@
                     </endButton>
                 </Dialog>
 
-                <!-- ── Notification Dialog ───────────────────────────── -->
-                <Dialog id="notificationDialog" title="Notifications" contentWidth="480px" verticalScrolling="true">
-                    <content>
-                        <List id="notificationList" noDataText="No pending notifications" mode="None"/>
-                    </content>
-                    <endButton>
-                        <Button text="Close" press="onCloseNotifications"/>
-                    </endButton>
-                </Dialog>
 
 
                 <!-- ── Quick Access Rail (role-adaptive) ───────────── -->

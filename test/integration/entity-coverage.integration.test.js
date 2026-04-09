@@ -375,34 +375,6 @@ describe('GazetteNotices CRUD', () => {
     });
 });
 
-// ─────────────────────────────────────────────────────────────
-// Notifications — recipientRole, recipientUser, title, message, severity, isRead
-// ─────────────────────────────────────────────────────────────
-describe('Notifications CRUD', () => {
-    let nId;
-
-    test('CREATE Notification', async () => {
-        const r = await run(INSERT.into('BridgeManagementService.Notifications').entries({
-            title: 'Test Notification', message: 'This is a test notification',
-            severity: 'INFO', isRead: false, recipientUser: 'admin',
-            category: 'SYSTEM'
-        }));
-        nId = r.ID;
-        expect(nId).toBeDefined();
-    });
-
-    test('READ Notification', async () => {
-        const r = await run(SELECT.one.from('BridgeManagementService.Notifications').where({ ID: nId }));
-        expect(r.severity).toBe('INFO');
-        expect(r.isRead).toBe(false);
-    });
-
-    test('UPDATE Notification (mark as read)', async () => {
-        await run(UPDATE('BridgeManagementService.Notifications', nId).set({ isRead: true }));
-        const r = await run(SELECT.one.from('BridgeManagementService.Notifications').where({ ID: nId }));
-        expect(r.isRead).toBe(true);
-    });
-});
 
 // ─────────────────────────────────────────────────────────────
 // RoleConfigs — role, featureKey, featureType, visible, editable, featureEnabled
@@ -644,15 +616,6 @@ describe('Service actions coverage', () => {
             expect(res).toBeDefined();
         } catch (e) {
             // Action may have specific param requirements — error is valid behavior
-            expect(e).toBeDefined();
-        }
-    });
-
-    test('generateNotifications runs without error', async () => {
-        try {
-            const res = await send({ event: 'generateNotifications' });
-            expect(res).toBeDefined();
-        } catch (e) {
             expect(e).toBeDefined();
         }
     });

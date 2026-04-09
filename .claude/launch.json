@@ -3,22 +3,16 @@
   "configurations": [
     {
       "name": "NHVR CAP Backend",
-      "runtimeExecutable": "/Users/siddharthaampolu/.nvm/versions/node/v20.19.6/bin/node",
+      "runtimeExecutable": "/Users/virinchy/.nvm/versions/node/v22.16.0/bin/node",
       "runtimeArgs": ["node_modules/.bin/cds", "watch"],
       "cwd": ".",
       "port": 4004,
       "autoPort": false,
       "env": {
         "NODE_ENV": "development",
-        "PATH": "/Users/siddharthaampolu/.nvm/versions/node/v20.19.6/bin:/usr/local/bin:/usr/bin:/bin"
+        "PATH": "/Users/virinchy/.nvm/versions/node/v22.16.0/bin:/usr/local/bin:/usr/bin:/bin"
       },
       "readyPattern": "server listening on"
-    },
-    {
-      "name": "NSW Bridge Demo",
-      "runtimeExecutable": "npx",
-      "runtimeArgs": ["serve", "-p", "8088", "scripts/nsw-bridge-demo/webapp"],
-      "port": 8088
     }
   ]
 }
