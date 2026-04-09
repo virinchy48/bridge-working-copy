@@ -23,8 +23,8 @@
   padding:24px 28px 40px;
 }
 
-/* ── TOKENS: Light ──────────────────────────────────────── */
-.nhvr-cmd-dash[data-theme="light"] {
+/* ── TOKENS ──────────────────────────────────────────────── */
+.nhvr-cmd-dash {
   --bg:#f1f3f8;--surf:#ffffff;--surf2:#f7f8fc;--surf3:#eaecf5;
   --b1:rgba(0,0,0,0.07);--b2:rgba(0,0,0,0.12);--b3:rgba(0,0,0,0.22);
   --tx:#181b28;--txm:#5a617e;--txd:#9299b5;
@@ -56,10 +56,6 @@
 .cmd-ldot{width:6px;height:6px;border-radius:50%;background:var(--g);animation:cmd-blink 2s ease infinite}
 @keyframes cmd-blink{0%,100%{opacity:1}50%{opacity:.3}}
 .cmd-tsmp{font-family:'DM Mono',monospace;font-size:11px;color:var(--txd)}
-.cmd-tbtn{width:34px;height:34px;border-radius:8px;border:.5px solid var(--b2);background:var(--surf2);
-  cursor:pointer;display:flex;align-items:center;justify-content:center;
-  color:var(--txm);font-size:14px;transition:background .2s}
-.cmd-tbtn:hover{background:var(--surf3)}
 
 /* SECTION LABEL */
 .cmd-sec{font-size:10px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--txd);

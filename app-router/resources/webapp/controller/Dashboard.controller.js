@@ -27,7 +27,6 @@ sap.ui.define([
         _riskAssessments: [],
         _inspectionOrders: [],
         _workOrders: [],
-        _darkMode: false,
         _delegated: false,
 
         // ── BOOT ─────────────────────────────────────────────
@@ -79,7 +78,6 @@ sap.ui.define([
         _renderAll: function () {
             var root = document.getElementById("nhvr-cmd-dashboard");
             if (!root) return;
-            root.setAttribute("data-theme", this._darkMode ? "dark" : "light");
             var k = this._computeKpis();
             var html = '<div class="cmd-dash">' +
                 this._renderHeader() +
@@ -160,7 +158,6 @@ sap.ui.define([
                 '<div class="cmd-hdr-r">' +
                 '<span class="cmd-lpill"><span class="cmd-ldot"></span>Live</span>' +
                 '<span class="cmd-tsmp">' + ts + '</span>' +
-                '<button class="cmd-tbtn" data-action="toggle-theme" title="Toggle theme">' + (this._darkMode ? "\u2600" : "\u263E") + '</button>' +
                 '</div></div>';
         },
 
@@ -463,10 +460,7 @@ sap.ui.define([
                     case "drill-kpi":
                         that._drillKpi(parseInt(param, 10));
                         break;
-                    case "toggle-theme":
-                        that._darkMode = !that._darkMode;
-                        that._renderAll();
-                        break;
+
                     case "nav-bridge":
                         if (param) that.getOwnerComponent().getRouter().navTo("BridgeDetail", { bridgeId: encodeURIComponent(param) });
                         break;
