@@ -5,8 +5,6 @@ name: BTP Smoke Test
 # Auth: uses CF_USERNAME / CF_PASSWORD repo secrets via XSUAA password grant.
 
 on:
-  schedule:
-    - cron: '23 7 * * *'
   workflow_dispatch:
 
 env:
