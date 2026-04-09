@@ -56,8 +56,10 @@
     <!-- SAP UI5 Bootstrap — env-aware: local uses /ui5cdn/ proxy, BTP uses SAP CDN -->
     <script>
         (function() {
-            var isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-            var ui5Src = isLocal
+            // /ui5cdn/ proxy only exists on the CDS dev server (port 4004)
+            var isCdsServer = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+                              && window.location.port === '4004';
+            var ui5Src = isCdsServer
                 ? '/ui5cdn/sap-ui-core.js'
                 : 'https://sapui5.hana.ondemand.com/1.133.1/resources/sap-ui-core.js';
             document.write(
