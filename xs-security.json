@@ -1,5 +1,5 @@
 {
-    "xsappname": "nhvr-bridge-app-592f5a7btrial-dev",
+    "xsappname": "nhvr-bridge-app-97bc647ftrial-dev",
     "tenant-mode": "dedicated",
     "description": "NHVR Bridge Asset & Restriction Management - Security Configuration",
     "scopes": [
@@ -160,8 +160,8 @@
         "token-validity": 3600,
         "refresh-token-validity": 86400,
         "redirect-uris": [
-            "https://592f5a7btrial-dev-nhvr-bridge-app-router.cfapps.us10-001.hana.ondemand.com/login/callback",
-            "https://592f5a7btrial-dev-nhvr-bridge-app-router.cfapps.us10-001.hana.ondemand.com/"
+            "https://97bc647ftrial-dev-nhvr-bridge-app-router.cfapps.us10-001.hana.ondemand.com/login/callback",
+            "https://97bc647ftrial-dev-nhvr-bridge-app-router.cfapps.us10-001.hana.ondemand.com/"
         ]
     }
 }
