@@ -228,13 +228,9 @@ sap.ui.define([
         onNavToAdmin:        function () { this._navTo("AdminConfig"); },
         onNavToInspections:          function () { this._navTo("InspectionDashboard"); },
         onNavToDefects:              function () { this._navTo("DefectRegister"); },
-        onNavToVehicleCombinations:  function () { this._navTo("VehicleCombinations"); },
         onNavToRestrictionTypes:     function () { this._navTo("AdminRestrictionTypes"); },
         onNavToMassEdit:             function () { this._navTo("MassEdit"); },
         onNavToVehicleTypes:         function () { this._navTo("AdminVehicleTypes"); },
-        onNavToPermits:              function () { this._navTo("Permits"); },
-        onNavToRouteAssessment:      function () { this._navTo("RouteAssessment"); },
-        onNavToRoutePlanner:         function () { this._navTo("RoutePlanner"); },
         onNavToIntegrationHub:       function () { this._navTo("integrationHub"); },
         onNavToInspectionCreate:     function () { this._navTo("InspectionCreateNew"); },
         onNavToFreightRoutes:        function () { this._navTo("FreightRoutes"); },
@@ -343,24 +339,6 @@ sap.ui.define([
             if (this.byId("inspectionsTileMain")) this.byId("inspectionsTileMain").setVisible(RoleManager.isVisible("inspections"));
             if (this.byId("defectsTileMain"))     this.byId("defectsTileMain").setVisible(RoleManager.isVisible("defects"));
 
-            // Operator section — visible for Operator, BridgeManager, Admin
-            const showOperator = RoleManager.isVisible("permits") || RoleManager.isVisible("vehicleaccess") || RoleManager.isVisible("routeassessment");
-            const sectionOperator = this.byId("sectionOperator");
-            if (sectionOperator) sectionOperator.setVisible(showOperator);
-            if (this.byId("operatorPermitsTile"))         this.byId("operatorPermitsTile").setVisible(RoleManager.isVisible("permits"));
-            if (this.byId("operatorVehicleTile"))         this.byId("operatorVehicleTile").setVisible(RoleManager.isVisible("vehicleaccess"));
-            if (this.byId("operatorRouteAssessmentTile")) this.byId("operatorRouteAssessmentTile").setVisible(RoleManager.isVisible("routeassessment"));
-
-            // ── Road Capacity & Permits section ───────────────────────────
-            var showRoadCapacity = RoleManager.isVisible("vehiclePermits") ||
-                                   RoleManager.isVisible("capacityReports") ||
-                                   RoleManager.isVisible("routeassessment");
-            var sectionRoadCapacity = this.byId("sectionRoadCapacity");
-            if (sectionRoadCapacity) sectionRoadCapacity.setVisible(showRoadCapacity);
-            if (this.byId("tileVehiclePermits"))    this.byId("tileVehiclePermits").setVisible(RoleManager.isVisible("vehiclePermits"));
-            if (this.byId("tileCapacityReports"))   this.byId("tileCapacityReports").setVisible(RoleManager.isVisible("capacityReports"));
-            if (this.byId("tileRouteAssessmentRC")) this.byId("tileRouteAssessmentRC").setVisible(RoleManager.isVisible("routeassessment"));
-
             // ── Network Tools section ──────────────────────────────────────
             var showNetworkTools = RoleManager.isVisible("bridgeMap") ||
                                    RoleManager.isVisible("recordInspection") ||
@@ -389,10 +367,6 @@ sap.ui.define([
                 { id: "tileDefectsMain",      capability: "DEFECTS" },
                 { id: "tileDefectsCard",      capability: "DEFECTS" },
                 { id: "defectsTileMain",      capability: "DEFECTS" },
-                // Operator section
-                { id: "tilePermitsMain",      capability: "PERMITS" },
-                { id: "tileRouteMain",        capability: "ROUTE_ASSESSMENT" },
-                { id: "tileVehicleMain",      capability: "VEHICLE_COMBINATIONS" },
                 { id: "tileFreightCorridors", capability: "FREIGHT_ROUTES" },
                 // Work Orders
                 { id: "tileWorkOrdersMain",   capability: "WORK_ORDERS" },
