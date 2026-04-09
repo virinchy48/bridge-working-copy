@@ -34,6 +34,7 @@ Thumbs.db
 
 # IDE
 .vscode/
+!.vscode/tasks.json
 .idea/
 
 # Test coverage

@@ -1,0 +1,59 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "MTA: Build MTA Project",
+            "type": "shell",
+            "command": "mbt build -s '${workspaceFolder}'",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "CDS: Build Production",
+            "type": "shell",
+            "command": "npx cds build --production",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "MTA: Full Build (cds + mbt)",
+            "type": "shell",
+            "command": "npx cds build --production && mbt build -s '${workspaceFolder}'",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "CF: Deploy MTA",
+            "type": "shell",
+            "command": "cf deploy nhvr-bridge-app_*.mtar --version-rule ALL -f",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "NPM: Run Tests",
+            "type": "shell",
+            "command": "npm test",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        }
+    ]
+}
