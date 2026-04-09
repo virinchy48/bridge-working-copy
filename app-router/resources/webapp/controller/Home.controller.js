@@ -28,15 +28,9 @@ sap.ui.define([
         onInit: function () {
             UserAnalytics.trackView("Home");
             this._loadUserInfo();
-            this._loadKpis();
-            this._loadRecentRestrictions();
             this._loadMySavedViews();
             this._initHelpAssistant("home");
             this._loadVersionInfo();
-
-            // Initialize home model (KPI loading state + misc flags)
-            var oHomeModel = new JSONModel({ kpiLoading: false });
-            this.getView().setModel(oHomeModel, "home");
 
             // Initialize UI model for ShellBar bindings
             var oUiModel = new JSONModel({
@@ -148,194 +142,13 @@ sap.ui.define([
                     }
 
                     // Show admin sections based on role
-                    const isTechAdmin = isAdmin || roles.some(r => r === "TechAdmin" || r === "NHVR_TechAdmin");
                     const adminSection = this.byId("sectionAdmin");
                     if (adminSection) adminSection.setVisible(isAdmin);
-                    const techSection  = this.byId("sectionTechAdmin");
-                    if (techSection)  techSection.setVisible(isTechAdmin);
                 })
                 .catch(() => {
                     // me() failed — default to showing Viewer access
                     const chip = this.byId("roleChip");
                     if (chip) { chip.setText("Viewer"); chip.addStyleClass("nhvrRoleBadgeViewer"); }
-                });
-        },
-
-        // ── Load KPI counts ───────────────────────────────────────
-        _loadKpis: function () {
-            const h = { Accept: "application/json" };
-
-            // Show loading spinner on KPI tile container
-            const oHomeModel = this.getView().getModel("home");
-            if (oHomeModel) oHomeModel.setProperty("/kpiLoading", true);
-
-            const _kpiErr = (id) => (err) => {
-                console.warn(`[NHVR] KPI load failed for '${id}':`, err);
-                this._setValue(id, "—");
-            };
-
-            const today = new Date().toISOString().slice(0, 10);
-            const in30  = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
-
-            const p1 = fetch(`${BASE}/Bridges?$count=true&$top=0`, { headers: h })
-                .then(r => r.json())
-                .then(j => this._setValue("homeTotalBridges", j["@odata.count"] ?? "—"))
-                .catch(_kpiErr("homeTotalBridges"));
-
-            const p2 = fetch(`${BASE}/Restrictions?$count=true&$top=0&$filter=status eq 'ACTIVE'`, { headers: h })
-                .then(r => r.json())
-                .then(j => this._setValue("homeActiveRestrictions", j["@odata.count"] ?? "—"))
-                .catch(_kpiErr("homeActiveRestrictions"));
-
-            const p3 = fetch(`${BASE}/Bridges?$count=true&$top=0&$filter=postingStatus eq 'CLOSED'`, { headers: h })
-                .then(r => r.json())
-                .then(j => this._setValue("homeClosedBridges", j["@odata.count"] ?? "—"))
-                .catch(_kpiErr("homeClosedBridges"));
-
-            // Permit-required restrictions — skip if PERMITS capability disabled
-            const p4 = CapabilityManager.canView("PERMITS")
-                ? fetch(`${BASE}/Restrictions?$count=true&$top=0&$filter=status eq 'ACTIVE' and permitRequired eq true`, { headers: h })
-                    .then(r => r.json())
-                    .then(j => this._setValue("homePermitRequired", j["@odata.count"] ?? "—"))
-                    .catch(_kpiErr("homePermitRequired"))
-                : Promise.resolve();
-
-            // Open defects (status != CLOSED) — skip if DEFECTS capability disabled
-            const p5 = CapabilityManager.canView("DEFECTS")
-                ? fetch(`${BASE}/BridgeDefects?$count=true&$top=0&$filter=status ne 'CLOSED'`, { headers: h })
-                    .then(r => r.json())
-                    .then(j => this._setValue("homeOpenDefects", j["@odata.count"] ?? "—"))
-                    .catch(_kpiErr("homeOpenDefects"))
-                : Promise.resolve();
-
-            // Overdue inspections — skip if INSPECTIONS capability disabled
-            const p6 = CapabilityManager.canView("INSPECTIONS")
-                ? fetch(`${BASE}/InspectionOrders?$count=true&$top=0&$filter=status ne 'COMPLETED' and status ne 'CANCELLED' and nextInspectionDue lt ${today}`, { headers: h })
-                    .then(r => r.json())
-                    .then(j => {
-                        const count = j["@odata.count"] ?? 0;
-                        this._setValue("homeOverdueInspections", count);
-                        const strip = this.byId("overdueInspStrip");
-                        if (strip && count > 0) {
-                            strip.setText(`${count} inspection order${count > 1 ? "s are" : " is"} overdue — review required.`);
-                            strip.setVisible(true);
-                        }
-                    })
-                    .catch(_kpiErr("homeOverdueInspections"))
-                : Promise.resolve();
-
-            // Restrictions expiring in the next 30 days
-            const p7 = fetch(`${BASE}/Restrictions?$count=true&$top=0&$filter=status eq 'ACTIVE' and validToDate le ${in30}`, { headers: h })
-                .then(r => r.json())
-                .then(j => {
-                    const count = j["@odata.count"] ?? 0;
-                    const strip = this.byId("expiringRestrictStrip");
-                    if (strip && count > 0) {
-                        strip.setText(`${count} active restriction${count > 1 ? "s expire" : " expires"} within 30 days — check validity.`);
-                        strip.setVisible(true);
-                    }
-                })
-                .catch(function (err) {
-                    // KPI fetch failure is non-fatal; show dash instead of throwing
-                    console.warn("[NHVR Home] KPI fetch failed:", err && err.message);
-                });
-
-            // Clear loading state once all KPI requests have settled (success or error)
-            Promise.allSettled([p1, p2, p3, p4, p5, p6, p7]).then(function () {
-                if (oHomeModel) oHomeModel.setProperty("/kpiLoading", false);
-            });
-
-            // Condition distribution (GOOD / FAIR / POOR / CRITICAL)
-            this._loadConditionDistribution(h);
-        },
-
-        _loadConditionDistribution: function (h) {
-            const conditions = ["GOOD","FAIR","POOR","CRITICAL"];
-            const ids        = { GOOD: "condGoodCount", FAIR: "condFairCount", POOR: "condPoorCount", CRITICAL: "condCritCount" };
-
-            Promise.all(conditions.map(c =>
-                fetch(`${BASE}/Bridges?$count=true&$top=0&$filter=condition eq '${c}'`, { headers: h })
-                    .then(r => r.json())
-                    .then(j => ({ cond: c, count: j["@odata.count"] || 0 }))
-                    .catch(() => ({ cond: c, count: 0 }))
-            )).then(results => {
-                const total = results.reduce((s, r) => s + r.count, 0);
-                if (total === 0) return;
-
-                results.forEach(r => {
-                    const ctrl = this.byId(ids[r.cond]);
-                    if (ctrl) ctrl.setText(String(r.count));
-                });
-
-                // Build the stacked bar
-                const bar = this.byId("condDistBar");
-                if (bar) {
-                    bar.destroyItems();
-                    results.forEach(r => {
-                        if (r.count === 0) return;
-                        const pct = (r.count / total * 100).toFixed(1);
-                        bar.addItem(new sap.m.HBox({
-                            width : pct + "%",
-                            tooltip: `${r.cond}: ${r.count} (${pct}%)`
-                        }).addStyleClass("nhvrCondSegment").addStyleClass("nhvrCondSeg" + r.cond.charAt(0) + r.cond.slice(1).toLowerCase()));
-                    });
-                }
-
-                this.byId("conditionDistBox") && this.byId("conditionDistBox").setVisible(true);
-            });
-        },
-
-        _setValue: function (id, val) {
-            const ctrl = this.byId(id);
-            if (ctrl) ctrl.setValue(String(val));
-            // Pulse the parent KPI tile red if value is non-zero and critical
-            const urgentKpis = ["homeClosedBridges","homeOpenDefects","homeOverdueInspections"];
-            if (urgentKpis.includes(id) && Number(val) > 0) {
-                const tile = ctrl && ctrl.getParent && ctrl.getParent() &&
-                             ctrl.getParent().getParent && ctrl.getParent().getParent();
-                if (tile && tile.addStyleClass) tile.addStyleClass("nhvrKpiUrgent");
-            }
-        },
-
-        // ── Load recent active restrictions ───────────────────────
-        _loadRecentRestrictions: function () {
-            const h    = { Accept: "application/json" };
-            const list = this.byId("homeRestrictionList");
-            if (!list) return;
-
-            fetch(`${BASE}/ActiveRestrictions?$top=5&$select=bridgeName,restrictionType,value,unit,vehicleClassName,routeCode`, { headers: h })
-                .then(r => r.json())
-                .then(j => {
-                    list.destroyItems();
-                    (j.value || []).forEach(r => {
-                        const vehicleLabel = r.vehicleClassName ? ` · ${r.vehicleClassName}` : "";
-                        const routeLabel   = r.routeCode ? ` · ${r.routeCode}` : "";
-                        list.addItem(new StandardListItem({
-                            title      : r.bridgeName || "Unknown Bridge",
-                            description: `${r.restrictionType}: ${r.value} ${r.unit}${vehicleLabel}${routeLabel}`,
-                            icon       : "sap-icon://alert",
-                            iconInset  : false,
-                            info       : "ACTIVE",
-                            infoState  : "Warning"
-                        }));
-                    });
-                    if (!j.value || j.value.length === 0) {
-                        list.addItem(new StandardListItem({
-                            title: "No active restrictions",
-                            icon : "sap-icon://accept"
-                        }));
-                    }
-                })
-                .catch(err => {
-                    console.warn("[NHVR] Failed to load recent restrictions:", err);
-                    if (list) {
-                        list.destroyItems();
-                        list.addItem(new StandardListItem({
-                            title: "Unable to load restrictions",
-                            icon : "sap-icon://message-error",
-                            iconInset: false
-                        }));
-                    }
                 });
         },
 
@@ -426,8 +239,6 @@ sap.ui.define([
         onNavToInspectionCreate:     function () { this._navTo("InspectionCreateNew"); },
         onNavToFreightRoutes:        function () { this._navTo("FreightRoutes"); },
         onNavToLicenseConfig:        function () { this._navTo("LicenseConfig"); },
-        onNavToAppAdmin:             function () { this._navTo("AppAdmin"); },
-        onNavToTechAdmin:            function () { this._navTo("BmsTechAdmin"); },
         onNavToAnalytics:            function () { this._navTo("AnalyticsDashboard"); },
 
         _navTo: function (routeName) {
@@ -525,12 +336,6 @@ sap.ui.define([
                 if (tile) tile.setVisible(RoleManager.isVisible(t.key));
             });
 
-            // BMS Tech Admin section — visible for Admin and TechAdmin roles
-            const showTechAdmin = RoleManager.isVisible("adminconfig") ||
-                                  RoleManager.isVisible("techAdmin");
-            const techSection = this.byId("sectionTechAdmin");
-            if (techSection) techSection.setVisible(showTechAdmin);
-
             // Inspector section — visible for Inspector, BridgeManager, Admin
             const showInspection = RoleManager.isVisible("inspections") || RoleManager.isVisible("defects");
             const sectionInspection = this.byId("sectionInspection");
@@ -567,21 +372,8 @@ sap.ui.define([
             if (this.byId("tileFreightCorridors")) this.byId("tileFreightCorridors").setVisible(RoleManager.isVisible("freightCorridors"));
 
             // ── Admin section extra tiles ─────────────────────────────────
-            if (this.byId("integrationHubTile"))  this.byId("integrationHubTile").setVisible(RoleManager.isVisible("integrationHub"));
             if (this.byId("tileLicenseConfig"))   this.byId("tileLicenseConfig").setVisible(RoleManager.isVisible("licenseConfig"));
 
-        },
-
-        // ── Quick Access Rail ─────────────────────────────────────
-        /**
-         * Dynamically render role-specific quick-access buttons into the rail VBox.
-         * Clears existing buttons before re-rendering to support role switching.
-         */
-        // ── Refresh ───────────────────────────────────────────────
-        onRefresh: function () {
-            this._loadKpis();
-            this._loadRecentRestrictions();
-            MessageToast.show("Data refreshed");
         },
 
         // ── Capability gating for home tiles ─────────────────────
@@ -604,8 +396,6 @@ sap.ui.define([
                 { id: "tileFreightCorridors", capability: "FREIGHT_ROUTES" },
                 // Work Orders
                 { id: "tileWorkOrdersMain",   capability: "WORK_ORDERS" },
-                // Analytics / Bridge IQ
-                { id: "tileAnalytics",        capability: "BRIDGE_IQ" },
                 // Admin section
                 { id: "tileMassUploadMain",   capability: "MASS_UPLOAD" },
                 { id: "tileMassEditMain",     capability: "MASS_EDIT" },
