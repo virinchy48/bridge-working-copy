@@ -22,11 +22,6 @@
 // Analytics service is separate: srv/analytics-service.cds.
 // ============================================================
 
-using nhvr from '../db/schema';
-
-// ─────────────────────────────────────────────────────────────
-// BRIDGE MANAGEMENT SERVICE (empty shell — extended by domain files)
-// ─────────────────────────────────────────────────────────────
 service BridgeManagementService @(path: '/bridge-management') {
 }
 
