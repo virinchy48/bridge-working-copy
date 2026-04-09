@@ -1,0 +1,8 @@
+{
+    "name": "nhvr-bridge-management",
+    "version": "1.0.0",
+    "description": "NHVR Bridge Management UI5 Application",
+    "scripts": {
+        "build:cf": "echo 'Static UI5 app - no build required'"
+    }
+}

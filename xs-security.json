@@ -1,0 +1,167 @@
+{
+    "xsappname": "nhvr-bridge-app-592f5a7btrial-dev",
+    "tenant-mode": "dedicated",
+    "description": "NHVR Bridge Asset & Restriction Management - Security Configuration",
+    "scopes": [
+        {
+            "name": "$XSAPPNAME.Admin",
+            "description": "Full administrative access - manage bridges, restrictions, and attribute definitions"
+        },
+        {
+            "name": "$XSAPPNAME.BridgeManager",
+            "description": "Create and edit bridge records and restrictions"
+        },
+        {
+            "name": "$XSAPPNAME.Viewer",
+            "description": "Read-only access to bridge and restriction data",
+            "grant-as-authority-to-apps": [
+                "$XSAPPNAME(application,nhvr-smoke-tester)"
+            ]
+        },
+        {
+            "name": "$XSAPPNAME.Uploader",
+            "description": "Permission to perform mass uploads via CSV"
+        },
+        {
+            "name": "$XSAPPNAME.Executive",
+            "description": "Read-only access to dashboards and KPI analytics"
+        },
+        {
+            "name": "$XSAPPNAME.Inspector",
+            "description": "Create and manage inspection orders, defect records, and condition assessments"
+        },
+        {
+            "name": "$XSAPPNAME.Operator",
+            "description": "Operational access - view bridge data, apply temporary restrictions, manage permits"
+        },
+        {
+            "name": "$XSAPPNAME.TechAdmin",
+            "description": "Technical Administrator - manage BTP environment, integrations, GIS config, jurisdiction, and map configuration"
+        }
+    ],
+    "attributes": [
+        {
+            "name": "Groups",
+            "description": "AD / IdP group membership — used for group-to-role-collection mapping in BTP Trust Configuration",
+            "valueType": "string",
+            "valueRequired": false
+        },
+        {
+            "name": "tenantCode",
+            "description": "Multi-tenant identifier — resolved from XSUAA custom attribute or X-Tenant-Code header",
+            "valueType": "string",
+            "valueRequired": false
+        }
+    ],
+    "role-templates": [
+        {
+            "name": "Admin",
+            "description": "NHVR System Administrator - full access",
+            "scope-references": [
+                "$XSAPPNAME.Admin",
+                "$XSAPPNAME.BridgeManager",
+                "$XSAPPNAME.Viewer",
+                "$XSAPPNAME.Uploader",
+                "$XSAPPNAME.Executive",
+                "$XSAPPNAME.Inspector",
+                "$XSAPPNAME.Operator"
+            ]
+        },
+        {
+            "name": "BridgeManager",
+            "description": "Bridge and Restriction Manager (Engineer / Planner)",
+            "scope-references": [
+                "$XSAPPNAME.BridgeManager",
+                "$XSAPPNAME.Viewer",
+                "$XSAPPNAME.Uploader",
+                "$XSAPPNAME.Executive",
+                "$XSAPPNAME.Inspector"
+            ]
+        },
+        {
+            "name": "Inspector",
+            "description": "Bridge Inspector (AS 5100) - inspection orders, defects, condition ratings",
+            "scope-references": [
+                "$XSAPPNAME.Inspector",
+                "$XSAPPNAME.Viewer"
+            ]
+        },
+        {
+            "name": "Operator",
+            "description": "Field Operator - view bridges, apply temporary restrictions, manage permits",
+            "scope-references": [
+                "$XSAPPNAME.Operator",
+                "$XSAPPNAME.Viewer"
+            ]
+        },
+        {
+            "name": "Viewer",
+            "description": "Read-only viewer - general staff",
+            "scope-references": [
+                "$XSAPPNAME.Viewer"
+            ]
+        },
+        {
+            "name": "Executive",
+            "description": "Executive dashboard access - KPIs and analytics only",
+            "scope-references": [
+                "$XSAPPNAME.Executive",
+                "$XSAPPNAME.Viewer"
+            ]
+        },
+        {
+            "name": "TechAdmin",
+            "description": "BMS Technical Administrator - BTP setup, integrations, GIS, jurisdiction config",
+            "scope-references": [
+                "$XSAPPNAME.TechAdmin",
+                "$XSAPPNAME.Viewer"
+            ]
+        }
+    ],
+    "role-collections": [
+        {
+            "name": "NHVR_Admin",
+            "description": "NHVR System Administrator Role Collection",
+            "role-template-references": ["$XSAPPNAME.Admin"]
+        },
+        {
+            "name": "NHVR_BridgeManager",
+            "description": "NHVR Bridge Manager / Engineer Role Collection",
+            "role-template-references": ["$XSAPPNAME.BridgeManager"]
+        },
+        {
+            "name": "NHVR_Inspector",
+            "description": "NHVR Bridge Inspector (AS 5100) Role Collection",
+            "role-template-references": ["$XSAPPNAME.Inspector"]
+        },
+        {
+            "name": "NHVR_Operator",
+            "description": "NHVR Field Operator Role Collection",
+            "role-template-references": ["$XSAPPNAME.Operator"]
+        },
+        {
+            "name": "NHVR_Viewer",
+            "description": "NHVR General Staff Viewer Role Collection",
+            "role-template-references": ["$XSAPPNAME.Viewer"]
+        },
+        {
+            "name": "NHVR_Executive",
+            "description": "NHVR Executive Dashboard Role Collection",
+            "role-template-references": ["$XSAPPNAME.Executive"]
+        },
+        {
+            "name": "NHVR_TechAdmin",
+            "description": "BMS Technical Administrator — manages BTP environment, integrations, GIS/map config, jurisdiction access. Recommended AD group: sg-nhvr-techadmin",
+            "role-template-references": ["$XSAPPNAME.TechAdmin"]
+        }
+    ],
+    "authorities": [],
+    "oauth2-configuration": {
+        "token-validity": 3600,
+        "refresh-token-validity": 86400,
+        "redirect-uris": [
+            "https://592f5a7btrial-dev-nhvr-bridge-app-router.cfapps.us10-001.hana.ondemand.com/login/callback",
+            "https://592f5a7btrial-dev-nhvr-bridge-app-router.cfapps.us10-001.hana.ondemand.com/"
+        ]
+    }
+}

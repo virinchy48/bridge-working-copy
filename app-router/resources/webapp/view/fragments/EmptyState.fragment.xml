@@ -1,0 +1,30 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:il="sap.m">
+    <!--
+        EmptyState.fragment.xml — Illustrated empty state panel
+        Required model: emptyState JSONModel
+          emptyState/title       — heading text
+          emptyState/description — body description
+          emptyState/actionText  — button label (omit to hide button)
+          emptyState/actionIcon  — sap-icon:// for button
+          emptyState/illustrationSrc — IllustratedMessage type e.g. "NoData"
+    -->
+    <VBox
+        class="nhvrEmptyState"
+        alignItems="Center"
+        justifyContent="Center">
+        <IllustratedMessage
+            illustrationType="{= 'sapIllus-' + (${emptyState>/illustrationType} || 'NoData') }"
+            title="{emptyState>/title}"
+            description="{emptyState>/description}">
+            <Button
+                text="{emptyState>/actionText}"
+                icon="{emptyState>/actionIcon}"
+                type="Emphasized"
+                press=".onEmptyStateAction"
+                visible="{= !!${emptyState>/actionText} }"/>
+        </IllustratedMessage>
+    </VBox>
+</core:FragmentDefinition>

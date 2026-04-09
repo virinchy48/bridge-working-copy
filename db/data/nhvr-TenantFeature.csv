@@ -1,0 +1,51 @@
+ID,tenant_ID,capabilityCode,isEnabled,validFrom,validTo,licenseNote
+tfn-bridge,t-nhvr-national,BRIDGE_REGISTRY,true,,,
+tfn-restr,t-nhvr-national,RESTRICTIONS,true,,,
+tfn-map,t-nhvr-national,MAP_VIEW,true,,,
+tfn-reports,t-nhvr-national,REPORTS,true,,,
+tfn-exec,t-nhvr-national,EXECUTIVE_DASHBOARD,true,,,
+tfn-insp,t-nhvr-national,INSPECTIONS,true,,,
+tfn-def,t-nhvr-national,DEFECTS,true,,,
+tfn-cap,t-nhvr-national,CAPACITY_RATINGS,true,,,
+tfn-upload,t-nhvr-national,MASS_UPLOAD,true,,,
+tfn-massedit,t-nhvr-national,MASS_EDIT,true,,,
+tfn-admin,t-nhvr-national,ADMIN_CONFIG,true,,,
+tfn-integ,t-nhvr-national,INTEGRATION_HUB,true,,,
+tfn-permits,t-nhvr-national,PERMITS,true,,,
+tfn-route,t-nhvr-national,ROUTE_ASSESSMENT,true,,,
+tfn-freight,t-nhvr-national,FREIGHT_ROUTES,true,,,
+tfn-veh,t-nhvr-national,VEHICLE_COMBINATIONS,true,,,
+tfn-iq,t-nhvr-national,BRIDGE_IQ,true,,,
+tfn-wo,t-nhvr-national,WORK_ORDERS,true,,,
+tfw-bridge,t-nsw-rms,BRIDGE_REGISTRY,true,,,
+tfw-restr,t-nsw-rms,RESTRICTIONS,true,,,
+tfw-map,t-nsw-rms,MAP_VIEW,true,,,
+tfw-reports,t-nsw-rms,REPORTS,true,,,
+tfw-exec,t-nsw-rms,EXECUTIVE_DASHBOARD,true,,,
+tfw-insp,t-nsw-rms,INSPECTIONS,true,,,
+tfw-def,t-nsw-rms,DEFECTS,true,,,
+tfw-cap,t-nsw-rms,CAPACITY_RATINGS,true,,,
+tfw-upload,t-nsw-rms,MASS_UPLOAD,true,,,
+tfw-permits,t-nsw-rms,PERMITS,true,,,
+tfw-route,t-nsw-rms,ROUTE_ASSESSMENT,true,,,
+tfw-freight,t-nsw-rms,FREIGHT_ROUTES,false,,,Freight module not purchased
+tfw-integ,t-nsw-rms,INTEGRATION_HUB,false,,,Integration add-on not purchased
+tfw-iq,t-nsw-rms,BRIDGE_IQ,false,,,Analytics add-on not purchased
+tfw-wo,t-nsw-rms,WORK_ORDERS,false,,,SAP PM integration not configured
+tfv-bridge,t-vicroads,BRIDGE_REGISTRY,true,,,
+tfv-restr,t-vicroads,RESTRICTIONS,true,,,
+tfv-map,t-vicroads,MAP_VIEW,true,,,
+tfv-reports,t-vicroads,REPORTS,true,,,
+tfv-exec,t-vicroads,EXECUTIVE_DASHBOARD,true,,,
+tfv-insp,t-vicroads,INSPECTIONS,true,,,
+tfv-def,t-vicroads,DEFECTS,true,,,
+tfv-upload,t-vicroads,MASS_UPLOAD,true,,,
+tfv-permits,t-vicroads,PERMITS,true,,,
+tfv-route,t-vicroads,ROUTE_ASSESSMENT,true,,,
+tfv-integ,t-vicroads,INTEGRATION_HUB,false,,,Not in scope for VicRoads contract
+tfv-iq,t-vicroads,BRIDGE_IQ,false,,,
+tfq-bridge,t-tmr-qld,BRIDGE_REGISTRY,true,,,Trial access
+tfq-restr,t-tmr-qld,RESTRICTIONS,true,,,Trial access
+tfq-map,t-tmr-qld,MAP_VIEW,true,,,Trial access
+tfq-insp,t-tmr-qld,INSPECTIONS,true,,,Trial access — expires 2025-12-31
+tfq-def,t-tmr-qld,DEFECTS,true,,,Trial access

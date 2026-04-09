@@ -1,0 +1,91 @@
+<!-- ============================================================
+     Mass Edit — Column Picker Dialog
+     Two sections: Standard Fields + Custom Attributes
+     Opened by MassEdit.controller.js onColumnPickerOpen()
+     ============================================================ -->
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:l="sap.ui.layout">
+
+    <Dialog id="colPickerDialog"
+        title="Select Columns to Display"
+        contentWidth="520px"
+        contentHeight="520px"
+        resizable="true"
+        draggable="true">
+
+        <content>
+            <VBox class="sapUiSmallMarginBeginEnd sapUiSmallMarginTopBottom">
+
+                <Text text="Check the fields you want visible in the grid. Custom attributes (✦) are available only if configured in Admin → Attributes."
+                    class="sapUiSmallMarginBottom" wrapping="true" class="nhvrSubText"/>
+
+                <!-- ── Standard Fields ── -->
+                <Panel headerText="Standard Fields" expandable="true" expanded="true"
+                    class="sapUiSmallMarginBottom">
+                    <content>
+                        <VBox class="sapUiTinyMarginBeginEnd sapUiTinyMarginTopBottom">
+                            <List noDataText="No standard fields." showNoData="true"
+                                items="{colPicker>/standardFields}">
+                                <items>
+                                    <CustomListItem type="Inactive">
+                                        <content>
+                                            <HBox alignItems="Center" class="sapUiTinyMarginTopBottom">
+                                                <CheckBox selected="{colPicker>selected}" class="sapUiTinyMarginEnd"/>
+                                                <Text text="{colPicker>label}"/>
+                                            </HBox>
+                                        </content>
+                                    </CustomListItem>
+                                </items>
+                            </List>
+                        </VBox>
+                    </content>
+                </Panel>
+
+                <!-- ── Custom Attributes ── -->
+                <Panel id="colPickerCustomPanel"
+                    headerText="Custom Attributes ✦"
+                    expandable="true"
+                    expanded="true"
+                    visible="{= ${colPicker>/customFields}.length > 0}">
+                    <content>
+                        <VBox class="sapUiTinyMarginBeginEnd sapUiTinyMarginTopBottom">
+                            <Text text="Custom attributes are configured in Admin → Attributes. Only attributes with Mass Edit enabled appear here."
+                                wrapping="true" class="sapUiTinyMarginBottom" class="nhvrSubText"/>
+                            <List noDataText="No custom attributes for this entity." showNoData="true"
+                                items="{colPicker>/customFields}">
+                                <items>
+                                    <CustomListItem type="Inactive">
+                                        <content>
+                                            <HBox alignItems="Center" class="sapUiTinyMarginTopBottom">
+                                                <CheckBox selected="{colPicker>selected}" class="sapUiTinyMarginEnd"/>
+                                                <Text text="{colPicker>label}"/>
+                                            </HBox>
+                                        </content>
+                                    </CustomListItem>
+                                </items>
+                            </List>
+                        </VBox>
+                    </content>
+                </Panel>
+
+                <!-- No custom attrs available message -->
+                <MessageStrip
+                    text="No custom attributes have been configured with Mass Edit enabled for this entity. Go to Admin → Attributes to add some."
+                    type="Information" showIcon="true"
+                    visible="{= ${colPicker>/customFields}.length === 0}"
+                    class="sapUiSmallMarginTop"/>
+
+            </VBox>
+        </content>
+
+        <beginButton>
+            <Button text="Apply" type="Emphasized" icon="sap-icon://accept" press="onColumnPickerConfirm"/>
+        </beginButton>
+        <endButton>
+            <Button text="Cancel" type="Transparent" icon="sap-icon://decline" press="onColumnPickerCancel"/>
+        </endButton>
+    </Dialog>
+
+</core:FragmentDefinition>

@@ -1,0 +1,39 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+    <!--
+        ConfirmDialog.fragment.xml — Generic confirm/cancel dialog
+        Required model: confirmDialog JSONModel
+          confirmDialog/title       — dialog title
+          confirmDialog/description — body text (HTML allowed via FormattedText)
+          confirmDialog/confirmText — confirm button label (default "Confirm")
+          confirmDialog/cancelText  — cancel button label (default "Cancel")
+          confirmDialog/type        — "Warning" | "Error" | "Information" (default Warning)
+        Controller must implement:
+          onConfirmDialogConfirm(oEvent)
+          onConfirmDialogCancel(oEvent)
+    -->
+    <Dialog
+        id="nhvrConfirmDialog"
+        title="{confirmDialog>/title}"
+        type="{= ${confirmDialog>/type} || 'Message' }"
+        state="{= ${confirmDialog>/type} === 'Error' ? 'Error' : (${confirmDialog>/type} === 'Warning' ? 'Warning' : 'None') }">
+        <content>
+            <VBox class="sapUiSmallMargin">
+                <Text text="{confirmDialog>/description}" wrapping="true"/>
+            </VBox>
+        </content>
+        <beginButton>
+            <Button
+                text="{= ${confirmDialog>/confirmText} || 'Confirm' }"
+                type="{= ${confirmDialog>/type} === 'Error' ? 'Reject' : 'Emphasized' }"
+                press=".onConfirmDialogConfirm"/>
+        </beginButton>
+        <endButton>
+            <Button
+                text="{= ${confirmDialog>/cancelText} || 'Cancel' }"
+                type="Default"
+                press=".onConfirmDialogCancel"/>
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

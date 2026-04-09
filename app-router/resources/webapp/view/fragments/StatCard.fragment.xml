@@ -1,0 +1,40 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:layout="sap.ui.layout"
+    xmlns:mc="sap.suite.ui.microchart">
+    <!--
+        StatCard.fragment.xml — Reusable KPI stat card
+        Usage: load with Fragment.load({ name: "nhvr.bridgemanagement.view.fragments.StatCard",
+                                         controller: this })
+        Required model properties (set on a JSONModel before opening):
+          statCard/title     — card header label (string)
+          statCard/value     — primary numeric value (string/number)
+          statCard/subtitle  — secondary description line (string)
+          statCard/trend     — trend text e.g. "+12% vs last month" (string)
+          statCard/trendDir  — "up" | "down" | "flat"
+          statCard/colorKey  — "primary" | "success" | "warning" | "error" | "purple"
+          statCard/icon      — SAP icon src e.g. "sap-icon://bridge"
+    -->
+    <VBox class="nhvrStatCard" id="statCardRoot">
+        <HBox alignItems="Center" justifyContent="SpaceBetween">
+            <Text text="{statCard>/title}" class="nhvrStatCard__label"/>
+            <core:Icon
+                src="{statCard>/icon}"
+                size="1.1rem"
+                color="{statCard>/iconColor}"
+                visible="{= !!${statCard>/icon} }"/>
+        </HBox>
+        <Text text="{statCard>/value}" class="nhvrStatCard__value"/>
+        <Text text="{statCard>/subtitle}" class="nhvrStatCard__sub" visible="{= !!${statCard>/subtitle} }"/>
+        <HBox alignItems="Center" visible="{= !!${statCard>/trend} }">
+            <core:Icon
+                src="{= ${statCard>/trendDir} === 'up' ? 'sap-icon://trend-up' : (${statCard>/trendDir} === 'down' ? 'sap-icon://trend-down' : 'sap-icon://trending-flat') }"
+                size="0.8rem"
+                class="{= 'nhvrStatCard__trend nhvrStatCard__trend--' + (${statCard>/trendDir} || 'flat') }"/>
+            <Text
+                text="{statCard>/trend}"
+                class="{= 'nhvrStatCard__trend nhvrStatCard__trend--' + (${statCard>/trendDir} || 'flat') }"/>
+        </HBox>
+    </VBox>
+</core:FragmentDefinition>

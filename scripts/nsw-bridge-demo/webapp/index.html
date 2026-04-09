@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NSW Bridge Asset & NHVR Permit Assessment</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- SAP UI5 -->
+  <script id="sap-ui-bootstrap"
+    src="https://ui5.sap.com/1.120/resources/sap-ui-core.js"
+    data-sap-ui-theme="sap_horizon"
+    data-sap-ui-libs="sap.m,sap.ui.layout,sap.ui.unified,sap.ui.table,sap.f"
+    data-sap-ui-compatVersion="edge"
+    data-sap-ui-async="true"
+    data-sap-ui-resourceroots='{"nsw.bridge.demo": "./"}'
+    data-sap-ui-frameOptions="allow">
+  </script>
+  <script>
+    sap.ui.getCore().attachInit(function () {
+      sap.ui.require(["sap/ui/core/ComponentContainer"], function (ComponentContainer) {
+        new ComponentContainer({
+          height: "100%",
+          width: "100%",
+          manifest: true,
+          name: "nsw.bridge.demo"
+        }).placeAt("content");
+      });
+    });
+  </script>
+  <style>
+    html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
+    #content { height: 100%; width: 100%; display: block; }
+    .leaflet-container { font-family: "72", Arial, Helvetica, sans-serif; }
+    .bridge-popup h3 { margin: 0 0 6px; font-size: 14px; color: #0a6ed1; }
+    .bridge-popup table { font-size: 12px; border-collapse: collapse; width: 100%; }
+    .bridge-popup td { padding: 2px 6px; }
+    .bridge-popup td:first-child { font-weight: bold; color: #555; }
+    .status-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; }
+    .status-compliant { background: #d4edda; color: #155724; }
+    .status-conditional { background: #fff3cd; color: #856404; }
+    .status-violation { background: #f8d7da; color: #721c24; }
+    .status-unassessed { background: #e2e3e5; color: #383d41; }
+  </style>
+</head>
+<body class="sapUiBody" id="content"></body>
+</html>

@@ -1,0 +1,56 @@
+name: UI Mirror Drift Check
+
+# Blocks merges that would ship a stale app-router UI copy.
+# Root cause: edits to app/bridge-management/webapp/ must be mirrored to
+# both app-router/resources/nhvr.bridgemanagement/ and app-router/resources/webapp/.
+# Local dev hides the bug (source is served directly) but BTP serves the mirror.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'app/bridge-management/webapp/**'
+      - 'app-router/resources/**'
+  push:
+    branches: [main]
+    paths:
+      - 'app/bridge-management/webapp/**'
+      - 'app-router/resources/**'
+
+jobs:
+  drift-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check mirror drift
+        run: |
+          set -e
+          SRC="app/bridge-management/webapp"
+          DEST1="app-router/resources/nhvr.bridgemanagement"
+          DEST2="app-router/resources/webapp"
+
+          fail=0
+          for DEST in "$DEST1" "$DEST2"; do
+            if [ -d "$DEST" ]; then
+              echo "Checking $SRC vs $DEST"
+              drift=$(rsync -a --dry-run --itemize-changes --delete \
+                --exclude='*.test.js' --exclude='test/' \
+                "$SRC/" "$DEST/" | grep -v '^$' || true)
+              if [ -n "$drift" ]; then
+                echo "::error::Drift detected in $DEST"
+                echo "$drift"
+                fail=1
+              else
+                echo "✓ $DEST in sync"
+              fi
+            else
+              echo "::warning::$DEST missing — skipping"
+            fi
+          done
+
+          if [ $fail -eq 1 ]; then
+            echo ""
+            echo "::error::UI mirror drift. Fix with: npm run sync-ui && npm run sync-ui:webapp"
+            exit 1
+          fi

@@ -1,0 +1,88 @@
+<!-- ============================================================
+     NHVR Admin — Restriction Type Configuration
+     ============================================================ -->
+<mvc:View
+    controllerName="nhvr.bridgemanagement.controller.AdminRestrictionTypes"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.f"
+    displayBlock="true">
+
+    <f:DynamicPage id="adminRestTypesPage" toggleHeaderOnTitleClick="false">
+        <f:title>
+            <f:DynamicPageTitle>
+                <f:heading><Title text="Restriction Type Configuration" level="H1"/></f:heading>
+                <f:actions>
+                    <Button text="Home" icon="sap-icon://home" press="onNavHome" type="Transparent"/>
+                </f:actions>
+                <f:breadcrumbs>
+                    <Breadcrumbs>
+                        <Link text="Home" press="onNavHome"/>
+                        <Link text="Admin"/>
+                        <Link text="Restriction Types"/>
+                    </Breadcrumbs>
+                </f:breadcrumbs>
+            </f:DynamicPageTitle>
+        </f:title>
+        <f:content>
+            <VBox class="nhvrApp">
+                <Table id="restTypeTable" items="{restTypes>/items}" fixedLayout="false"
+                    growing="true" growingThreshold="50" noDataText="No restriction types found."
+                    alternateRowColors="true" class="sapUiSmallMarginBeginEnd">
+                    <headerToolbar>
+                        <OverflowToolbar>
+                            <Title id="restTypeTableTitle" text="Restriction Types" level="H3"/>
+                            <ToolbarSpacer/>
+                            <Button text="Add Type" icon="sap-icon://add" press="onAddRestType" type="Emphasized"/>
+                        </OverflowToolbar>
+                    </headerToolbar>
+                    <columns>
+                        <Column width="120px"><Text text="Code"/></Column>
+                        <Column><Text text="Display Label"/></Column>
+                        <Column width="80px" hAlign="Center"><Text text="Unit"/></Column>
+                        <Column width="80px" hAlign="Center"><Text text="Active"/></Column>
+                        <Column width="80px" hAlign="Center"><Text text="System"/></Column>
+                        <Column width="80px" hAlign="Center"><Text text="Actions"/></Column>
+                    </columns>
+                    <items>
+                        <ColumnListItem type="Inactive" vAlign="Middle">
+                            <cells>
+                                <Text text="{restTypes>code}"/>
+                                <Text text="{restTypes>displayLabel}"/>
+                                <Text text="{restTypes>defaultUnit}"/>
+                                <ObjectStatus text="{= ${restTypes>active} ? 'Active' : 'Inactive'}"
+                                    state="{= ${restTypes>active} ? 'Success' : 'None'}"/>
+                                <ObjectStatus text="{= ${restTypes>isSystem} ? 'System' : 'Custom'}"
+                                    state="{= ${restTypes>isSystem} ? 'Information' : 'None'}"/>
+                                <Button icon="sap-icon://edit" tooltip="Edit" press="onEditRestType"
+                                    type="Transparent" enabled="{= !${restTypes>isSystem}}"/>
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
+            </VBox>
+        </f:content>
+    </f:DynamicPage>
+
+    <!-- Add/Edit Dialog -->
+    <Dialog id="restTypeDlg" title="Restriction Type" contentWidth="480px" draggable="true">
+        <content>
+            <VBox class="sapUiSmallMarginBeginEnd sapUiSmallMarginTop">
+                <Label text="Code" required="true" class="sapUiTinyMarginBottom"/>
+                <Input id="rtCode" placeholder="e.g. BRIDGE_WORKS" width="100%" class="sapUiSmallMarginBottom"/>
+                <Label text="Display Label" required="true" class="sapUiTinyMarginBottom"/>
+                <Input id="rtLabel" placeholder="e.g. Bridge Works Restriction" width="100%" class="sapUiSmallMarginBottom"/>
+                <Label text="Default Unit" class="sapUiTinyMarginBottom"/>
+                <Input id="rtUnit" placeholder="t / m / kph" width="100%" class="sapUiSmallMarginBottom"/>
+                <Label text="Description" class="sapUiTinyMarginBottom"/>
+                <TextArea id="rtDesc" rows="2" width="100%" class="sapUiSmallMarginBottom"/>
+                <CheckBox id="rtActive" text="Active" selected="true" class="sapUiSmallMarginBottom"/>
+            </VBox>
+        </content>
+        <buttons>
+            <Button id="rtSaveBtn" text="Save" type="Emphasized" press="onSaveRestType" icon="sap-icon://save"/>
+            <Button text="Cancel" press="onCancelRestType" type="Transparent"/>
+        </buttons>
+    </Dialog>
+</mvc:View>

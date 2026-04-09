@@ -1,0 +1,11 @@
+ID,routeCode,description,region,state,isActive
+10000000-0000-0000-0000-000000000001,HWY-31,Hume Highway,New South Wales,NSW,true
+10000000-0000-0000-0000-000000000002,HWY-1,Pacific Highway,New South Wales,NSW,true
+10000000-0000-0000-0000-000000000003,M7,Western Sydney Motorway,New South Wales,NSW,true
+10000000-0000-0000-0000-000000000004,HWY-39,Stuart Highway,Northern Territory,NT,true
+10000000-0000-0000-0000-000000000005,HWY-1-WA,Great Northern Highway,Western Australia,WA,true
+10000000-0000-0000-0000-000000000006,HWY-95,Barkly Highway,Queensland,QLD,true
+10000000-0000-0000-0000-000000000007,M1,South Eastern Freeway,South Australia,SA,true
+10000000-0000-0000-0000-000000000008,HWY-8,Midland Highway,Victoria,VIC,true
+10000000-0000-0000-0000-000000000009,HWY-A1,Bass Highway,Tasmania,TAS,true
+10000000-0000-0000-0000-000000000010,HWY-23,New England Highway,New South Wales,NSW,true

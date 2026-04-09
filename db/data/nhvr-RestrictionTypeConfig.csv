@@ -1,0 +1,13 @@
+ID,code,displayLabel,defaultUnit,valueRequired,description,sortOrder,active,isSystem,createdAt,createdBy,modifiedAt,modifiedBy
+rc-001,GROSS_MASS,Gross Vehicle Mass,t,true,Maximum gross vehicle mass permitted on the bridge,1,true,true,2024-01-01T00:00:00Z,system,2024-01-01T00:00:00Z,system
+rc-002,HEIGHT,Height Limit,m,true,Maximum vehicle height permitted to pass under the bridge,2,true,true,2024-01-01T00:00:00Z,system,2024-01-01T00:00:00Z,system
+rc-003,WIDTH,Width Limit,m,true,Maximum vehicle width permitted on the bridge,3,true,true,2024-01-01T00:00:00Z,system,2024-01-01T00:00:00Z,system
+rc-004,AXLE_LOAD,Axle Load Limit,t,true,Maximum load per axle group permitted on the bridge,4,true,true,2024-01-01T00:00:00Z,system,2024-01-01T00:00:00Z,system
+rc-005,SPEED,Speed Limit,kph,true,Maximum vehicle speed permitted on the bridge,5,true,true,2024-01-01T00:00:00Z,system,2024-01-01T00:00:00Z,system
+rc-006,TOTAL_MASS,Total Mass,t,true,Maximum total mass of vehicle and load,6,true,true,2024-01-01T00:00:00Z,system,2024-01-01T00:00:00Z,system
+rc-007,LENGTH,Length Limit,m,true,Maximum vehicle length permitted on the bridge,7,true,true,2024-01-01T00:00:00Z,system,2024-01-01T00:00:00Z,system
+rc-008,LOAD,Load Limit,t,true,Maximum load weight restriction,8,true,true,2024-01-01T00:00:00Z,system,2024-01-01T00:00:00Z,system
+rc-009,MASS,Mass Restriction,t,true,General mass restriction,9,true,true,2024-01-01T00:00:00Z,system,2024-01-01T00:00:00Z,system
+rc-010,VEHICLE_TYPE,Vehicle Type Restriction,,false,Restriction by vehicle category or class,10,true,true,2024-01-01T00:00:00Z,system,2024-01-01T00:00:00Z,system
+rc-011,EMERGENCY_CLOSURE,Emergency Closure,,false,Temporary emergency closure,11,true,false,2024-01-01T00:00:00Z,system,2024-01-01T00:00:00Z,system
+rc-012,SEASONAL_FLOOD,Seasonal Flood Restriction,,false,Seasonal restriction due to flood risk,12,true,false,2024-01-01T00:00:00Z,system,2024-01-01T00:00:00Z,system

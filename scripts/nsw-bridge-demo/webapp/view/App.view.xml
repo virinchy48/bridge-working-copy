@@ -1,0 +1,441 @@
+<mvc:View
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns="sap.m"
+  xmlns:l="sap.ui.layout"
+  xmlns:form="sap.ui.layout.form"
+  xmlns:core="sap.ui.core"
+  displayBlock="true"
+  controllerName="nsw.bridge.demo.controller.App">
+
+  <App id="appRoot">
+  <pages>
+  <Page id="mainPage" showHeader="true" enableScrolling="false">
+    <customHeader>
+      <Bar>
+        <contentLeft>
+          <core:Icon src="sap-icon://map-2" size="1.5rem" color="#0a6ed1"/>
+          <Title text="NSW Bridge Asset &amp; NHVR Permit Assessment" titleStyle="H5"/>
+        </contentLeft>
+        <contentMiddle>
+          <Text text="Transport for NSW · NHVR Heavy Vehicle Compliance" class="sapMTextMuted"/>
+        </contentMiddle>
+        <contentRight>
+          <Button icon="sap-icon://information" tooltip="About this application" press=".onAbout" type="Transparent"/>
+        </contentRight>
+      </Bar>
+    </customHeader>
+    <content>
+      <IconTabBar id="mainTabBar"
+        expanded="true"
+        stretchContentHeight="true"
+        backgroundDesign="Transparent"
+        tabDensityMode="Compact"
+        select=".onTabSelect">
+
+        <!-- ═══════════════════════ TAB 1: MAP ═══════════════════════ -->
+        <items>
+          <IconTabFilter key="map" icon="sap-icon://map-2" text="Map View">
+            <content>
+              <FlexBox direction="Row" width="100%" height="100%">
+                <!-- Left: Leaflet Map (70%) -->
+                <FlexBox direction="Column" width="70%">
+                  <Toolbar height="40px">
+                    <Label text="Filter:"/>
+                    <Select id="regionFilter" width="160px" change=".onMapFilterChange">
+                      <core:Item key="All" text="All Regions"/>
+                      <core:Item key="Sydney Metro" text="Sydney Metro"/>
+                      <core:Item key="Hunter" text="Hunter"/>
+                      <core:Item key="Central Coast" text="Central Coast"/>
+                      <core:Item key="New England" text="New England"/>
+                      <core:Item key="North West" text="North West"/>
+                      <core:Item key="Western NSW" text="Western NSW"/>
+                      <core:Item key="Riverina" text="Riverina"/>
+                      <core:Item key="South East" text="South East"/>
+                      <core:Item key="Illawarra" text="Illawarra"/>
+                      <core:Item key="Central West" text="Central West"/>
+                      <core:Item key="North Coast" text="North Coast"/>
+                      <core:Item key="Southern Highlands" text="Southern Highlands"/>
+                    </Select>
+                    <Select id="postingFilter" width="160px" change=".onMapFilterChange">
+                      <core:Item key="All" text="All Posting Status"/>
+                      <core:Item key="Unrestricted" text="Unrestricted"/>
+                      <core:Item key="Posted" text="Posted"/>
+                      <core:Item key="Load Limited" text="Load Limited"/>
+                      <core:Item key="Closed" text="Closed"/>
+                    </Select>
+                    <CheckBox id="freightRouteFilter" text="Freight Routes Only" select=".onMapFilterChange"/>
+                    <ToolbarSpacer/>
+                    <Text id="mapBridgeCount" text="150 bridges" class="sapMTextMuted"/>
+                    <Button icon="sap-icon://reset" text="Reset" press=".onMapReset" type="Transparent"/>
+                  </Toolbar>
+                  <!-- Legend -->
+                  <HBox class="sapUiSmallMarginBegin sapUiTinyMarginBottom" alignItems="Center">
+                    <core:Icon src="sap-icon://circle-task-2" color="#6c757d" size="0.9rem"/>
+                    <Text text="Default" class="sapUiTinyMarginBegin sapUiSmallMarginEnd"/>
+                    <core:Icon src="sap-icon://circle-task-2" color="#28a745" size="0.9rem"/>
+                    <Text text="Compliant" class="sapUiTinyMarginBegin sapUiSmallMarginEnd"/>
+                    <core:Icon src="sap-icon://circle-task-2" color="#ffc107" size="0.9rem"/>
+                    <Text text="Conditional" class="sapUiTinyMarginBegin sapUiSmallMarginEnd"/>
+                    <core:Icon src="sap-icon://circle-task-2" color="#dc3545" size="0.9rem"/>
+                    <Text text="Violation / Restricted" class="sapUiTinyMarginBegin"/>
+                  </HBox>
+                  <!-- Leaflet Map Container -->
+                  <core:HTML id="leafletMap"
+                    content="&lt;div id='nsw-bridge-map' style='height:calc(100vh - 230px);width:100%;border:1px solid #d9d9d9;'&gt;&lt;/div&gt;"
+                    afterRendering=".onMapAfterRendering"/>
+                </FlexBox>
+
+                <!-- Right: Bridge Detail Panel (30%) -->
+                <FlexBox direction="Column" width="30%" class="sapUiSmallMarginBegin">
+                  <Panel id="noSelectionPanel" headerText="Bridge Details" expandable="false">
+                    <content>
+                      <VBox class="sapUiMediumMargin" alignItems="Center">
+                        <core:Icon src="sap-icon://map-2" size="3rem" color="#b0b0b0"/>
+                        <Text text="Click a bridge marker on the map to view its details"
+                          class="sapMTextMuted sapUiSmallMarginTop" textAlign="Center"/>
+                      </VBox>
+                    </content>
+                  </Panel>
+                  <Panel id="bridgeDetailPanel" headerText="Bridge Details" expandable="false" visible="false">
+                    <content>
+                      <VBox class="sapUiSmallMarginBeginEnd">
+                        <ObjectHeader
+                          id="detailHeader"
+                          title="{state>/selectedBridge/bridge_name}"
+                          number="{state>/selectedBridge/bridge_id}"
+                          backgroundDesign="Transparent"
+                          condensed="true">
+                          <statuses>
+                            <ObjectStatus
+                              title="Posting"
+                              text="{state>/selectedBridge/posting_status}"
+                              state="{state>/selectedBridge/_postingState}"/>
+                            <ObjectStatus
+                              title="Condition"
+                              text="{state>/selectedBridge/condition}"
+                              state="{state>/selectedBridge/_conditionState}"/>
+                          </statuses>
+                        </ObjectHeader>
+                        <form:SimpleForm editable="false" layout="ResponsiveGridLayout"
+                          columnsM="1" columnsL="1" columnsXL="1">
+                          <core:Title text="Location"/>
+                          <Label text="Region"/><Text text="{state>/selectedBridge/region}"/>
+                          <Label text="LGA"/><Text text="{state>/selectedBridge/lga}"/>
+                          <Label text="Road Route"/><Text text="{state>/selectedBridge/road_route}"/>
+                          <Label text="Route No."/><Text text="{state>/selectedBridge/route_number}"/>
+                          <Label text="Coordinates"/><Text id="coordText" text=""/>
+
+                          <core:Title text="Physical Attributes"/>
+                          <Label text="Structure Type"/><Text text="{state>/selectedBridge/structure_type}"/>
+                          <Label text="Material"/><Text text="{state>/selectedBridge/material}"/>
+                          <Label text="Total Length"/><Text text="{state>/selectedBridge/total_length_m} m"/>
+                          <Label text="Main Span"/><Text text="{state>/selectedBridge/main_span_m} m"/>
+                          <Label text="Width"/><Text text="{state>/selectedBridge/width_m} m"/>
+                          <Label text="Clearance Height"/><Text text="{state>/selectedBridge/clearance_height_m} m"/>
+                          <Label text="No. of Spans"/><Text text="{state>/selectedBridge/no_of_spans}"/>
+                          <Label text="No. of Lanes"/><Text text="{state>/selectedBridge/no_of_lanes}"/>
+
+                          <core:Title text="NHVR &amp; Traffic"/>
+                          <Label text="NHVR Assessed"/>
+                          <core:Icon id="nhvrIcon" src="sap-icon://accept" color="#28a745"/>
+                          <Label text="Over Mass Route"/><Text text="{state>/selectedBridge/over_mass_route}"/>
+                          <Label text="Gazette Ref"/><Text text="{state>/selectedBridge/gazette_reference}"/>
+                          <Label text="AADT"/><Text text="{state>/selectedBridge/aadt}"/>
+                          <Label text="Freight Route"/><Text text="{state>/selectedBridge/freight_route}"/>
+                          <Label text="Flood Impacted"/><Text text="{state>/selectedBridge/flood_impacted}"/>
+                          <Label text="Scour Risk"/><Text text="{state>/selectedBridge/scour_risk}"/>
+
+                          <core:Title text="Ownership"/>
+                          <Label text="Asset Owner"/><Text text="{state>/selectedBridge/asset_owner}"/>
+                          <Label text="Data Source"/><Text text="{state>/selectedBridge/data_source}"/>
+                          <Label text="Confidence"/><Text text="{state>/selectedBridge/data_confidence}"/>
+                          <Label text="Last Updated"/><Text text="{state>/selectedBridge/last_updated}"/>
+                        </form:SimpleForm>
+                        <HBox class="sapUiSmallMarginTop sapUiSmallMarginBottom" justifyContent="Center">
+                          <Button text="Run Permit Check" icon="sap-icon://document-text"
+                            press=".onRunPermitFromDetail" type="Emphasized"/>
+                        </HBox>
+                      </VBox>
+                    </content>
+                  </Panel>
+                </FlexBox>
+              </FlexBox>
+            </content>
+          </IconTabFilter>
+
+          <!-- ═══════════════════════ TAB 2: LIST ═══════════════════════ -->
+          <IconTabFilter key="list" icon="sap-icon://table-view" text="Bridge List">
+            <content>
+              <VBox>
+                <Toolbar>
+                  <Title text="NSW Bridge Inventory"/>
+                  <ToolbarSpacer/>
+                  <SearchField id="tableSearch" width="240px" search=".onTableSearch" liveChange=".onTableSearch"/>
+                  <Select id="tableRegionFilter" width="160px" change=".onTableFilter">
+                    <core:Item key="All" text="All Regions"/>
+                    <core:Item key="Sydney Metro" text="Sydney Metro"/>
+                    <core:Item key="Hunter" text="Hunter"/>
+                    <core:Item key="Central Coast" text="Central Coast"/>
+                    <core:Item key="New England" text="New England"/>
+                    <core:Item key="North West" text="North West"/>
+                    <core:Item key="Western NSW" text="Western NSW"/>
+                    <core:Item key="Riverina" text="Riverina"/>
+                    <core:Item key="South East" text="South East"/>
+                    <core:Item key="Illawarra" text="Illawarra"/>
+                    <core:Item key="Central West" text="Central West"/>
+                    <core:Item key="North Coast" text="North Coast"/>
+                    <core:Item key="Southern Highlands" text="Southern Highlands"/>
+                  </Select>
+                  <Select id="tableConditionFilter" width="140px" change=".onTableFilter">
+                    <core:Item key="All" text="All Conditions"/>
+                    <core:Item key="Good" text="Good"/>
+                    <core:Item key="Fair" text="Fair"/>
+                    <core:Item key="Poor" text="Poor"/>
+                    <core:Item key="Critical" text="Critical"/>
+                  </Select>
+                  <Select id="tablePostingFilter" width="150px" change=".onTableFilter">
+                    <core:Item key="All" text="All Postings"/>
+                    <core:Item key="Unrestricted" text="Unrestricted"/>
+                    <core:Item key="Posted" text="Posted"/>
+                    <core:Item key="Load Limited" text="Load Limited"/>
+                    <core:Item key="Closed" text="Closed"/>
+                  </Select>
+                  <Button icon="sap-icon://excel-attachment" text="Export CSV" press=".onExportCSV" type="Transparent"/>
+                </Toolbar>
+                <Table id="bridgeTable"
+                  items="{bridges>/bridges}"
+                  growing="true"
+                  growingThreshold="50"
+                  sticky="ColumnHeaders,HeaderToolbar"
+                  mode="SingleSelectMaster"
+                  selectionChange=".onTableRowSelect">
+                  <columns>
+                    <Column width="120px"><Text text="Bridge ID"/></Column>
+                    <Column><Text text="Bridge Name"/></Column>
+                    <Column width="140px"><Text text="Region"/></Column>
+                    <Column width="160px"><Text text="Road Route"/></Column>
+                    <Column width="130px"><Text text="Structure Type"/></Column>
+                    <Column width="90px" hAlign="End"><Text text="Length (m)"/></Column>
+                    <Column width="100px" hAlign="End"><Text text="Clearance (m)"/></Column>
+                    <Column width="100px" hAlign="Center"><Text text="Condition"/></Column>
+                    <Column width="110px" hAlign="Center"><Text text="Posting Status"/></Column>
+                    <Column width="80px" hAlign="Center"><Text text="NHVR"/></Column>
+                    <Column width="80px" hAlign="Center"><Text text="Freight"/></Column>
+                    <Column width="80px" hAlign="End"><Text text="AADT"/></Column>
+                    <Column width="110px" hAlign="Center"><Text text="Confidence"/></Column>
+                  </columns>
+                  <items>
+                    <ColumnListItem press=".onTableRowSelect" type="Active">
+                      <cells>
+                        <Text text="{bridges>bridge_id}"/>
+                        <ObjectIdentifier title="{bridges>bridge_name}" text="{bridges>lga}"/>
+                        <Text text="{bridges>region}"/>
+                        <Text text="{bridges>road_route}"/>
+                        <Text text="{bridges>structure_type}"/>
+                        <Text text="{bridges>total_length_m}"/>
+                        <ObjectNumber number="{bridges>clearance_height_m}" unit="m"
+                          state="{= ${bridges>clearance_height_m} >= 4.6 ? 'Success' : ${bridges>clearance_height_m} >= 4.25 ? 'Warning' : 'Error'}"/>
+                        <ObjectStatus
+                          text="{bridges>condition}"
+                          state="{= ${bridges>condition} === 'Good' ? 'Success' : ${bridges>condition} === 'Fair' ? 'Warning' : 'Error'}"/>
+                        <ObjectStatus
+                          text="{bridges>posting_status}"
+                          state="{= ${bridges>posting_status} === 'Unrestricted' ? 'Success' : ${bridges>posting_status} === 'Posted' ? 'Warning' : 'Error'}"/>
+                        <core:Icon src="{= ${bridges>nhvr_route_assessed} ? 'sap-icon://accept' : 'sap-icon://decline'}"
+                          color="{= ${bridges>nhvr_route_assessed} ? '#28a745' : '#6c757d'}"/>
+                        <core:Icon src="{= ${bridges>freight_route} ? 'sap-icon://accept' : 'sap-icon://less'}"
+                          color="{= ${bridges>freight_route} ? '#0a6ed1' : '#6c757d'}"/>
+                        <Text text="{bridges>aadt}"/>
+                        <ObjectStatus
+                          text="{bridges>data_confidence}"
+                          state="{= ${bridges>data_confidence} === 'Sourced' ? 'Success' : ${bridges>data_confidence} === 'Inferred' ? 'Warning' : 'None'}"/>
+                      </cells>
+                    </ColumnListItem>
+                  </items>
+                </Table>
+              </VBox>
+            </content>
+          </IconTabFilter>
+
+          <!-- ═══════════════════════ TAB 3: PERMIT CHECKER ═══════════════════════ -->
+          <IconTabFilter key="permit" icon="sap-icon://document-text" text="Permit Checker">
+            <content>
+              <FlexBox direction="Row" width="100%">
+
+                <!-- Left: Input Panel -->
+                <Panel width="380px" headerText="Vehicle &amp; Route Parameters"
+                  class="sapUiMediumMarginBegin sapUiMediumMarginTop">
+                  <content>
+                    <form:SimpleForm editable="true" layout="ResponsiveGridLayout"
+                      labelSpanXL="5" labelSpanL="5" labelSpanM="5"
+                      emptySpanXL="0" emptySpanL="0" emptySpanM="0">
+                      <core:Title text="Vehicle Configuration"/>
+                      <Label text="Permit Class" required="true"/>
+                      <Select id="permitClassSel" selectedKey="PBS1" width="100%">
+                        <core:Item key="Standard" text="Standard Mass Limits (SML)"/>
+                        <core:Item key="HML" text="Higher Mass Limits (HML)"/>
+                        <core:Item key="PBS1" text="PBS Level 1"/>
+                        <core:Item key="PBS2" text="PBS Level 2"/>
+                        <core:Item key="PBS3" text="PBS Level 3"/>
+                        <core:Item key="PBS4" text="PBS Level 4"/>
+                        <core:Item key="Oversize" text="Oversize / Over-Dimensional"/>
+                        <core:Item key="Overmass" text="Over-Mass Permit"/>
+                      </Select>
+
+                      <Label text="Gross Vehicle Mass (t)" required="true"/>
+                      <Input id="gvmInput" value="42.5" type="Number" placeholder="e.g. 42.5"/>
+
+                      <Label text="Vehicle Height (m)" required="true"/>
+                      <Input id="heightInput" value="4.3" type="Number" placeholder="e.g. 4.3"/>
+
+                      <Label text="Vehicle Width (m)"/>
+                      <Input id="widthInput" value="2.5" type="Number" placeholder="e.g. 2.5"/>
+
+                      <Label text="Vehicle Length (m)"/>
+                      <Input id="lengthInput" value="19.0" type="Number" placeholder="e.g. 19.0"/>
+
+                      <core:Title text="Axle Group Loads (tonnes)"/>
+                      <Label text="Steer Axle"/>
+                      <Input id="steerAxleInput" value="6.0" type="Number"/>
+                      <Label text="Drive Axle Group"/>
+                      <Input id="driveAxleInput" value="16.5" type="Number"/>
+                      <Label text="Trailer Axle Group"/>
+                      <Input id="trailerAxleInput" value="20.0" type="Number"/>
+
+                      <core:Title text="Route Filter"/>
+                      <Label text="Region"/>
+                      <Select id="permitRegionFilter" width="100%">
+                        <core:Item key="All" text="All NSW"/>
+                        <core:Item key="Sydney Metro" text="Sydney Metro"/>
+                        <core:Item key="Hunter" text="Hunter"/>
+                        <core:Item key="Central Coast" text="Central Coast"/>
+                        <core:Item key="New England" text="New England"/>
+                        <core:Item key="North West" text="North West"/>
+                        <core:Item key="Western NSW" text="Western NSW"/>
+                        <core:Item key="Riverina" text="Riverina"/>
+                        <core:Item key="South East" text="South East"/>
+                        <core:Item key="Illawarra" text="Illawarra"/>
+                        <core:Item key="Central West" text="Central West"/>
+                        <core:Item key="North Coast" text="North Coast"/>
+                        <core:Item key="Southern Highlands" text="Southern Highlands"/>
+                      </Select>
+                      <Label text="NHVR Assessed Only"/>
+                      <CheckBox id="nhvrOnlyCheck" selected="false"/>
+                    </form:SimpleForm>
+
+                    <HBox class="sapUiMediumMargin" justifyContent="SpaceBetween">
+                      <Button text="Run Permit Check" icon="sap-icon://accept"
+                        type="Emphasized" press=".onRunPermitCheck" width="180px"/>
+                      <Button text="Reset" icon="sap-icon://reset"
+                        type="Transparent" press=".onResetPermit"/>
+                    </HBox>
+
+                    <!-- NHVR Reference Info -->
+                    <Panel headerText="NHVR Mass Limit Reference" expandable="true" expanded="false">
+                      <content>
+                        <Table class="sapUiTinyMargin">
+                          <columns>
+                            <Column><Text text="Axle Config"/></Column>
+                            <Column hAlign="End"><Text text="SML (t)"/></Column>
+                            <Column hAlign="End"><Text text="HML (t)"/></Column>
+                          </columns>
+                          <items>
+                            <ColumnListItem><cells>
+                              <Text text="Steer axle"/><Text text="6.0"/><Text text="6.0"/>
+                            </cells></ColumnListItem>
+                            <ColumnListItem><cells>
+                              <Text text="Single axle"/><Text text="9.0"/><Text text="9.0"/>
+                            </cells></ColumnListItem>
+                            <ColumnListItem><cells>
+                              <Text text="Tandem axle"/><Text text="16.5"/><Text text="17.0"/>
+                            </cells></ColumnListItem>
+                            <ColumnListItem><cells>
+                              <Text text="Tri-axle"/><Text text="20.0"/><Text text="22.5"/>
+                            </cells></ColumnListItem>
+                            <ColumnListItem><cells>
+                              <Text text="GCM B-double"/><Text text="62.5"/><Text text="68.5"/>
+                            </cells></ColumnListItem>
+                          </items>
+                        </Table>
+                      </content>
+                    </Panel>
+                  </content>
+                </Panel>
+
+                <!-- Right: Results Panel -->
+                <FlexBox direction="Column" class="sapUiMediumMarginBegin sapUiMediumMarginTop sapUiMediumMarginEnd"
+                  width="calc(100% - 420px)">
+                  <Panel id="permitResultsPanel" headerText="Assessment Results" expandable="false">
+                    <content>
+                      <VBox id="permitNoResults" class="sapUiLargeMargin" alignItems="Center">
+                        <core:Icon src="sap-icon://document-text" size="3rem" color="#b0b0b0"/>
+                        <Text text="Enter vehicle parameters and click Run Permit Check to assess NSW bridges."
+                          class="sapMTextMuted sapUiSmallMarginTop" textAlign="Center"/>
+                      </VBox>
+
+                      <HBox id="permitSummaryBar" visible="false"
+                        class="sapUiSmallMarginBegin sapUiSmallMarginEnd sapUiSmallMarginTop sapUiSmallMarginBottom"
+                        justifyContent="SpaceAround">
+                        <VBox alignItems="Center">
+                          <ObjectNumber id="compliantCount" number="0" unit="Compliant" state="Success"/>
+                        </VBox>
+                        <VBox alignItems="Center">
+                          <ObjectNumber id="conditionalCount" number="0" unit="Conditional" state="Warning"/>
+                        </VBox>
+                        <VBox alignItems="Center">
+                          <ObjectNumber id="violationCount" number="0" unit="Violation" state="Error"/>
+                        </VBox>
+                        <VBox alignItems="Center">
+                          <ObjectNumber id="unassessedCount" number="0" unit="Unassessed"/>
+                        </VBox>
+                      </HBox>
+
+                      <Table id="permitResultsTable"
+                        visible="false"
+                        items="{state>/results}"
+                        growing="true"
+                        growingThreshold="50"
+                        sticky="ColumnHeaders">
+                        <columns>
+                          <Column width="120px"><Text text="Bridge ID"/></Column>
+                          <Column><Text text="Bridge Name"/></Column>
+                          <Column width="130px"><Text text="Region"/></Column>
+                          <Column width="100px" hAlign="End"><Text text="Clearance (m)"/></Column>
+                          <Column width="100px" hAlign="Center"><Text text="Posting"/></Column>
+                          <Column width="100px" hAlign="Center"><Text text="Height"/></Column>
+                          <Column width="100px" hAlign="Center"><Text text="Mass"/></Column>
+                          <Column width="110px" hAlign="Center"><Text text="Route"/></Column>
+                          <Column width="110px" hAlign="Center"><Text text="Result"/></Column>
+                          <Column><Text text="Notes"/></Column>
+                        </columns>
+                        <items>
+                          <ColumnListItem>
+                            <cells>
+                              <Text text="{state>bridge_id}"/>
+                              <ObjectIdentifier title="{state>bridge_name}" text="{state>road_route}"/>
+                              <Text text="{state>region}"/>
+                              <ObjectNumber number="{state>clearance_height_m}" unit="m"
+                                state="{state>clearanceState}"/>
+                              <ObjectStatus text="{state>posting_status}" state="{state>postingState}"/>
+                              <ObjectStatus text="{state>heightCheck}" state="{state>heightState}"/>
+                              <ObjectStatus text="{state>massCheck}"   state="{state>massState}"/>
+                              <ObjectStatus text="{state>routeCheck}"  state="{state>routeState}"/>
+                              <ObjectStatus text="{state>overallResult}" state="{state>overallState}"/>
+                              <Text text="{state>notes}" wrapping="true"/>
+                            </cells>
+                          </ColumnListItem>
+                        </items>
+                      </Table>
+                    </content>
+                  </Panel>
+                </FlexBox>
+              </FlexBox>
+            </content>
+          </IconTabFilter>
+        </items>
+      </IconTabBar>
+    </content>
+  </Page>
+  </pages>
+  </App>
+</mvc:View>

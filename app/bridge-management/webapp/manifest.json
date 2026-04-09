@@ -1,0 +1,322 @@
+{
+    "_version": "1.49.0",
+    "sap.app": {
+        "id": "nhvr.bridgemanagement",
+        "type": "application",
+        "i18n": "i18n/i18n.properties",
+        "applicationVersion": { "version": "3.3.0" },
+        "title": "{{appTitle}}",
+        "description": "{{appDescription}}",
+        "dataSources": {
+            "mainService": {
+                "uri": "/bridge-management/",
+                "type": "OData",
+                "settings": {
+                    "annotations": [],
+                    "localUri": "localService/metadata.xml",
+                    "odataVersion": "4.0"
+                }
+            }
+        },
+        "crossNavigation": {
+            "inbounds": {
+                "NHVRBridgeManagement-manage": {
+                    "semanticObject": "NHVRBridgeManagement",
+                    "action": "manage",
+                    "title": "Bridge Management System (BMS)",
+                    "subTitle": "National Heavy Vehicle Regulator",
+                    "icon": "sap-icon://bridge",
+                    "info": "Manage bridge assets, restrictions, permits and route assessments",
+                    "deviceTypes": { "desktop": true, "tablet": true, "phone": false },
+                    "signature": {
+                        "parameters": {},
+                        "additionalParameters": "allowed"
+                    }
+                },
+                "NHVRBridge-display": {
+                    "semanticObject": "NHVRBridge",
+                    "action": "display",
+                    "title": "Bridge Detail",
+                    "subTitle": "BMS — Bridge Asset",
+                    "icon": "sap-icon://bridge",
+                    "deviceTypes": { "desktop": true, "tablet": true, "phone": false },
+                    "signature": {
+                        "parameters": {
+                            "bridgeId": { "defaultValue": { "value": "", "format": "plain" } }
+                        },
+                        "additionalParameters": "allowed"
+                    }
+                },
+                "NHVRDashboard-display": {
+                    "semanticObject": "NHVRDashboard",
+                    "action": "display",
+                    "title": "BMS Executive Dashboard",
+                    "subTitle": "Bridge Network KPIs",
+                    "icon": "sap-icon://manager-insight",
+                    "deviceTypes": { "desktop": true, "tablet": true, "phone": false },
+                    "signature": {
+                        "parameters": {},
+                        "additionalParameters": "ignored"
+                    }
+                }
+            },
+            "outbounds": {}
+        }
+    },
+    "sap.ui": {
+        "technology": "UI5",
+        "icons": { "icon": "sap-icon://bridge" },
+        "deviceTypes": { "desktop": true, "tablet": true, "phone": true }
+    },
+    "sap.fiori": {
+        "registrationIds": ["F9999"],
+        "archetype": "transactional",
+        "abstract": false,
+        "tags": {
+            "technicalAttributes": ["OData V4", "SAP HANA Cloud", "SAP BTP", "CAP"],
+            "businessAttributes": ["Asset Management", "Infrastructure", "Public Sector"]
+        }
+    },
+    "sap.ui5": {
+        "flexEnabled": true,
+        "dependencies": {
+            "minUI5Version": "1.120.0",
+            "libs": {
+                "sap.m": {},
+                "sap.ui.core": {},
+                "sap.f": {},
+                "sap.suite.ui.commons": {},
+                "sap.ushell": {},
+                "sap.fe.templates": {},
+                "sap.ui.layout": {},
+                "sap.ui.export": {}
+            }
+        },
+        "contentDensities": { "compact": true, "cozy": true },
+        "resources": {
+            "css": [{ "uri": "css/style.css" }]
+        },
+        "models": {
+            "": {
+                "dataSource": "mainService",
+                "preload": true,
+                "settings": {
+                    "synchronizationMode": "None",
+                    "operationMode": "Server",
+                    "autoExpandSelect": true,
+                    "earlyRequests": true
+                }
+            },
+            "i18n": {
+                "type": "sap.ui.model.resource.ResourceModel",
+                "settings": { "bundleName": "nhvr.bridgemanagement.i18n.i18n" }
+            }
+        },
+        "routing": {
+            "config": {
+                "routerClass": "sap.m.routing.Router",
+                "type": "View",
+                "viewType": "XML",
+                "controlId": "nhvrRootApp",
+                "controlAggregation": "pages",
+                "async": true
+            },
+            "routes": [
+                { "pattern": "",                       "name": "Home",              "target": "Home" },
+                { "pattern": "Dashboard",              "name": "Dashboard",         "target": "Dashboard" },
+
+                { "pattern": "BridgeDetail/{bridgeId}","name": "BridgeDetail",      "target": "BridgeDetail" },
+                { "pattern": "Bridges:?query:",        "name": "BridgesList",       "target": "BridgesList" },
+                { "pattern": "Restrictions:?query:",   "name": "RestrictionsList",  "target": "RestrictionsList" },
+                { "pattern": "Map:?query:",            "name": "MapView",           "target": "MapView" },
+                { "pattern": "Reports",                "name": "Reports",           "target": "Reports" },
+                { "pattern": "Upload",                 "name": "MassUpload",           "target": "MassUpload" },
+                { "pattern": "Admin",                  "name": "AdminConfig",          "target": "AdminConfig" },
+                { "pattern": "Inspections",            "name": "InspectionDashboard",  "target": "InspectionDashboard" },
+                { "pattern": "Defects",                "name": "DefectRegister",       "target": "DefectRegister" },
+                { "pattern": "BridgeNew",              "name": "BridgeNew",             "target": "BridgeNew" },
+                { "pattern": "BridgeEdit/{bridgeId}",  "name": "BridgeEdit",            "target": "BridgeEdit" },
+                { "pattern": "VehicleCombinations:?query:", "name": "VehicleCombinations", "target": "VehicleCombinations" },
+                { "pattern": "AdminRestrictionTypes", "name": "AdminRestrictionTypes", "target": "AdminRestrictionTypes" },
+                { "pattern": "MassEdit", "name": "MassEdit", "target": "MassEdit" },
+                { "pattern": "AdminVehicleTypes", "name": "AdminVehicleTypes", "target": "AdminVehicleTypes" },
+                { "pattern": "Permits:?query:", "name": "Permits", "target": "Permits" },
+                { "pattern": "Permits/{permitId}", "name": "PermitDetail", "target": "Permits" },
+                { "pattern": "RouteAssessment", "name": "RouteAssessment", "target": "RouteAssessment" },
+                { "pattern": "FreightRoutes", "name": "FreightRoutes", "target": "FreightRoutes" },
+                { "pattern": "FreightRoutes/{routeId}", "name": "FreightRouteDetail", "target": "FreightRouteDetail" },
+                { "pattern": "WorkOrders", "name": "WorkOrders", "target": "WorkOrders" },
+                { "pattern": "IntegrationHub", "name": "integrationHub", "target": "IntegrationHub" },
+                { "pattern": "inspection/create/{bridgeId}", "name": "InspectionCreate", "target": "InspectionCreate" },
+                { "pattern": "inspection/create", "name": "InspectionCreateNew", "target": "InspectionCreate" },
+                { "pattern": "LicenseConfig", "name": "LicenseConfig", "target": "LicenseConfig" },
+                { "pattern": "RoutePlanner", "name": "RoutePlanner", "target": "RoutePlanner" },
+                { "pattern": "AppAdmin", "name": "AppAdmin", "target": "AppAdmin" },
+                { "pattern": "BmsTechAdmin", "name": "BmsTechAdmin", "target": "BmsTechAdmin" },
+                { "pattern": "reports/annual-condition", "name": "AnnualConditionReport", "target": "AnnualConditionReport" },
+                { "pattern": "reports/permit-register", "name": "PermitRegisterReport", "target": "PermitRegisterReport" },
+                { "pattern": "analytics-dashboard", "name": "AnalyticsDashboard", "target": "AnalyticsDashboard" }
+            ],
+            "targets": {
+                "Home": {
+                    "type": "XML", "viewLevel": 0,
+                    "viewName": "nhvr.bridgemanagement.view.Home"
+                },
+                "Dashboard": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewName": "nhvr.bridgemanagement.view.Dashboard"
+                },
+                "BridgeDetail": {
+                    "type": "XML", "viewLevel": 2,
+                    "viewName": "nhvr.bridgemanagement.view.BridgeDetail"
+                },
+                "BridgesList": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewName": "nhvr.bridgemanagement.view.Bridges"
+                },
+                "RestrictionsList": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewName": "nhvr.bridgemanagement.view.Restrictions"
+                },
+                "MapView": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewName": "nhvr.bridgemanagement.view.MapView"
+                },
+                "Reports": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewName": "nhvr.bridgemanagement.view.Reports"
+                },
+                "MassUpload": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewName": "nhvr.bridgemanagement.view.MassUpload"
+                },
+                "AdminConfig": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewName": "nhvr.bridgemanagement.view.AdminConfig"
+                },
+                "InspectionDashboard": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewName": "nhvr.bridgemanagement.view.InspectionDashboard"
+                },
+                "DefectRegister": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewName": "nhvr.bridgemanagement.view.Defects"
+                },
+                "BridgeNew": {
+                    "type": "XML", "viewLevel": 2,
+                    "viewName": "nhvr.bridgemanagement.view.BridgeForm"
+                },
+                "BridgeEdit": {
+                    "type": "XML", "viewLevel": 2,
+                    "viewName": "nhvr.bridgemanagement.view.BridgeForm"
+                },
+                "VehicleCombinations": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewName": "nhvr.bridgemanagement.view.VehicleCombinations"
+                },
+                "AdminRestrictionTypes": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewId": "AdminRestrictionTypes",
+                    "viewName": "nhvr.bridgemanagement.view.AdminRestrictionTypes"
+                },
+                "MassEdit": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewId": "MassEdit",
+                    "viewName": "nhvr.bridgemanagement.view.MassEdit"
+                },
+                "AdminVehicleTypes": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewId": "AdminVehicleTypes",
+                    "viewName": "nhvr.bridgemanagement.view.AdminVehicleTypes"
+                },
+                "Permits": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewId": "Permits",
+                    "viewName": "nhvr.bridgemanagement.view.Permits"
+                },
+                "RouteAssessment": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewId": "RouteAssessment",
+                    "viewName": "nhvr.bridgemanagement.view.RouteAssessment"
+                },
+                "FreightRoutes": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewId": "FreightRoutes",
+                    "viewName": "nhvr.bridgemanagement.view.FreightRoutes"
+                },
+                "FreightRouteDetail": {
+                    "type": "XML", "viewLevel": 2,
+                    "viewId": "FreightRouteDetail",
+                    "viewName": "nhvr.bridgemanagement.view.FreightRouteDetail"
+                },
+                "WorkOrders": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewId": "WorkOrders",
+                    "viewName": "nhvr.bridgemanagement.view.WorkOrders"
+                },
+                "IntegrationHub": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewId": "IntegrationHub",
+                    "viewName": "nhvr.bridgemanagement.view.IntegrationHub"
+                },
+                "InspectionCreate": {
+                    "type": "XML", "viewLevel": 2,
+                    "viewId": "InspectionCreate",
+                    "viewName": "nhvr.bridgemanagement.view.InspectionCreate"
+                },
+                "LicenseConfig": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewId": "LicenseConfig",
+                    "viewName": "nhvr.bridgemanagement.view.LicenseConfig"
+                },
+                "RoutePlanner": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewId": "RoutePlanner",
+                    "viewName": "nhvr.bridgemanagement.view.RoutePlanner"
+                },
+                "AppAdmin": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewId": "AppAdmin",
+                    "viewName": "nhvr.bridgemanagement.view.AppAdmin"
+                },
+                "BmsTechAdmin": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewId": "BmsTechAdmin",
+                    "viewName": "nhvr.bridgemanagement.view.BmsTechAdmin"
+                },
+                "AnnualConditionReport": {
+                    "type": "XML", "viewLevel": 2,
+                    "viewId": "AnnualConditionReport",
+                    "viewName": "nhvr.bridgemanagement.view.AnnualConditionReport"
+                },
+                "PermitRegisterReport": {
+                    "type": "XML", "viewLevel": 2,
+                    "viewId": "PermitRegisterReport",
+                    "viewName": "nhvr.bridgemanagement.view.PermitRegisterReport"
+                },
+                "AnalyticsDashboard": {
+                    "type": "XML",
+                    "viewName": "nhvr.bridgemanagement.view.AnalyticsDashboard",
+                    "viewLevel": 1
+                }
+            }
+        },
+        "extends": { "extensions": {} },
+        "library": { "i18n": false }
+    },
+    "sap.accessibility": {
+        "version": "1.0.0",
+        "features": {
+            "wcag": "2.1",
+            "conformanceLevel": "AA",
+            "keyboardNavigation": true,
+            "screenReader": true,
+            "highContrast": true,
+            "textResize": true,
+            "focusManagement": true,
+            "ariaLiveRegions": true
+        },
+        "contentDensities": ["compact", "cozy"],
+        "formFactor": ["desktop", "tablet", "phone"]
+    }
+}

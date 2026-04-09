@@ -1,0 +1,133 @@
+{
+    "xsappname": "nhvr-bridge-iq-v3",
+    "tenant-mode": "dedicated",
+    "description": "NHVR Bridge IQ v3 — Security Configuration (separate from nhvr-bridge-app)",
+    "scopes": [
+        {
+            "name": "$XSAPPNAME.Admin",
+            "description": "Full administrative access - manage bridges, restrictions, and attribute definitions"
+        },
+        {
+            "name": "$XSAPPNAME.BridgeManager",
+            "description": "Create and edit bridge records and restrictions"
+        },
+        {
+            "name": "$XSAPPNAME.Viewer",
+            "description": "Read-only access to bridge and restriction data"
+        },
+        {
+            "name": "$XSAPPNAME.Uploader",
+            "description": "Permission to perform mass uploads via CSV"
+        },
+        {
+            "name": "$XSAPPNAME.Executive",
+            "description": "Read-only access to dashboards and KPI analytics"
+        },
+        {
+            "name": "$XSAPPNAME.Inspector",
+            "description": "Create and manage inspection orders, defect records, and condition assessments"
+        },
+        {
+            "name": "$XSAPPNAME.Operator",
+            "description": "Operational access - view bridge data, apply temporary restrictions, manage permits"
+        }
+    ],
+    "attributes": [],
+    "role-templates": [
+        {
+            "name": "Admin",
+            "description": "NHVR System Administrator - full access",
+            "scope-references": [
+                "$XSAPPNAME.Admin",
+                "$XSAPPNAME.BridgeManager",
+                "$XSAPPNAME.Viewer",
+                "$XSAPPNAME.Uploader",
+                "$XSAPPNAME.Executive",
+                "$XSAPPNAME.Inspector",
+                "$XSAPPNAME.Operator"
+            ]
+        },
+        {
+            "name": "BridgeManager",
+            "description": "Bridge and Restriction Manager (Engineer / Planner)",
+            "scope-references": [
+                "$XSAPPNAME.BridgeManager",
+                "$XSAPPNAME.Viewer",
+                "$XSAPPNAME.Uploader",
+                "$XSAPPNAME.Executive",
+                "$XSAPPNAME.Inspector"
+            ]
+        },
+        {
+            "name": "Inspector",
+            "description": "Bridge Inspector (AS 5100) - inspection orders, defects, condition ratings",
+            "scope-references": [
+                "$XSAPPNAME.Inspector",
+                "$XSAPPNAME.Viewer"
+            ]
+        },
+        {
+            "name": "Operator",
+            "description": "Field Operator - view bridges, apply temporary restrictions, manage permits",
+            "scope-references": [
+                "$XSAPPNAME.Operator",
+                "$XSAPPNAME.Viewer"
+            ]
+        },
+        {
+            "name": "Viewer",
+            "description": "Read-only viewer - general staff",
+            "scope-references": [
+                "$XSAPPNAME.Viewer"
+            ]
+        },
+        {
+            "name": "Executive",
+            "description": "Executive dashboard access - KPIs and analytics only",
+            "scope-references": [
+                "$XSAPPNAME.Executive",
+                "$XSAPPNAME.Viewer"
+            ]
+        }
+    ],
+    "role-collections": [
+        {
+            "name": "NHVR_IQ_Admin",
+            "description": "NHVR IQ v3 System Administrator",
+            "role-template-references": ["$XSAPPNAME.Admin"]
+        },
+        {
+            "name": "NHVR_IQ_BridgeManager",
+            "description": "NHVR IQ v3 Bridge Manager / Engineer",
+            "role-template-references": ["$XSAPPNAME.BridgeManager"]
+        },
+        {
+            "name": "NHVR_IQ_Inspector",
+            "description": "NHVR IQ v3 Bridge Inspector (AS 5100)",
+            "role-template-references": ["$XSAPPNAME.Inspector"]
+        },
+        {
+            "name": "NHVR_IQ_Operator",
+            "description": "NHVR IQ v3 Field Operator",
+            "role-template-references": ["$XSAPPNAME.Operator"]
+        },
+        {
+            "name": "NHVR_IQ_Viewer",
+            "description": "NHVR IQ v3 General Staff Viewer",
+            "role-template-references": ["$XSAPPNAME.Viewer"]
+        },
+        {
+            "name": "NHVR_IQ_Executive",
+            "description": "NHVR IQ v3 Executive Dashboard",
+            "role-template-references": ["$XSAPPNAME.Executive"]
+        }
+    ],
+    "oauth2-configuration": {
+        "token-validity": 43200,
+        "refresh-token-validity": 604800,
+        "redirect-uris": [
+            "https://592f5a7btrial-dev-nhvr-iq-v3-app-router.cfapps.us10-001.hana.ondemand.com/**",
+            "https://*.hana.ondemand.com/**"
+        ]
+    }
+}

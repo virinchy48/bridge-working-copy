@@ -1,0 +1,340 @@
+<!-- ============================================================
+     NHVR Admin — Vehicle Type Register
+     AS 5100.7 / NHVR HVNL compliant vehicle configuration register
+     ============================================================ -->
+<mvc:View
+    controllerName="nhvr.bridgemanagement.controller.AdminVehicleTypes"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.f"
+    displayBlock="true">
+
+    <f:DynamicPage id="vtPage" toggleHeaderOnTitleClick="false">
+        <f:title>
+            <f:DynamicPageTitle>
+                <f:heading>
+                    <Title text="Vehicle Type Register" level="H1"/>
+                </f:heading>
+                <f:breadcrumbs>
+                    <Breadcrumbs>
+                        <Link text="Home" press="onNavHome"/>
+                        <Link text="Admin"/>
+                        <Link text="Vehicle Types"/>
+                    </Breadcrumbs>
+                </f:breadcrumbs>
+                <f:actions>
+                    <Button text="+ Add Vehicle Type" icon="sap-icon://add" press="onAddVehicleType" type="Emphasized"/>
+                    <Button text="Export CSV" icon="sap-icon://download" press="onExportCSV" type="Default"/>
+                    <Button text="Home" icon="sap-icon://home" press="onNavHome" type="Transparent"/>
+                </f:actions>
+            </f:DynamicPageTitle>
+        </f:title>
+
+        <f:content>
+            <VBox class="nhvrApp">
+
+                <!-- Filter Bar -->
+                <HBox wrap="Wrap" alignItems="Center" class="sapUiSmallMarginBeginEnd sapUiSmallMarginTop sapUiSmallMarginBottom">
+                    <Label text="Search" class="sapUiTinyMarginEnd"/>
+                    <SearchField id="vtSearch" width="240px" search="onVTSearch" liveChange="onVTSearch"
+                        placeholder="Code, name, NHVR class…" class="sapUiSmallMarginEnd"/>
+                    <Label text="Category" class="sapUiTinyMarginEnd"/>
+                    <Select id="vtCatFilter" change="onVTFilter" width="190px" class="sapUiSmallMarginEnd">
+                        <core:Item key="" text="All Categories"/>
+                        <core:Item key="GENERAL_ACCESS"    text="General Access"/>
+                        <core:Item key="HIGHER_MASS"       text="Higher Mass Limits"/>
+                        <core:Item key="B_DOUBLE"          text="B-Double"/>
+                        <core:Item key="B_TRAIN"           text="B-Train"/>
+                        <core:Item key="ROAD_TRAIN"        text="Road Train"/>
+                        <core:Item key="PBS_LEVEL2"        text="PBS Level 2"/>
+                        <core:Item key="PBS_LEVEL3"        text="PBS Level 3"/>
+                        <core:Item key="PBS_LEVEL4"        text="PBS Level 4"/>
+                        <core:Item key="OVERSIZE"          text="Oversize"/>
+                        <core:Item key="OVERMASS"          text="Overmass"/>
+                        <core:Item key="SPECIAL"           text="Special"/>
+                    </Select>
+                    <Label text="NHVR Class" class="sapUiTinyMarginEnd"/>
+                    <Select id="vtClassFilter" change="onVTFilter" width="140px" class="sapUiSmallMarginEnd">
+                        <core:Item key="" text="All Classes"/>
+                        <core:Item key="GEN"  text="GEN"/>
+                        <core:Item key="HML"  text="HML"/>
+                        <core:Item key="BD"   text="BD"/>
+                        <core:Item key="RT"   text="RT"/>
+                        <core:Item key="PBS2" text="PBS2"/>
+                        <core:Item key="PBS3" text="PBS3"/>
+                        <core:Item key="PBS4" text="PBS4"/>
+                    </Select>
+                    <CheckBox id="vtPermitFilter" text="Permit Required" select="onVTFilter" class="sapUiSmallMarginEnd"/>
+                    <CheckBox id="vtActiveFilter" text="Active Only" selected="true" select="onVTFilter"/>
+                    <ToolbarSpacer/>
+                    <Button text="Clear" icon="sap-icon://clear-filter" press="onVTClearFilters" type="Transparent"/>
+                </HBox>
+
+                <!-- Table -->
+                <Table id="vtTable" items="{vtModel>/}" class="sapUiSmallMarginBeginEnd"
+                    noDataText="No vehicle types found" growing="true" growingThreshold="25">
+                    <headerToolbar>
+                        <Toolbar>
+                            <Title id="vtTableTitle" text="Vehicle Types (0)" level="H5"/>
+                        </Toolbar>
+                    </headerToolbar>
+                    <columns>
+                        <Column width="90px"><Text text="Code"/></Column>
+                        <Column width="200px"><Text text="Display Name"/></Column>
+                        <Column width="140px"><Text text="Category"/></Column>
+                        <Column width="80px" hAlign="Center"><Text text="NHVR Class"/></Column>
+                        <Column width="85px" hAlign="End"><Text text="Max GVM (t)"/></Column>
+                        <Column width="85px" hAlign="End"><Text text="Max H (m)"/></Column>
+                        <Column width="85px" hAlign="End"><Text text="Max W (m)"/></Column>
+                        <Column width="110px"><Text text="Axle Config"/></Column>
+                        <Column width="110px"><Text text="Suspension"/></Column>
+                        <Column width="85px" hAlign="Center"><Text text="Permit Req."/></Column>
+                        <Column width="65px" hAlign="Center"><Text text="Active"/></Column>
+                        <Column width="130px" hAlign="Center"><Text text="Actions"/></Column>
+                    </columns>
+                    <items>
+                        <ColumnListItem>
+                            <cells>
+                                <Text text="{vtModel>code}" wrapping="false"/>
+                                <Text text="{vtModel>displayName}" wrapping="false"/>
+                                <ObjectStatus text="{vtModel>vehicleCategory}" state="None"/>
+                                <Text text="{vtModel>nhvrClass}"/>
+                                <Text text="{vtModel>maxGVM_t}"/>
+                                <Text text="{vtModel>maxHeight_m}"/>
+                                <Text text="{vtModel>maxWidth_m}"/>
+                                <Text text="{vtModel>axleGroupConfig}"/>
+                                <Text text="{vtModel>suspensionType}"/>
+                                <ObjectStatus text="{= ${vtModel>permitRequired} ? 'Required' : 'Not req.'}"
+                                    state="{= ${vtModel>permitRequired} ? 'Warning' : 'None'}"/>
+                                <ObjectStatus text="{= ${vtModel>active} ? 'Active' : 'Inactive'}"
+                                    state="{= ${vtModel>active} ? 'Success' : 'Error'}"/>
+                                <HBox>
+                                    <Button icon="sap-icon://edit" tooltip="Edit"
+                                        press="onEditVT" type="Transparent" enabled="{= !${vtModel>isSystem}}"/>
+                                    <Button icon="sap-icon://copy" tooltip="Clone"
+                                        press="onCloneVT" type="Transparent"/>
+                                    <Button icon="{= ${vtModel>active} ? 'sap-icon://decline' : 'sap-icon://accept'}"
+                                        tooltip="{= ${vtModel>active} ? 'Deactivate' : 'Activate'}"
+                                        press="onToggleVTActive" type="Transparent"
+                                        enabled="{= !${vtModel>isSystem}}"/>
+                                </HBox>
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
+
+            </VBox>
+        </f:content>
+    </f:DynamicPage>
+
+    <!-- ── Add / Edit Vehicle Type Dialog ──────────────────── -->
+    <Dialog id="vtDialog" title="Vehicle Type" contentWidth="700px" draggable="true" resizable="true">
+        <content>
+            <IconTabBar id="vtDialogTabs" class="sapUiSmallMarginBeginEnd">
+                <items>
+                    <!-- Section 1: Classification -->
+                    <IconTabFilter text="Classification" icon="sap-icon://category">
+                        <VBox class="sapUiSmallMarginTop">
+                            <HBox wrap="Wrap">
+                                <VBox width="200px" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                                    <Label text="Vehicle Type ID *" class="sapUiTinyMarginBottom"/>
+                                    <Input id="vtfId" placeholder="e.g. VT-013"/>
+                                </VBox>
+                                <VBox width="130px" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                                    <Label text="Code *" class="sapUiTinyMarginBottom"/>
+                                    <Input id="vtfCode" placeholder="e.g. B-TRAIN"/>
+                                </VBox>
+                                <VBox width="300px" class="sapUiTinyMarginBottom">
+                                    <Label text="Display Name *" class="sapUiTinyMarginBottom"/>
+                                    <Input id="vtfName" placeholder="Full descriptive name"/>
+                                </VBox>
+                            </HBox>
+                            <HBox wrap="Wrap">
+                                <VBox width="200px" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                                    <Label text="Category *" class="sapUiTinyMarginBottom"/>
+                                    <Select id="vtfCategory" width="100%">
+                                        <core:Item key="GENERAL_ACCESS"    text="General Access"/>
+                                        <core:Item key="HIGHER_MASS"       text="Higher Mass Limits"/>
+                                        <core:Item key="B_DOUBLE"          text="B-Double"/>
+                                        <core:Item key="B_TRAIN"           text="B-Train"/>
+                                        <core:Item key="ROAD_TRAIN"        text="Road Train"/>
+                                        <core:Item key="PBS_LEVEL2"        text="PBS Level 2"/>
+                                        <core:Item key="PBS_LEVEL3"        text="PBS Level 3"/>
+                                        <core:Item key="PBS_LEVEL4"        text="PBS Level 4"/>
+                                        <core:Item key="OVERSIZE"          text="Oversize"/>
+                                        <core:Item key="OVERMASS"          text="Overmass"/>
+                                        <core:Item key="OVERSIZE_OVERMASS" text="Oversize + Overmass"/>
+                                        <core:Item key="SPECIAL"           text="Special"/>
+                                    </Select>
+                                </VBox>
+                                <VBox width="120px" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                                    <Label text="NHVR Class" class="sapUiTinyMarginBottom"/>
+                                    <Select id="vtfNhvrClass" width="100%">
+                                        <core:Item key=""     text="—"/>
+                                        <core:Item key="GEN"  text="GEN"/>
+                                        <core:Item key="HML"  text="HML"/>
+                                        <core:Item key="BD"   text="BD"/>
+                                        <core:Item key="RT"   text="RT"/>
+                                        <core:Item key="PBS2" text="PBS2"/>
+                                        <core:Item key="PBS3" text="PBS3"/>
+                                        <core:Item key="PBS4" text="PBS4"/>
+                                    </Select>
+                                </VBox>
+                                <VBox width="150px" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                                    <Label text="HVNL Section" class="sapUiTinyMarginBottom"/>
+                                    <Input id="vtfHvnl" placeholder="e.g. HVNL s96"/>
+                                </VBox>
+                                <VBox width="100px" class="sapUiTinyMarginBottom">
+                                    <Label text="Active" class="sapUiTinyMarginBottom"/>
+                                    <CheckBox id="vtfActive" selected="true"/>
+                                </VBox>
+                            </HBox>
+                            <HBox wrap="Wrap">
+                                <VBox width="300px" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                                    <Label text="Permit Class" class="sapUiTinyMarginBottom"/>
+                                    <Input id="vtfPermitClass" placeholder="e.g. HML Pre-approved Route"/>
+                                </VBox>
+                                <VBox width="120px" class="sapUiTinyMarginBottom">
+                                    <Label text="Permit Required" class="sapUiTinyMarginBottom"/>
+                                    <CheckBox id="vtfPermitRequired" text="Yes"/>
+                                </VBox>
+                            </HBox>
+                            <VBox class="sapUiTinyMarginBottom">
+                                <Label text="Description" class="sapUiTinyMarginBottom"/>
+                                <TextArea id="vtfDesc" rows="2" width="100%" placeholder="Brief description of this vehicle type"/>
+                            </VBox>
+                            <VBox class="sapUiTinyMarginBottom">
+                                <Label text="Industry Use Case" class="sapUiTinyMarginBottom"/>
+                                <Input id="vtfUseCase" placeholder="e.g. Grain haulage, livestock, mining equipment"/>
+                            </VBox>
+                            <VBox>
+                                <Label text="NHVR Reference URL" class="sapUiTinyMarginBottom"/>
+                                <Input id="vtfNhvrRef" placeholder="https://www.nhvr.gov.au/…"/>
+                            </VBox>
+                        </VBox>
+                    </IconTabFilter>
+
+                    <!-- Section 2: Mass Configuration -->
+                    <IconTabFilter text="Mass" icon="sap-icon://measure">
+                        <VBox class="sapUiSmallMarginTop">
+                            <MessageStrip text="All mass values in tonnes (t). Per AS 4741 axle group notation: 1-2-3 = steer + tandem drive + tri trailer." type="Information" showIcon="true" showCloseButton="false" class="sapUiSmallMarginBottom"/>
+                            <HBox wrap="Wrap">
+                                <VBox width="150px" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                                    <Label text="Max GVM (t) *" class="sapUiTinyMarginBottom"/>
+                                    <Input id="vtfGVM" type="Number" placeholder="e.g. 42.5"/>
+                                </VBox>
+                                <VBox width="150px" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                                    <Label text="Max GCM (t)" class="sapUiTinyMarginBottom"/>
+                                    <Input id="vtfGCM" type="Number" placeholder="e.g. 68.0"/>
+                                </VBox>
+                                <VBox width="150px" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                                    <Label text="Steer Axle Max (t)" class="sapUiTinyMarginBottom"/>
+                                    <Input id="vtfSteer" type="Number" placeholder="e.g. 6.0"/>
+                                </VBox>
+                                <VBox width="170px" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                                    <Label text="Drive Axle Group Max (t)" class="sapUiTinyMarginBottom"/>
+                                    <Input id="vtfDrive" type="Number" placeholder="e.g. 16.5"/>
+                                </VBox>
+                                <VBox width="170px" class="sapUiTinyMarginBottom">
+                                    <Label text="Trailer Axle Group Max (t)" class="sapUiTinyMarginBottom"/>
+                                    <Input id="vtfTrailer" type="Number" placeholder="e.g. 20.0"/>
+                                </VBox>
+                            </HBox>
+                            <HBox wrap="Wrap">
+                                <VBox width="220px" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                                    <Label text="Axle Group Config (AS 4741)" class="sapUiTinyMarginBottom"/>
+                                    <Input id="vtfAxleConfig" placeholder="e.g. 1-2.2-3"/>
+                                </VBox>
+                                <VBox width="120px" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                                    <Label text="No. of Axles" class="sapUiTinyMarginBottom"/>
+                                    <Input id="vtfAxleCount" type="Number" placeholder="e.g. 5"/>
+                                </VBox>
+                                <VBox width="140px" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                                    <Label text="Min Axle Spacing (m)" class="sapUiTinyMarginBottom"/>
+                                    <Input id="vtfAxleSpacing" type="Number" placeholder="e.g. 1.2"/>
+                                </VBox>
+                                <VBox width="150px" class="sapUiTinyMarginBottom">
+                                    <Label text="Max Tyre Pressure (kPa)" class="sapUiTinyMarginBottom"/>
+                                    <Input id="vtfTyrePressure" type="Number" placeholder="e.g. 830"/>
+                                </VBox>
+                            </HBox>
+                        </VBox>
+                    </IconTabFilter>
+
+                    <!-- Section 3: Dimensions -->
+                    <IconTabFilter text="Dimensions" icon="sap-icon://measure">
+                        <VBox class="sapUiSmallMarginTop">
+                            <MessageStrip text="All dimension values in metres (m). Height is loaded vehicle height." type="Information" showIcon="true" showCloseButton="false" class="sapUiSmallMarginBottom"/>
+                            <HBox wrap="Wrap">
+                                <VBox width="160px" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                                    <Label text="Max Height (m) *" class="sapUiTinyMarginBottom"/>
+                                    <Input id="vtfHeight" type="Number" placeholder="e.g. 4.3"/>
+                                </VBox>
+                                <VBox width="150px" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                                    <Label text="Max Width (m) *" class="sapUiTinyMarginBottom"/>
+                                    <Input id="vtfWidth" type="Number" placeholder="e.g. 2.5"/>
+                                </VBox>
+                                <VBox width="150px" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                                    <Label text="Max Length (m) *" class="sapUiTinyMarginBottom"/>
+                                    <Input id="vtfLength" type="Number" placeholder="e.g. 19.0"/>
+                                </VBox>
+                                <VBox width="150px" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                                    <Label text="Max Rear Overhang (m)" class="sapUiTinyMarginBottom"/>
+                                    <Input id="vtfOverhang" type="Number" placeholder="e.g. 3.7"/>
+                                </VBox>
+                                <VBox width="160px" class="sapUiTinyMarginBottom">
+                                    <Label text="Min Turning Radius (m)" class="sapUiTinyMarginBottom"/>
+                                    <Input id="vtfTurnRadius" type="Number" placeholder="e.g. 12.5"/>
+                                </VBox>
+                            </HBox>
+                            <HBox wrap="Wrap">
+                                <VBox width="160px" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                                    <Label text="Requires Escort" class="sapUiTinyMarginBottom"/>
+                                    <CheckBox id="vtfEscort" text="Yes"/>
+                                </VBox>
+                                <VBox width="400px" class="sapUiTinyMarginBottom">
+                                    <Label text="Escort Configuration" class="sapUiTinyMarginBottom"/>
+                                    <Input id="vtfEscortConfig" placeholder="e.g. 1 front + 1 rear pilot"/>
+                                </VBox>
+                            </HBox>
+                        </VBox>
+                    </IconTabFilter>
+
+                    <!-- Section 4: Dynamic Characteristics -->
+                    <IconTabFilter text="Dynamic" icon="sap-icon://performance">
+                        <VBox class="sapUiSmallMarginTop">
+                            <MessageStrip text="Dynamic Factor per AS 5100.2 Table 7.2. Air/road-friendly suspension = 0.25; steel leaf spring = 0.40. Lower factor = less dynamic impact on bridge." type="Information" showIcon="true" showCloseButton="false" class="sapUiSmallMarginBottom"/>
+                            <HBox wrap="Wrap">
+                                <VBox width="200px" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                                    <Label text="Suspension Type *" class="sapUiTinyMarginBottom"/>
+                                    <Select id="vtfSuspension" width="100%">
+                                        <core:Item key="STEEL_LEAF"    text="Steel Leaf Spring"/>
+                                        <core:Item key="AIR_SUSPENSION" text="Air Suspension"/>
+                                        <core:Item key="RUBBER"        text="Rubber Suspension"/>
+                                        <core:Item key="HYDRAULIC"     text="Hydraulic"/>
+                                        <core:Item key="INDEPENDENT"   text="Independent"/>
+                                        <core:Item key="ROAD_FRIENDLY" text="Road-Friendly (Austroads)"/>
+                                    </Select>
+                                </VBox>
+                                <VBox width="150px" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                                    <Label text="Dynamic Factor" class="sapUiTinyMarginBottom"/>
+                                    <Input id="vtfDynFactor" type="Number" placeholder="e.g. 0.35"/>
+                                </VBox>
+                                <VBox width="180px" class="sapUiTinyMarginBottom">
+                                    <Label text="Max Operating Speed (km/h)" class="sapUiTinyMarginBottom"/>
+                                    <Input id="vtfSpeed" type="Number" placeholder="e.g. 110"/>
+                                </VBox>
+                            </HBox>
+                        </VBox>
+                    </IconTabFilter>
+                </items>
+            </IconTabBar>
+        </content>
+        <buttons>
+            <Button id="vtSaveBtn" text="Save Vehicle Type" icon="sap-icon://save" type="Emphasized" press="onSaveVT"/>
+            <Button text="Cancel" press="onCancelVT" type="Transparent"/>
+        </buttons>
+    </Dialog>
+
+</mvc:View>

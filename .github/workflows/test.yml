@@ -1,0 +1,87 @@
+# ============================================================
+# NHVR Bridge Management - Test Pipeline
+# Runs unit, integration, security, and full test suites
+# ============================================================
+name: Test Suite
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      # ── Step 0: Checkout ──────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── Step 1: Setup Node.js ─────────────────────────────────
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      # ── Step 2: Cache node_modules ────────────────────────────
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        id: cache-node-modules
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ env.NODE_VERSION }}-
+
+      # ── Step 3: Install dependencies ──────────────────────────
+      - name: Install dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: npm ci
+
+      # ── Step 4: npm audit (allow failure) ─────────────────────
+      - name: Security audit
+        continue-on-error: true
+        run: npm audit --audit-level=high
+
+      # ── Step 5: Unit tests ────────────────────────────────────
+      - name: Run unit tests
+        run: npx jest test/unit/ --forceExit --testTimeout=30000
+        env:
+          NODE_ENV: test
+
+      # ── Step 6: Integration tests ─────────────────────────────
+      - name: Run integration tests
+        run: npx jest test/integration/ --forceExit --testTimeout=30000
+        env:
+          NODE_ENV: test
+
+      # ── Step 7: Security tests ────────────────────────────────
+      - name: Run security tests
+        run: npx jest test/security/ --forceExit --testTimeout=30000
+        env:
+          NODE_ENV: test
+
+      # ── Step 8: All remaining tests ───────────────────────────
+      - name: Run all other tests
+        run: npx jest --forceExit --passWithNoTests --testTimeout=30000
+        env:
+          NODE_ENV: test
+
+      # ── Step 9: Upload test results artifact ──────────────────
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            test/reports/
+            coverage/
+          retention-days: 14

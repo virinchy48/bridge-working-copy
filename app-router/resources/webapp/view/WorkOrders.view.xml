@@ -1,0 +1,116 @@
+<mvc:View
+    controllerName="nhvr.bridgemanagement.controller.WorkOrders"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:f="sap.f"
+    xmlns:t="sap.ui.table"
+    xmlns:core="sap.ui.core"
+    displayBlock="true">
+
+    <f:DynamicPage id="workOrdersPage" fitContent="true" toggleHeaderOnTitleClick="false">
+        <f:title>
+            <f:DynamicPageTitle>
+                <f:heading>
+                    <Title text="Work Orders" level="H2"/>
+                </f:heading>
+                <f:breadcrumbs>
+                    <Breadcrumbs>
+                        <Link text="Home" press="onNavHome"/>
+                        <Link text="Work Orders"/>
+                    </Breadcrumbs>
+                </f:breadcrumbs>
+                <f:navigationActions>
+                    <Button icon="sap-icon://nav-back" tooltip="Back" press="onNavHome"/>
+                </f:navigationActions>
+            </f:DynamicPageTitle>
+        </f:title>
+
+        <f:content>
+            <VBox class="sapUiSmallMarginBeginEnd sapUiSmallMarginTop">
+
+                <HBox class="sapUiSmallMarginBottom" alignItems="Center">
+                    <SearchField id="woSearch" placeholder="Search by WO number or assignee..."
+                        width="24rem" search="onSearch" liveChange="onSearch"/>
+                    <Select id="woStatusFilter" width="12rem" change="onStatusFilter"
+                        class="sapUiSmallMarginBegin">
+                        <core:Item key="" text="All Statuses"/>
+                        <core:Item key="CREATED" text="Created"/>
+                        <core:Item key="IN_PROGRESS" text="In Progress"/>
+                        <core:Item key="COMPLETED" text="Completed"/>
+                        <core:Item key="CANCELLED" text="Cancelled"/>
+                    </Select>
+                    <Select id="woPriorityFilter" width="10rem" change="onPriorityFilter"
+                        class="sapUiSmallMarginBegin">
+                        <core:Item key="" text="All Priorities"/>
+                        <core:Item key="HIGH" text="High"/>
+                        <core:Item key="MEDIUM" text="Medium"/>
+                        <core:Item key="LOW" text="Low"/>
+                    </Select>
+                    <Text id="woCount" text="Loading..." class="sapUiSmallMarginBegin sapUiSmallMarginTop"/>
+                </HBox>
+
+                <t:Table id="workOrdersTable"
+                    rows="{workOrders>/items}"
+                    visibleRowCount="15"
+                    selectionMode="None"
+                    class="nhvrTable">
+                    <t:toolbar>
+                        <OverflowToolbar>
+                            <Title text="Work Orders" level="H4"/>
+                            <ToolbarSpacer/>
+                            <Button icon="sap-icon://refresh" tooltip="Refresh" press="onRefresh"/>
+                        </OverflowToolbar>
+                    </t:toolbar>
+                    <t:columns>
+                        <t:Column width="9rem">
+                            <Label text="WO Number" design="Bold"/>
+                            <t:template>
+                                <Text text="{workOrders>woNumber}" wrapping="false"/>
+                            </t:template>
+                        </t:Column>
+                        <t:Column width="8rem">
+                            <Label text="Priority" design="Bold"/>
+                            <t:template>
+                                <ObjectStatus text="{workOrders>priority}"
+                                    state="{= ${workOrders>priority} === 'HIGH' ? 'Error' : (${workOrders>priority} === 'MEDIUM' ? 'Warning' : 'Success') }"/>
+                            </t:template>
+                        </t:Column>
+                        <t:Column width="10rem">
+                            <Label text="Status" design="Bold"/>
+                            <t:template>
+                                <ObjectStatus text="{workOrders>status}"
+                                    state="{= ${workOrders>status} === 'COMPLETED' ? 'Success' : (${workOrders>status} === 'CANCELLED' ? 'None' : (${workOrders>status} === 'IN_PROGRESS' ? 'Warning' : 'Information') ) }"/>
+                            </t:template>
+                        </t:Column>
+                        <t:Column width="10rem">
+                            <Label text="Planned Date" design="Bold"/>
+                            <t:template>
+                                <Text text="{path:'workOrders>plannedDate', type:'sap.ui.model.type.Date', formatOptions:{style:'medium'}}"/>
+                            </t:template>
+                        </t:Column>
+                        <t:Column width="14rem">
+                            <Label text="Assigned To" design="Bold"/>
+                            <t:template>
+                                <Text text="{workOrders>assignedTo}" wrapping="false"/>
+                            </t:template>
+                        </t:Column>
+                        <t:Column width="10rem" hAlign="End">
+                            <Label text="Est. Cost ($)" design="Bold"/>
+                            <t:template>
+                                <ObjectNumber number="{workOrders>estimatedCost}" unit="AUD"/>
+                            </t:template>
+                        </t:Column>
+                        <t:Column>
+                            <Label text="Notes" design="Bold"/>
+                            <t:template>
+                                <Text text="{workOrders>notes}" maxLines="2"/>
+                            </t:template>
+                        </t:Column>
+                    </t:columns>
+                </t:Table>
+
+            </VBox>
+        </f:content>
+    </f:DynamicPage>
+
+</mvc:View>

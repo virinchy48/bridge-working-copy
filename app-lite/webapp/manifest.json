@@ -1,0 +1,259 @@
+{
+    "_version": "1.49.0",
+    "sap.app": {
+        "id": "nhvr.bridgelite",
+        "type": "application",
+        "i18n": "i18n/i18n.properties",
+        "applicationVersion": { "version": "1.0.0" },
+        "title": "{{appTitle}}",
+        "description": "{{appDescription}}",
+        "dataSources": {
+            "mainService": {
+                "uri": "/bridge-management/",
+                "type": "OData",
+                "settings": {
+                    "annotations": [],
+                    "localUri": "localService/metadata.xml",
+                    "odataVersion": "4.0"
+                }
+            }
+        },
+        "crossNavigation": {
+            "inbounds": {
+                "NHVRBridge-display": {
+                    "semanticObject": "NHVRBridge",
+                    "action": "display",
+                    "title": "{{appTitle}}",
+                    "icon": "sap-icon://bridge",
+                    "signature": {
+                        "parameters": {
+                            "bridgeId": { "defaultValue": { "value": "", "format": "plain" } }
+                        },
+                        "additionalParameters": "allowed"
+                    }
+                },
+                "NHVRBridgeManagement-manage": {
+                    "semanticObject": "NHVRBridgeManagement",
+                    "action": "manage",
+                    "title": "{{appTitle}}",
+                    "icon": "sap-icon://bridge",
+                    "signature": {
+                        "parameters": {},
+                        "additionalParameters": "allowed"
+                    }
+                },
+                "NHVRDashboard-display": {
+                    "semanticObject": "NHVRDashboard",
+                    "action": "display",
+                    "title": "NHVR Executive Dashboard",
+                    "icon": "sap-icon://da",
+                    "signature": {
+                        "parameters": {},
+                        "additionalParameters": "ignored"
+                    }
+                }
+            },
+            "outbounds": {}
+        }
+    },
+    "sap.ui": {
+        "technology": "UI5",
+        "icons": { "icon": "sap-icon://bridge" },
+        "deviceTypes": { "desktop": true, "tablet": true, "phone": true }
+    },
+    "sap.fiori": {
+        "registrationIds": ["F9999"],
+        "archeType": "transactional",
+        "abstract": false,
+        "tags": {
+            "technicalAttributes": ["OData V4", "SAP HANA Cloud", "SAP BTP", "CAP"],
+            "businessAttributes": ["Asset Management", "Infrastructure", "Public Sector"]
+        }
+    },
+    "sap.ui5": {
+        "flexEnabled": true,
+        "dependencies": {
+            "minUI5Version": "1.120.0",
+            "libs": {
+                "sap.m": {},
+                "sap.ui.core": {},
+                "sap.f": {},
+                "sap.suite.ui.commons": {},
+                "sap.ushell": {},
+                "sap.fe.templates": {},
+                "sap.ui.layout": {},
+                "sap.ui.export": {}
+            }
+        },
+        "contentDensities": { "compact": true, "cozy": true },
+        "resources": {
+            "css": [{ "uri": "css/style.css" }]
+        },
+        "models": {
+            "": {
+                "dataSource": "mainService",
+                "preload": true,
+                "settings": {
+                    "synchronizationMode": "None",
+                    "operationMode": "Server",
+                    "autoExpandSelect": true,
+                    "earlyRequests": true
+                }
+            },
+            "i18n": {
+                "type": "sap.ui.model.resource.ResourceModel",
+                "settings": { "bundleName": "nhvr.bridgelite.i18n.i18n" }
+            }
+        },
+        "routing": {
+            "config": {
+                "routerClass": "sap.m.routing.Router",
+                "type": "View",
+                "viewType": "XML",
+                "controlId": "nhvrRootApp",
+                "controlAggregation": "pages",
+                "async": true
+            },
+            "routes": [
+                { "pattern": "",                       "name": "Home",              "target": "Home" },
+                { "pattern": "Dashboard",              "name": "Dashboard",         "target": "Dashboard" },
+                { "pattern": "Executive",              "name": "ExecutiveDashboard","target": "ExecutiveDashboard" },
+                { "pattern": "BridgeDetail/{bridgeId}","name": "BridgeDetail",      "target": "BridgeDetail" },
+                { "pattern": "Bridges:?query:",        "name": "BridgesList",       "target": "BridgesList" },
+                { "pattern": "Restrictions:?query:",   "name": "RestrictionsList",  "target": "RestrictionsList" },
+                { "pattern": "Map:?query:",            "name": "MapView",           "target": "MapView" },
+                { "pattern": "Reports",                "name": "Reports",           "target": "Reports" },
+                { "pattern": "Upload",                 "name": "MassUpload",           "target": "MassUpload" },
+                { "pattern": "Admin",                  "name": "AdminConfig",          "target": "AdminConfig" },
+                { "pattern": "BridgeNew",              "name": "BridgeNew",             "target": "BridgeNew" },
+                { "pattern": "BridgeEdit/{bridgeId}",  "name": "BridgeEdit",            "target": "BridgeEdit" },
+                { "pattern": "VehicleCombinations:?query:", "name": "VehicleCombinations", "target": "VehicleCombinations" },
+                { "pattern": "AdminRestrictionTypes", "name": "AdminRestrictionTypes", "target": "AdminRestrictionTypes" },
+                { "pattern": "MassEdit", "name": "MassEdit", "target": "MassEdit" },
+                { "pattern": "AdminVehicleTypes", "name": "AdminVehicleTypes", "target": "AdminVehicleTypes" },
+                { "pattern": "FreightRoutes", "name": "FreightRoutes", "target": "FreightRoutes" },
+                { "pattern": "FreightRoutes/{routeId}", "name": "FreightRouteDetail", "target": "FreightRouteDetail" },
+                { "pattern": "IntegrationHub", "name": "integrationHub", "target": "IntegrationHub" },
+                { "pattern": "BridgeIQ", "name": "BridgeIQDashboard", "target": "BridgeIQDashboard" },
+                { "pattern": "LicenseConfig", "name": "LicenseConfig", "target": "LicenseConfig" },
+                { "pattern": "RoutePlanner", "name": "RoutePlanner", "target": "RoutePlanner" }
+            ],
+            "targets": {
+                "Home": {
+                    "type": "XML", "viewLevel": 0,
+                    "viewName": "nhvr.bridgelite.view.Home"
+                },
+                "Dashboard": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewName": "nhvr.bridgelite.view.Dashboard"
+                },
+                "ExecutiveDashboard": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewName": "nhvr.bridgelite.view.ExecutiveDashboard"
+                },
+                "BridgeDetail": {
+                    "type": "XML", "viewLevel": 2,
+                    "viewName": "nhvr.bridgelite.view.BridgeDetail"
+                },
+                "BridgesList": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewName": "nhvr.bridgelite.view.Bridges"
+                },
+                "RestrictionsList": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewName": "nhvr.bridgelite.view.Restrictions"
+                },
+                "MapView": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewName": "nhvr.bridgelite.view.MapView"
+                },
+                "Reports": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewName": "nhvr.bridgelite.view.Reports"
+                },
+                "MassUpload": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewName": "nhvr.bridgelite.view.MassUpload"
+                },
+                "AdminConfig": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewName": "nhvr.bridgelite.view.AdminConfig"
+                },
+                "BridgeNew": {
+                    "type": "XML", "viewLevel": 2,
+                    "viewName": "nhvr.bridgelite.view.BridgeForm"
+                },
+                "BridgeEdit": {
+                    "type": "XML", "viewLevel": 2,
+                    "viewName": "nhvr.bridgelite.view.BridgeForm"
+                },
+                "VehicleCombinations": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewName": "nhvr.bridgelite.view.VehicleCombinations"
+                },
+                "AdminRestrictionTypes": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewId": "AdminRestrictionTypes",
+                    "viewName": "nhvr.bridgelite.view.AdminRestrictionTypes"
+                },
+                "MassEdit": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewId": "MassEdit",
+                    "viewName": "nhvr.bridgelite.view.MassEdit"
+                },
+                "AdminVehicleTypes": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewId": "AdminVehicleTypes",
+                    "viewName": "nhvr.bridgelite.view.AdminVehicleTypes"
+                },
+                "FreightRoutes": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewId": "FreightRoutes",
+                    "viewName": "nhvr.bridgelite.view.FreightRoutes"
+                },
+                "FreightRouteDetail": {
+                    "type": "XML", "viewLevel": 2,
+                    "viewId": "FreightRouteDetail",
+                    "viewName": "nhvr.bridgelite.view.FreightRouteDetail"
+                },
+                "IntegrationHub": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewId": "IntegrationHub",
+                    "viewName": "nhvr.bridgelite.view.IntegrationHub"
+                },
+                "BridgeIQDashboard": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewId": "BridgeIQDashboard",
+                    "viewName": "nhvr.bridgelite.view.BridgeIQDashboard"
+                },
+                "LicenseConfig": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewId": "LicenseConfig",
+                    "viewName": "nhvr.bridgelite.view.LicenseConfig"
+                },
+                "RoutePlanner": {
+                    "type": "XML", "viewLevel": 1,
+                    "viewId": "RoutePlanner",
+                    "viewName": "nhvr.bridgelite.view.RoutePlanner"
+                }
+            }
+        },
+        "extends": { "extensions": {} },
+        "library": { "i18n": false }
+    },
+    "sap.accessibility": {
+        "version": "1.0.0",
+        "features": {
+            "wcag": "2.1",
+            "conformanceLevel": "AA",
+            "keyboardNavigation": true,
+            "screenReader": true,
+            "highContrast": true,
+            "textResize": true,
+            "focusManagement": true,
+            "ariaLiveRegions": true
+        },
+        "contentDensities": ["compact", "cozy"],
+        "formFactor": ["desktop", "tablet", "phone"]
+    }
+}

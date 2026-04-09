@@ -1,0 +1,113 @@
+{
+    "requires": {
+        "db": {
+            "kind": "hana-cloud",
+            "[development]": {
+                "kind": "sqlite",
+                "credentials": { "url": "db.sqlite" }
+            }
+        },
+        "auth": {
+            "kind": "xsuaa",
+            "[development]": {
+                "kind": "mocked",
+                "users": {
+                    "admin": {
+                        "password": "admin",
+                        "roles": ["Admin", "BridgeManager", "Viewer"]
+                    },
+                    "manager": {
+                        "password": "manager",
+                        "roles": ["BridgeManager", "Viewer"]
+                    },
+                    "viewer": {
+                        "password": "viewer",
+                        "roles": ["Viewer"]
+                    },
+                    "executive": {
+                        "password": "executive",
+                        "roles": ["Executive", "Viewer"]
+                    },
+                    "inspector": {
+                        "password": "inspector",
+                        "roles": ["Inspector", "Viewer"]
+                    },
+                    "operator": {
+                        "password": "operator",
+                        "roles": ["Operator", "Viewer"]
+                    },
+                    "anonymous": {
+                        "password": "",
+                        "roles": ["Admin", "BridgeManager", "Viewer"]
+                    }
+                }
+            },
+            "[test]": {
+                "kind": "dummy"
+            }
+        }
+    },
+    "build": {
+        "target": "gen",
+        "tasks": [
+            { "for": "hana",   "src": "db",  "options": { "model": ["db", "srv", "app"] } },
+            { "for": "nodejs", "src": "srv", "options": { "model": ["db", "srv", "app"] } }
+        ]
+    },
+    "hana": {
+        "deploy-format": "hdbtable"
+    },
+    "odata": {
+        "version": "v4",
+        "containment": true
+    },
+    "query": {
+        "limit": {
+            "default": 9999,
+            "max": 9999
+        }
+    },
+    "[supertester]": {
+        "requires": {
+            "db": {
+                "kind": "sqlite",
+                "credentials": { "url": "db-supertester.sqlite" }
+            },
+            "auth": { "kind": "dummy" }
+        }
+    },
+    "[demo]": {
+        "requires": {
+            "db": {
+                "kind": "sqlite",
+                "credentials": { "url": "db-demo.sqlite" }
+            },
+            "auth": {
+                "kind": "mocked",
+                "users": {
+                    "trainer": {
+                        "password": "demo",
+                        "roles": ["Admin", "BridgeManager", "Inspector", "Viewer"]
+                    },
+                    "learner": {
+                        "password": "demo",
+                        "roles": ["BridgeManager", "Inspector", "Viewer"]
+                    },
+                    "viewer": {
+                        "password": "demo",
+                        "roles": ["Viewer"]
+                    },
+                    "anonymous": {
+                        "roles": ["Admin", "BridgeManager", "Inspector", "Viewer"]
+                    }
+                }
+            }
+        }
+    },
+    "features": {
+        "serve_on_root": false
+    },
+    "server": {
+        "body_size": "10mb"
+    }
+}

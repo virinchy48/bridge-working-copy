@@ -1,0 +1,11 @@
+ID,bridge_ID,changedAt,oldCondition,newCondition,conditionScore,changedBy,notes
+c0000000-0000-0000-0000-000000000001,30000000-0000-0000-0000-000000000001,2024-03-15T17:00:00Z,GOOD,GOOD,82,J. Thompson,Condition confirmed GOOD at routine inspection. Rating upgraded from 7 to 8 post deck joint works.
+c0000000-0000-0000-0000-000000000002,30000000-0000-0000-0000-000000000002,2024-01-20T16:30:00Z,FAIR,FAIR,61,M. Chen,Condition declining — transverse cracking with delamination on Span 2. Mass restriction applied.
+c0000000-0000-0000-0000-000000000003,30000000-0000-0000-0000-000000000002,2023-01-15T12:00:00Z,GOOD,FAIR,68,P. Nguyen,Condition downgraded from GOOD to FAIR. Early-stage corrosion identified on soffit reinforcement.
+c0000000-0000-0000-0000-000000000004,30000000-0000-0000-0000-000000000003,2023-11-10T17:00:00Z,POOR,POOR,38,Dr. K. Patel,Condition confirmed POOR. Arch ring cracking and abutment cracks are critical. Principal inspection completed.
+c0000000-0000-0000-0000-000000000005,30000000-0000-0000-0000-000000000003,2022-05-20T10:00:00Z,FAIR,POOR,45,R. Osman,Condition downgraded to POOR. Progressive arch ring cracking identified at principal inspection.
+c0000000-0000-0000-0000-000000000006,30000000-0000-0000-0000-000000000008,2023-08-15T12:00:00Z,POOR,CRITICAL,22,VicRoads Emergency,Emergency inspection — condition downgraded to CRITICAL. Extensive beam spalling. Immediate closure.
+c0000000-0000-0000-0000-000000000007,30000000-0000-0000-0000-000000000008,2022-06-10T09:00:00Z,FAIR,POOR,40,VicRoads Inspector,Condition downgraded to POOR. Concrete spalling and exposed reinforcement on multiple beams.
+c0000000-0000-0000-0000-000000000008,30000000-0000-0000-0000-000000000009,2024-01-08T10:00:00Z,POOR,POOR,41,VicRoads North Inspector,Condition confirmed POOR post-flood. Scour damage at all 4 piers assessed. Mass restriction applied.
+c0000000-0000-0000-0000-000000000009,30000000-0000-0000-0000-000000000012,2023-09-22T15:00:00Z,POOR,POOR,35,TfNSW New England Inspector,Principal inspection confirms POOR. Timber pile decay at 60%. Replacement prioritised in 2025-26 budget.
+c0000000-0000-0000-0000-000000000010,30000000-0000-0000-0000-000000000006,2023-12-05T17:00:00Z,FAIR,FAIR,58,NT DOI Inspector,Condition confirmed FAIR. Scour damage at 3 piers. Wet season mass restriction applied.

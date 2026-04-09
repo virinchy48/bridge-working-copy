@@ -1,0 +1,610 @@
+<!-- ============================================================
+     NHVR Home / Launchpad View — Role-Adaptive Navigation
+     ============================================================ -->
+<mvc:View
+    controllerName="nhvr.bridgemanagement.controller.Home"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.f"
+    displayBlock="true">
+
+    <Page showHeader="false" class="nhvrApp" backgroundDesign="Solid">
+        <content>
+            <VBox>
+
+                <!-- ── Training / Demo Environment Banner ─────────── -->
+                <HBox id="trainingBanner" visible="false"
+                    justifyContent="SpaceBetween" alignItems="Center"
+                    class="nhvrTrainingBanner">
+                    <HBox alignItems="Center">
+                        <core:Icon src="sap-icon://education" size="1.2rem" color="#fff"
+                            class="sapUiSmallMarginBeginEnd"/>
+                        <VBox>
+                            <Title text="TRAINING ENVIRONMENT" level="H4" class="nhvrTrainingBannerTitle"/>
+                            <Text text="You are using a demo instance with synthetic data. No production data will be affected."
+                                class="nhvrTrainingBannerSub"/>
+                        </VBox>
+                    </HBox>
+                    <HBox alignItems="Center" class="sapUiSmallMarginEnd">
+                        <Button text="Open Help Guide" icon="sap-icon://sys-help"
+                            type="Transparent" press="onOpenHelp"
+                            class="nhvrTrainingHelpBtn sapUiSmallMarginEnd"/>
+                        <Text id="trainingModeLabel" text="DEMO" class="nhvrTrainingModeChip"/>
+                    </HBox>
+                </HBox>
+
+                <!-- ── Offline Banner ──────────────────────────────── -->
+                <MessageStrip id="offlineBanner"
+                    text="You are offline. Changes are queued and will sync automatically when reconnected."
+                    type="Warning" showIcon="true" showCloseButton="false"
+                    visible="false" class="sapUiSmallMarginBottom"/>
+
+                <!-- ── SAP Fiori ShellBar (replaces custom HBox header) ── -->
+                <f:ShellBar id="nhvrShellBar"
+                    title="Bridge Management System (BMS)"
+                    secondTitle="{ui>/appSubtitle}"
+                    showNavButton="false"
+                    notificationsNumber="{ui>/notifCount}"
+                    showNotifications="true"
+                    showSearch="false"
+                    showProductSwitcher="false"
+                    homeIconPressed="onNavHome"
+                    notificationsPressed="onOpenNotifications"
+                    avatarPressed="onAvatarPress"
+                    class="nhvrShellBar">
+                    <f:profile>
+                        <Avatar id="userAvatar"
+                            initials="{ui>/userInitials}"
+                            displayShape="Circle"
+                            displaySize="XS"
+                            tooltip="{ui>/userName}"/>
+                    </f:profile>
+                    <f:additionalContent>
+                        <!-- v4.7.7: sap.f.ShellBar.additionalContent expects sap.f.IShellBar
+                             items; OverflowToolbarButton implements the interface, raw Button
+                             does not and triggers UI5 deprecation warnings. -->
+                        <OverflowToolbarButton id="btnRoleSwitch"
+                            icon="sap-icon://user-settings"
+                            text="{i18n>tooltip.switchRole}"
+                            tooltip="{i18n>tooltip.switchRole}"
+                            press="onOpenRoleDialog"
+                            type="Transparent"
+                            class="nhvrShellBarBtn"/>
+                        <OverflowToolbarButton id="btnThemeToggle"
+                            icon="sap-icon://night-mode"
+                            text="{i18n>tooltip.toggleTheme}"
+                            tooltip="{i18n>tooltip.toggleTheme}"
+                            press="onThemeToggle"
+                            type="Transparent"
+                            class="nhvrShellBarBtn"/>
+                        <OverflowToolbarButton icon="sap-icon://sys-help"
+                            text="{i18n>tooltip.openHelp}"
+                            tooltip="{i18n>tooltip.openHelp}"
+                            press="onOpenHelp"
+                            type="Transparent"
+                            class="nhvrShellBarBtn"/>
+                    </f:additionalContent>
+                </f:ShellBar>
+
+                <!-- ── Role Switch Dialog ──────────────────────────── -->
+                <Dialog id="roleSwitchDialog"
+                    title="{i18n>dialog.switchRole}"
+                    contentWidth="320px">
+                    <content>
+                        <VBox class="sapUiSmallMargin">
+                            <Label text="{i18n>label.selectRole}" design="Bold" class="sapUiTinyMarginBottom"/>
+                            <Select id="roleSelector" width="100%" change="onRoleChange"
+                                tooltip="{i18n>tooltip.switchRole}">
+                                <core:Item key="ADMIN"          text="🔑 {i18n>role.admin}"/>
+                                <core:Item key="BRIDGE_MANAGER" text="🏗 {i18n>role.bridgeManager}"/>
+                                <core:Item key="INSPECTOR"      text="🔍 {i18n>role.inspector}"/>
+                                <core:Item key="OPERATOR"       text="🚛 {i18n>role.operator}"/>
+                                <core:Item key="READ_ONLY"      text="👁 {i18n>role.readOnly}"/>
+                            </Select>
+                            <HBox alignItems="Center" class="sapUiSmallMarginTop">
+                                <core:Icon src="sap-icon://employee" class="sapUiTinyMarginEnd"/>
+                                <Text id="roleChip" text="" class="nhvrRoleBadge"/>
+                            </HBox>
+                            <HBox alignItems="Center" class="sapUiTinyMarginTop">
+                                <Text id="appVersionBadge" text="" class="nhvrVersionBadge sapUiTinyMarginEnd"/>
+                                <Text id="appEnvBadge" text="" class="nhvrEnvBadge"/>
+                            </HBox>
+                        </VBox>
+                    </content>
+                    <beginButton>
+                        <Button text="{i18n>btn.apply}" type="Emphasized" press="onRoleSwitchConfirm"/>
+                    </beginButton>
+                    <endButton>
+                        <Button text="{i18n>btn.cancel}" press="onRoleSwitchCancel"/>
+                    </endButton>
+                </Dialog>
+
+                <!-- ── Notification Dialog ───────────────────────────── -->
+                <Dialog id="notificationDialog" title="Notifications" contentWidth="480px" verticalScrolling="true">
+                    <content>
+                        <List id="notificationList" noDataText="No pending notifications" mode="None"/>
+                    </content>
+                    <endButton>
+                        <Button text="Close" press="onCloseNotifications"/>
+                    </endButton>
+                </Dialog>
+
+
+                <!-- ── Quick Access Rail (role-adaptive) ───────────── -->
+                <FlexBox id="quickAccessSection" wrap="Wrap" alignItems="Center"
+                    class="nhvrQuickAccessRail" visible="false">
+                    <!-- Populated dynamically by Home.controller.js onRoleChange/onInit -->
+                    <!-- Items rendered via _renderQuickAccessRail() -->
+                </FlexBox>
+
+                <!-- ── Command Palette Dialog ────────────────────────── -->
+                <Dialog id="cmdPaletteDialog" title="Quick Actions" contentWidth="480px"
+                    class="nhvrCommandPalette">
+                    <content>
+                        <VBox>
+                            <SearchField id="cmdPaletteSearch"
+                                placeholder="Search actions, bridges, screens..."
+                                liveChange="onCommandSearch"
+                                class="sapUiSmallMargin"/>
+                            <List id="cmdPaletteList"
+                                mode="None"
+                                noDataText="No matching actions"
+                                itemPress="onCommandSelect">
+                                <items>
+                                    <!-- Populated dynamically by _renderCommandPalette() -->
+                                </items>
+                            </List>
+                        </VBox>
+                    </content>
+                    <endButton>
+                        <Button text="Close" press="onCmdPaletteClose"/>
+                    </endButton>
+                </Dialog>
+
+                <!-- ── Section: Operations ───────────────────────────── -->
+                <VBox class="nhvrDashSection">
+                    <Title text="Operations" level="H3" class="nhvrDashSectionTitle"/>
+                    <FlexBox wrap="Wrap" justifyContent="Start" alignItems="Start" class="sapUiTinyMarginTop">
+
+                        <GenericTile id="tileDashboard" class="nhvrLaunchTile tileDashboard sapUiTinyMargin"
+                            header="Dashboard"
+                            subheader="Portfolio Insights"
+                            press="onNavToDashboard"
+                            frameType="OneByOne">
+                            <TileContent>
+                                <ImageContent src="sap-icon://home"/>
+                            </TileContent>
+                        </GenericTile>
+
+                        <GenericTile id="tileBridges" class="nhvrLaunchTile tileBridges sapUiTinyMargin"
+                            header="Bridges"
+                            subheader="Asset Registry"
+                            press="onNavToBridges"
+                            frameType="OneByOne">
+                            <TileContent>
+                                <ImageContent src="sap-icon://journey-arrive"/>
+                            </TileContent>
+                        </GenericTile>
+
+                        <GenericTile id="tileRestrictions" class="nhvrLaunchTile tileRestrict sapUiTinyMargin"
+                            header="Restrictions"
+                            subheader="Active &amp; Scheduled"
+                            press="onNavToRestrictions"
+                            frameType="OneByOne">
+                            <TileContent>
+                                <ImageContent src="sap-icon://alert"/>
+                            </TileContent>
+                        </GenericTile>
+
+                    </FlexBox>
+                </VBox>
+
+                <!-- ── Section: My Saved Views (cross-module filter presets) ─ -->
+                <VBox id="sectionSavedViews" class="nhvrDashSection sapUiMediumMarginTop" visible="false">
+                    <Title text="My Saved Views" level="H3" class="nhvrDashSectionTitle"/>
+                    <Text id="savedViewsHint"
+                        text="Click any view to jump to its module with the saved filters applied."
+                        class="sapUiTinyMarginTop sapUiTinyMarginBegin sapUiSmallMarginBottom"/>
+                    <List id="savedViewsList"
+                        mode="None"
+                        class="nhvrSavedViewsList"
+                        showSeparators="Inner"
+                        items="{home>/savedViews}"
+                        itemPress="onNamedViewPress"
+                        noDataText="No saved views yet">
+                        <StandardListItem
+                            title="{home>name}"
+                            description="{home>moduleLabel}"
+                            info="{home>updatedLabel}"
+                            icon="{home>icon}"
+                            type="Active"/>
+                    </List>
+                </VBox>
+
+                <!-- ── Section: Analytics ────────────────────────────── -->
+                <VBox class="nhvrDashSection sapUiMediumMarginTop">
+                    <Title text="Analytics" level="H3" class="nhvrDashSectionTitle"/>
+                    <FlexBox wrap="Wrap" justifyContent="Start" alignItems="Start" class="sapUiTinyMarginTop">
+
+                        <GenericTile id="tileReports" class="nhvrLaunchTile tileReports sapUiTinyMargin"
+                            header="Reports"
+                            subheader="Compliance &amp; Export"
+                            press="onNavToReports"
+                            frameType="OneByOne">
+                            <TileContent>
+                                <ImageContent src="sap-icon://bar-chart"/>
+                            </TileContent>
+                        </GenericTile>
+
+                        <GenericTile id="tileAnnualConditionReport" class="nhvrLaunchTile sapUiTinyMargin"
+                            header="Annual Condition Report"
+                            subheader="Statutory — AS 5100 / BIMM"
+                            press="onNavToAnnualConditionReport"
+                            frameType="TwoByOne">
+                            <TileContent footer="Minister/Parliament submission">
+                                <ImageContent src="sap-icon://bar-chart"/>
+                            </TileContent>
+                        </GenericTile>
+
+                        <GenericTile id="tileAnalyticsMap" class="nhvrLaunchTile sapUiTinyMargin"
+                            header="{i18n>tile.analyticsMap}"
+                            subheader="{i18n>tile.analyticsMap.sub}"
+                            press="onNavToMap"
+                            frameType="OneByOne">
+                            <TileContent>
+                                <ImageContent src="sap-icon://map-2"/>
+                            </TileContent>
+                        </GenericTile>
+
+                    </FlexBox>
+                </VBox>
+
+                <!-- ── Inline Alert Strips (overdue / expiring) ──────────── -->
+                <VBox class="sapUiSmallMarginBeginEnd sapUiSmallMarginTop" id="alertStripsBox">
+                    <MessageStrip id="overdueInspStrip"
+                        text="Loading inspection status…"
+                        type="Error" showIcon="true" showCloseButton="false"
+                        visible="false" class="nhvrAlertStrip sapUiTinyMarginBottom"/>
+                    <MessageStrip id="expiringRestrictStrip"
+                        text="Loading restriction status…"
+                        type="Warning" showIcon="true" showCloseButton="false"
+                        visible="false" class="nhvrAlertStrip"/>
+                </VBox>
+
+                <!-- ── Condition Distribution Bar ────────────────────────── -->
+                <VBox id="conditionDistBox" class="nhvrDashSection sapUiSmallMarginTop" visible="false">
+                    <Title text="Network Condition" level="H3" class="nhvrDashSectionTitle"/>
+                    <HBox alignItems="Center" class="sapUiTinyMarginTop nhvrCondDistRow">
+                        <VBox class="nhvrCondDistItem sapUiSmallMarginEnd" alignItems="Center">
+                            <Text id="condGoodCount"  text="—" class="nhvrCondDistCount nhvrCondGood"/>
+                            <Text text="GOOD"     class="nhvrCondDistLabel"/>
+                        </VBox>
+                        <VBox class="nhvrCondDistItem sapUiSmallMarginEnd" alignItems="Center">
+                            <Text id="condFairCount"  text="—" class="nhvrCondDistCount nhvrCondFair"/>
+                            <Text text="FAIR"     class="nhvrCondDistLabel"/>
+                        </VBox>
+                        <VBox class="nhvrCondDistItem sapUiSmallMarginEnd" alignItems="Center">
+                            <Text id="condPoorCount"  text="—" class="nhvrCondDistCount nhvrCondPoor"/>
+                            <Text text="POOR"     class="nhvrCondDistLabel"/>
+                        </VBox>
+                        <VBox class="nhvrCondDistItem sapUiSmallMarginEnd" alignItems="Center">
+                            <Text id="condCritCount"  text="—" class="nhvrCondDistCount nhvrCondCritical"/>
+                            <Text text="CRITICAL" class="nhvrCondDistLabel"/>
+                        </VBox>
+                        <VBox class="sapUiSmallMarginBegin nhvrFlexGrow1">
+                            <HBox id="condDistBar" class="nhvrCondDistBar" alignItems="Stretch">
+                                <!-- Segments injected by controller -->
+                            </HBox>
+                        </VBox>
+                    </HBox>
+                </VBox>
+
+                <!-- ── Section: Live KPI Summary ─────────────────────── -->
+                <VBox class="nhvrDashSection sapUiMediumMarginTop">
+                    <HBox justifyContent="SpaceBetween" alignItems="Center">
+                        <Title text="Live Summary" level="H3" class="nhvrDashSectionTitle"/>
+                        <Button text="Refresh" icon="sap-icon://refresh" press="onRefresh"
+                            type="Transparent" class="sapUiTinyMarginTop"/>
+                    </HBox>
+                    <HBox wrap="Wrap" class="sapUiTinyMarginTop" busy="{= ${home>/kpiLoading} === true}">
+                        <GenericTile class="nhvrKpiTile sapUiTinyMargin"
+                            header="Total Bridges" subheader="In registry"
+                            press="onNavToBridges">
+                            <TileContent>
+                                <NumericContent id="homeTotalBridges" value="—"
+                                    valueColor="Neutral" icon="sap-icon://journey-arrive"/>
+                            </TileContent>
+                        </GenericTile>
+                        <GenericTile class="nhvrKpiTile sapUiTinyMargin"
+                            header="Active Restrictions" subheader="Currently active"
+                            press="onNavToRestrictions">
+                            <TileContent>
+                                <NumericContent id="homeActiveRestrictions" value="—"
+                                    valueColor="Critical" icon="sap-icon://alert"/>
+                            </TileContent>
+                        </GenericTile>
+                        <GenericTile class="nhvrKpiTile sapUiTinyMargin"
+                            header="Closed Bridges" subheader="Requires action"
+                            press="onNavToClosedBridges">
+                            <TileContent>
+                                <NumericContent id="homeClosedBridges" value="—"
+                                    valueColor="Error" icon="sap-icon://decline"/>
+                            </TileContent>
+                        </GenericTile>
+                        <GenericTile class="nhvrKpiTile sapUiTinyMargin"
+                            header="Permit Required" subheader="Active permits"
+                            press="onNavToPermitRestrictions">
+                            <TileContent>
+                                <NumericContent id="homePermitRequired" value="—"
+                                    valueColor="Critical" icon="sap-icon://document"/>
+                            </TileContent>
+                        </GenericTile>
+                        <GenericTile class="nhvrKpiTile sapUiTinyMargin"
+                            header="Open Defects" subheader="Unresolved defects"
+                            press="onNavToDefects">
+                            <TileContent>
+                                <NumericContent id="homeOpenDefects" value="—"
+                                    valueColor="Error" icon="sap-icon://warning2"/>
+                            </TileContent>
+                        </GenericTile>
+                        <GenericTile class="nhvrKpiTile sapUiTinyMargin"
+                            header="Overdue Inspections" subheader="Past due date"
+                            press="onNavToInspections">
+                            <TileContent>
+                                <NumericContent id="homeOverdueInspections" value="—"
+                                    valueColor="Error" icon="sap-icon://date-time"/>
+                            </TileContent>
+                        </GenericTile>
+                    </HBox>
+                </VBox>
+
+                <!-- ── Section: BMS Business Admin (Admin only) ─────── -->
+                <VBox id="sectionAdmin" class="nhvrDashSection sapUiMediumMarginTop" visible="false">
+                    <Title text="BMS Business Admin" level="H3" class="nhvrDashSectionTitle"/>
+                    <FlexBox wrap="Wrap" justifyContent="Start" alignItems="Start" class="sapUiTinyMarginTop">
+
+                        <GenericTile id="massUploadTile" class="nhvrLaunchTile tileUpload sapUiTinyMargin"
+                            header="Mass Upload"
+                            subheader="CSV Drag &amp; Drop"
+                            press="onNavToMassUpload"
+                            frameType="OneByOne">
+                            <TileContent>
+                                <ImageContent src="sap-icon://upload-to-cloud"/>
+                            </TileContent>
+                        </GenericTile>
+
+                        <GenericTile id="adminConfigTile" class="nhvrLaunchTile tileBizAdmin sapUiTinyMargin"
+                            header="BMS Business Admin"
+                            subheader="Attributes, Lookups &amp; Roles"
+                            press="onNavToAdmin"
+                            frameType="OneByOne">
+                            <TileContent>
+                                <ImageContent src="sap-icon://settings"/>
+                            </TileContent>
+                        </GenericTile>
+
+                        <GenericTile id="tileLicenseConfig" class="nhvrLaunchTile tileBizAdmin sapUiTinyMargin"
+                            header="Client Licensing"
+                            subheader="Orgs, Features &amp; Usage"
+                            press="onNavToLicenseConfig"
+                            frameType="OneByOne">
+                            <TileContent>
+                                <ImageContent src="sap-icon://customer"/>
+                            </TileContent>
+                        </GenericTile>
+
+                        <GenericTile id="restrictionTypesTile" class="nhvrLaunchTile sapUiTinyMargin"
+                            header="Restriction Types" subheader="Configure Types"
+                            press="onNavToRestrictionTypes" frameType="OneByOne">
+                            <TileContent>
+                                <ImageContent src="sap-icon://category"/>
+                            </TileContent>
+                        </GenericTile>
+
+                        <GenericTile id="massEditTile" class="nhvrLaunchTile sapUiTinyMargin"
+                            header="Mass Edit" subheader="In-App Grid Editor"
+                            press="onNavToMassEdit" frameType="OneByOne">
+                            <TileContent>
+                                <ImageContent src="sap-icon://edit-outside"/>
+                            </TileContent>
+                        </GenericTile>
+
+                        <GenericTile id="vehicleTypesTile" class="nhvrLaunchTile sapUiTinyMargin"
+                            header="Vehicle Types" subheader="NHVR Vehicle Classes"
+                            press="onNavToVehicleTypes" frameType="OneByOne">
+                            <TileContent>
+                                <ImageContent src="sap-icon://bus-public-transport"/>
+                            </TileContent>
+                        </GenericTile>
+
+                    </FlexBox>
+                </VBox>
+
+                <!-- ── Section: BMS Tech Admin (Admin + TechAdmin role) ─ -->
+                <VBox id="sectionTechAdmin" class="nhvrDashSection sapUiMediumMarginTop" visible="false">
+                    <Title text="BMS Tech Admin" level="H3" class="nhvrDashSectionTitle"/>
+                    <FlexBox wrap="Wrap" justifyContent="Start" alignItems="Start" class="sapUiTinyMarginTop">
+
+                        <GenericTile id="appAdminTile" class="nhvrLaunchTile tileTechAdmin sapUiTinyMargin"
+                            header="App Admin"
+                            subheader="BTP · XSUAA · Work Zone"
+                            press="onNavToAppAdmin"
+                            frameType="OneByOne">
+                            <TileContent>
+                                <ImageContent src="sap-icon://cloud-check"/>
+                            </TileContent>
+                        </GenericTile>
+
+                        <GenericTile id="integrationHubTile" class="nhvrLaunchTile tileTechAdmin sapUiTinyMargin"
+                            header="Integration Hub"
+                            subheader="S/4HANA · BANC · GIS"
+                            press="onNavToIntegrationHub"
+                            frameType="OneByOne">
+                            <TileContent>
+                                <ImageContent src="sap-icon://it-system"/>
+                            </TileContent>
+                        </GenericTile>
+
+                        <GenericTile id="techConfigTile" class="nhvrLaunchTile tileTechAdmin sapUiTinyMargin"
+                            header="Tech Config"
+                            subheader="Jurisdiction · Map · Standards"
+                            press="onNavToTechAdmin"
+                            frameType="OneByOne">
+                            <TileContent>
+                                <ImageContent src="sap-icon://technical-object"/>
+                            </TileContent>
+                        </GenericTile>
+
+                        <GenericTile id="tileAnalytics"
+                            header="{i18n>analytics.tile.title}"
+                            subheader="{i18n>analytics.tile.subtitle}"
+                            press="onNavToAnalytics"
+                            class="sapUiSmallMarginEnd sapUiSmallMarginBottom nhvrLaunchTile tileAdmin">
+                            <customData>
+                                <core:CustomData key="role" value="analyticsDashboard" writeToDom="true" />
+                            </customData>
+                            <TileContent>
+                                <NumericContent icon="sap-icon://performance" withMargin="false" />
+                            </TileContent>
+                        </GenericTile>
+
+                    </FlexBox>
+                </VBox>
+
+                <!-- ── Section: Inspection & Defects (Inspector role) ─ -->
+                <VBox id="sectionInspection" class="nhvrDashSection sapUiMediumMarginTop" visible="false">
+                    <Title text="Inspection &amp; Defects" level="H3" class="nhvrDashSectionTitle"/>
+                    <FlexBox wrap="Wrap" justifyContent="Start" alignItems="Start" class="sapUiTinyMarginTop">
+
+                        <GenericTile id="inspectionsTileMain" class="nhvrLaunchTile sapUiTinyMargin"
+                            header="Inspections"
+                            subheader="Orders &amp; Due Dates"
+                            press="onNavToInspections"
+                            frameType="OneByOne">
+                            <TileContent>
+                                <ImageContent src="sap-icon://factory"/>
+                            </TileContent>
+                        </GenericTile>
+
+                        <GenericTile id="defectsTileMain" class="nhvrLaunchTile sapUiTinyMargin"
+                            header="Defect Register"
+                            subheader="All Bridge Defects"
+                            press="onNavToDefects"
+                            frameType="OneByOne">
+                            <TileContent>
+                                <ImageContent src="sap-icon://warning2"/>
+                            </TileContent>
+                        </GenericTile>
+
+                    </FlexBox>
+                </VBox>
+
+                <!-- ── Section: Operator Tools ────────────────────── -->
+                <VBox id="sectionOperator" class="nhvrDashSection sapUiMediumMarginTop" visible="false">
+                    <Title text="Operator Tools" level="H3" class="nhvrDashSectionTitle"/>
+                    <FlexBox wrap="Wrap" justifyContent="Start" alignItems="Start" class="sapUiTinyMarginTop">
+
+                        <GenericTile id="operatorPermitsTile" class="nhvrLaunchTile sapUiTinyMargin"
+                            header="Permits"
+                            subheader="Assessment &amp; Approval"
+                            press="onNavToPermits"
+                            frameType="OneByOne">
+                            <TileContent>
+                                <ImageContent src="sap-icon://document-text"/>
+                            </TileContent>
+                        </GenericTile>
+
+                        <GenericTile id="operatorVehicleTile" class="nhvrLaunchTile sapUiTinyMargin"
+                            header="Vehicle Access"
+                            subheader="Combinations &amp; Routes"
+                            press="onNavToVehicleCombinations"
+                            frameType="OneByOne">
+                            <TileContent>
+                                <ImageContent src="sap-icon://travel-itinerary"/>
+                            </TileContent>
+                        </GenericTile>
+
+                        <GenericTile id="operatorRouteAssessmentTile" class="nhvrLaunchTile sapUiTinyMargin"
+                            header="Route Assessment"
+                            subheader="Check Vehicle Suitability"
+                            press="onNavToRouteAssessment"
+                            frameType="OneByOne">
+                            <TileContent>
+                                <ImageContent src="sap-icon://process"/>
+                            </TileContent>
+                        </GenericTile>
+
+                        <GenericTile id="operatorRoutePlannerTile" class="nhvrLaunchTile sapUiTinyMargin"
+                            header="Route Planner"
+                            subheader="Plan &amp; Assess Custom Routes"
+                            press="onNavToRoutePlanner"
+                            frameType="OneByOne">
+                            <TileContent>
+                                <ImageContent src="sap-icon://map-2"/>
+                            </TileContent>
+                        </GenericTile>
+
+                    </FlexBox>
+                </VBox>
+
+                <!-- ── Section: Road Capacity & Permits ───────────── -->
+                <VBox id="sectionRoadCapacity" class="nhvrDashSection sapUiMediumMarginTop">
+                    <Title text="Road Capacity &amp; Permits" level="H3" class="nhvrDashSectionTitle"/>
+                    <FlexBox wrap="Wrap" justifyContent="Start" alignItems="Start" class="sapUiTinyMarginTop">
+
+                        <GenericTile id="tileCapacityReports" class="nhvrLaunchTile tileReports sapUiTinyMargin"
+                            header="Capacity Reports"
+                            subheader="Compliance &amp; Overdue Reviews"
+                            press="onNavToReports"
+                            frameType="OneByOne">
+                            <TileContent>
+                                <ImageContent src="sap-icon://measurement-document"/>
+                            </TileContent>
+                        </GenericTile>
+
+                    </FlexBox>
+                </VBox>
+
+                <!-- ── Section: Network Tools ──────────────────────── -->
+                <VBox id="sectionNetworkTools" class="nhvrDashSection sapUiMediumMarginTop">
+                    <Title text="Network Tools" level="H3" class="nhvrDashSectionTitle"/>
+                    <FlexBox wrap="Wrap" justifyContent="Start" alignItems="Start" class="sapUiTinyMarginTop">
+
+                        <GenericTile id="tileBridgeMap" class="nhvrLaunchTile tileMap sapUiTinyMargin"
+                            header="Map View"
+                            subheader="Geographic Explorer"
+                            press="onNavToMap"
+                            frameType="OneByOne">
+                            <TileContent>
+                                <ImageContent src="sap-icon://map-2"/>
+                            </TileContent>
+                        </GenericTile>
+
+                        <GenericTile id="tileRecordInspection" class="nhvrLaunchTile sapUiTinyMargin"
+                            header="Record Inspection"
+                            subheader="AS 5100.7 Form"
+                            press="onNavToInspectionCreate"
+                            frameType="OneByOne">
+                            <TileContent>
+                                <ImageContent src="sap-icon://inspection"/>
+                            </TileContent>
+                        </GenericTile>
+
+                        <GenericTile id="tileFreightCorridors" class="nhvrLaunchTile sapUiTinyMargin"
+                            header="Freight Corridors"
+                            subheader="PBS / HML Routes"
+                            press="onNavToFreightRoutes"
+                            frameType="OneByOne">
+                            <TileContent>
+                                <ImageContent src="sap-icon://shipping-status"/>
+                            </TileContent>
+                        </GenericTile>
+
+                    </FlexBox>
+                </VBox>
+
+            </VBox>
+        </content>
+    </Page>
+</mvc:View>

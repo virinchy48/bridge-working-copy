@@ -1,0 +1,137 @@
+## ============================================================
+## NHVR Bridge Asset & Restriction Management
+## MTA Deployment Descriptor
+## ============================================================
+
+_schema-version: "3.1"
+ID: nhvr-bridge-app
+description: NHVR Bridge Asset & Restriction Management Application
+version: 4.7.24
+parameters:
+    enable-parallel-deployments: true
+
+# ─────────────────────────────────────────────────────────────
+# MODULES
+# ─────────────────────────────────────────────────────────────
+modules:
+
+# ── 0. CDS Build (pre-step) ───────────────────────────────────
+- name: nhvr-bridge-app-cds-build
+  type: custom
+  path: .
+  build-parameters:
+      commands:
+        - npx cds build --production
+      supported-platforms: []
+
+# ── 1. CAP Backend (Node.js) ──────────────────────────────────
+- name: nhvr-bridge-srv
+  type: nodejs
+  path: gen/srv
+  parameters:
+      buildpack: nodejs_buildpack
+      memory: 512M
+      disk-quota: 1G
+  build-parameters:
+      builder: npm-ci
+      requires:
+        - name: nhvr-bridge-app-cds-build
+  properties:
+      NODE_ENV: production
+  requires:
+    - name: nhvr-db
+    - name: nhvr-xsuaa
+    - name: nhvr-logging
+  provides:
+    - name: srv-api
+      properties:
+          srv-url: ${default-url}
+
+# ── 2. HANA DB Deployer ───────────────────────────────────────
+- name: nhvr-bridge-db-deployer
+  type: hdb
+  path: gen/db
+  parameters:
+      buildpack: nodejs_buildpack
+      memory: 256M
+  build-parameters:
+      requires:
+        - name: nhvr-bridge-app-cds-build
+  requires:
+    - name: nhvr-db
+
+# ── 3. App Router (Frontend) ──────────────────────────────────
+- name: nhvr-bridge-app-router
+  type: approuter.nodejs
+  path: app-router
+  parameters:
+      memory: 256M
+      disk-quota: 512M
+  build-parameters:
+      requires:
+        - name: nhvr-bridge-management-ui
+          artifacts:
+            - "**"
+          target-path: resources/nhvr.bridgemanagement
+  properties:
+      INCOMING_CONNECTION_TIMEOUT: 60000
+      SESSION_TIMEOUT: 15
+  requires:
+    - name: nhvr-xsuaa
+    - name: nhvr-destination
+    - name: srv-api
+      group: destinations
+      properties:
+          name: srv-api
+          url: ~{srv-url}
+          forwardAuthToken: true
+
+# ── 4. Bridge Management UI ──────────────────────────────────
+- name: nhvr-bridge-management-ui
+  type: html5
+  path: app/bridge-management
+  build-parameters:
+      build-result: webapp
+      builder: custom
+      commands:
+        - npm install
+        - npm run build:cf
+      supported-platforms: []
+
+# ─────────────────────────────────────────────────────────────
+# RESOURCES (BTP Services)
+# ─────────────────────────────────────────────────────────────
+resources:
+
+# ── HANA Cloud (HDI Container) ────────────────────────────────
+- name: nhvr-db
+  type: com.sap.xs.hdi-container
+  parameters:
+      service: hana
+      service-plan: hdi-shared
+  properties:
+      hdi-service-name: ${service-name}
+
+# ── XSUAA (Authentication & Authorization) ───────────────────
+- name: nhvr-xsuaa
+  type: org.cloudfoundry.managed-service
+  parameters:
+      service: xsuaa
+      service-plan: application
+      path: ./xs-security.json
+      config:
+          tenant-mode: dedicated
+
+# ── SAP BTP Destination Service ───────────────────────────────
+- name: nhvr-destination
+  type: org.cloudfoundry.managed-service
+  parameters:
+      service: destination
+      service-plan: lite
+
+# ── SAP Application Logging ───────────────────────────────────
+- name: nhvr-logging
+  type: org.cloudfoundry.managed-service
+  parameters:
+      service: application-logs
+      service-plan: lite

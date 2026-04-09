@@ -1,0 +1,38 @@
+name: BTP Smoke Test
+
+# Runs scripts/btp-smoke-test.sh against the deployed BTP app.
+# Schedule: daily at 07:23 UTC (~17:23 AEST), plus manual trigger.
+# Auth: uses CF_USERNAME / CF_PASSWORD repo secrets via XSUAA password grant.
+
+on:
+  schedule:
+    - cron: '23 7 * * *'
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  smoke:
+    name: BTP Smoke Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Ensure python3 is available
+        run: python3 --version
+
+      - name: Run BTP smoke test
+        env:
+          CF_USERNAME: ${{ secrets.CF_USERNAME }}
+          CF_PASSWORD: ${{ secrets.CF_PASSWORD }}
+          # Optional: override XSUAA client id if the default 'cf' client
+          # fallback in the script is restricted by policy.
+          XSUAA_CLIENT_ID: ${{ secrets.XSUAA_CLIENT_ID }}
+          XSUAA_SECRET:    ${{ secrets.XSUAA_SECRET }}
+        run: |
+          chmod +x scripts/btp-smoke-test.sh
+          ./scripts/btp-smoke-test.sh

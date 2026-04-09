@@ -1,0 +1,401 @@
+<!-- ============================================================
+     NHVR Route Assessment Tool
+     Select a route + vehicle → assess all bridge assets on route
+     Checks: structural capacity, active restrictions, temp restrictions,
+             height/width clearances, speed limits, condition risk
+     ============================================================ -->
+<mvc:View
+    controllerName="nhvr.bridgemanagement.controller.RouteAssessment"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.f"
+    displayBlock="true">
+
+    <f:DynamicPage id="assessPage" toggleHeaderOnTitleClick="false">
+
+        <!-- ── Title ──────────────────────────────────────────── -->
+        <f:title>
+            <f:DynamicPageTitle>
+                <f:heading>
+                    <Title text="Route Assessment" level="H1"/>
+                </f:heading>
+                <f:actions>
+                    <Button id="btnAssess" text="Assess Route" icon="sap-icon://process" press="onAssessRoute"
+                        type="Emphasized" enabled="{= !!${assess>/selectedRouteId}}"/>
+                    <Button text="Clear" icon="sap-icon://clear-all" press="onClearAssessment" type="Transparent"/>
+                    <Button text="Export Results" icon="sap-icon://download" press="onExportResults" type="Transparent"
+                        visible="{= ${assess>/results}.length > 0}"/>
+                    <Button text="Find Alternatives" icon="sap-icon://navigation-right-arrow" press="onFindAlternativeRoutes" type="Default"
+                        visible="{= ${assess>/results}.length > 0}"/>
+                    <Button text="Show Map" icon="sap-icon://map" press="onToggleAssessMap" type="Default"
+                        visible="{= ${assess>/results}.length > 0}"/>
+                    <Button text="Home" icon="sap-icon://home" press="onNavHome" type="Transparent"/>
+                </f:actions>
+                <f:breadcrumbs>
+                    <Breadcrumbs>
+                        <Link text="Home" press="onNavHome"/>
+                        <Link text="Route Assessment"/>
+                    </Breadcrumbs>
+                </f:breadcrumbs>
+            </f:DynamicPageTitle>
+        </f:title>
+
+        <!-- ── Setup Panel (always visible in header) ────────── -->
+        <f:header>
+            <f:DynamicPageHeader pinnable="true">
+                <VBox class="sapUiSmallMarginBeginEnd sapUiSmallMarginTopBottom">
+                    <Text text="ROUTE &amp; VEHICLE SELECTION" class="nhvrDashSectionTitle sapUiTinyMarginBottom"/>
+                    <HBox wrap="Wrap" alignItems="End">
+
+                        <!-- Route Selection -->
+                        <VBox class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                            <Label text="Approved Route" design="Bold" required="true" class="sapUiTinyMarginBottom"/>
+                            <Select id="routeSelect" width="280px" change="onRouteSelected"
+                                    selectedKey="{assess>/selectedRouteId}">
+                                <core:Item key="" text="-- Select a Route --"/>
+                            </Select>
+                        </VBox>
+
+                        <!-- Vehicle Type -->
+                        <VBox class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                            <Label text="Vehicle Type / Class" design="Bold" class="sapUiTinyMarginBottom"/>
+                            <Select id="vehicleTypeSelect" width="220px" change="onVehicleTypeSelected"
+                                    selectedKey="{assess>/selectedVehicleTypeId}">
+                                <core:Item key="" text="-- Select Vehicle Type --"/>
+                            </Select>
+                        </VBox>
+
+                        <!-- Divider -->
+                        <core:HTML content="&lt;div style='background:#d9d9d9;height:40px;width:2px;margin-right:0.5rem;align-self:center;'&gt;&lt;/div&gt;"/>
+
+                        <!-- Gross Vehicle Mass -->
+                        <VBox class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                            <Label text="Gross Vehicle Mass (t)" design="Bold" class="sapUiTinyMarginBottom"/>
+                            <Input id="inputGVM" width="100px" type="Number" placeholder="e.g. 45" value="{assess>/vehicleGVM}"/>
+                        </VBox>
+
+                        <!-- Gross Combination Mass -->
+                        <VBox class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                            <Label text="Gross Combination Mass (t)" design="Bold" class="sapUiTinyMarginBottom"/>
+                            <Input id="inputGCM" width="110px" type="Number" placeholder="e.g. 68" value="{assess>/vehicleGCM}"/>
+                        </VBox>
+
+                        <!-- Height -->
+                        <VBox class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                            <Label text="Height (m)" design="Bold" class="sapUiTinyMarginBottom"/>
+                            <Input id="inputHeight" width="90px" type="Number" placeholder="e.g. 4.3" value="{assess>/vehicleHeight}"/>
+                        </VBox>
+
+                        <!-- Width -->
+                        <VBox class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                            <Label text="Width (m)" design="Bold" class="sapUiTinyMarginBottom"/>
+                            <Input id="inputWidth" width="90px" type="Number" placeholder="e.g. 2.5" value="{assess>/vehicleWidth}"/>
+                        </VBox>
+
+                        <!-- Length -->
+                        <VBox class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                            <Label text="Length (m)" design="Bold" class="sapUiTinyMarginBottom"/>
+                            <Input id="inputLength" width="90px" type="Number" placeholder="e.g. 19" value="{assess>/vehicleLength}"/>
+                        </VBox>
+
+                        <!-- Speed -->
+                        <VBox class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                            <Label text="Crossing Speed (km/h)" design="Bold" class="sapUiTinyMarginBottom"/>
+                            <Input id="inputSpeed" width="90px" type="Number" placeholder="e.g. 40" value="{assess>/crossingSpeed}"/>
+                        </VBox>
+
+                        <!-- Assess button -->
+                        <VBox class="sapUiSmallMarginBottom" justifyContent="End">
+                            <Button text="Assess Route" icon="sap-icon://process" press="onAssessRoute"
+                                type="Emphasized" class="sapUiTinyMarginBottom"/>
+                        </VBox>
+
+                        <!-- Find Alternatives + Show Map buttons (shown after assessment) -->
+                        <VBox class="sapUiSmallMarginBottom sapUiSmallMarginStart" justifyContent="End"
+                            visible="{= ${assess>/results}.length > 0}">
+                            <HBox alignItems="Center">
+                                <Button text="Find Alternative Routes" icon="sap-icon://navigation-right-arrow"
+                                    press="onFindAlternativeRoutes" type="Default" class="sapUiTinyMarginBottom sapUiTinyMarginEnd"/>
+                                <Button text="Show Map" icon="sap-icon://map"
+                                    press="onToggleAssessMap" type="Default" class="sapUiTinyMarginBottom"/>
+                            </HBox>
+                        </VBox>
+
+                    </HBox>
+                </VBox>
+            </f:DynamicPageHeader>
+        </f:header>
+
+        <f:content>
+            <VBox class="nhvrApp">
+
+                <!-- ── Route Info Banner ───────────────────────────── -->
+                <Panel id="routeInfoPanel" visible="{= !!${assess>/routeInfo/routeName}}"
+                    expandable="false" class="sapUiSmallMarginBeginEnd sapUiTinyMarginTop">
+                    <content>
+                        <HBox wrap="Wrap" class="sapUiSmallMarginBeginEnd sapUiSmallMarginTopBottom" alignItems="Center">
+                            <VBox width="200px" class="sapUiSmallMarginEnd">
+                                <Label text="Route" design="Bold"/>
+                                <Text text="{assess>/routeInfo/routeName}"/>
+                            </VBox>
+                            <VBox width="120px" class="sapUiSmallMarginEnd">
+                                <Label text="Status" design="Bold"/>
+                                <ObjectStatus id="routeStatusKpi" text="{assess>/routeInfo/routeStatus}" state="None"/>
+                            </VBox>
+                            <VBox width="120px" class="sapUiSmallMarginEnd">
+                                <Label text="Route GVM Limit" design="Bold"/>
+                                <ObjectStatus id="routeGVMKpi" text="{assess>/routeInfo/routeGVMLimitText}" state="None"/>
+                            </VBox>
+                            <VBox width="120px" class="sapUiSmallMarginEnd">
+                                <Label text="Height Limit" design="Bold"/>
+                                <ObjectStatus id="routeHtKpi" text="{assess>/routeInfo/routeHeightLimitText}" state="None"/>
+                            </VBox>
+                            <VBox width="120px" class="sapUiSmallMarginEnd">
+                                <Label text="Width Limit" design="Bold"/>
+                                <ObjectStatus id="routeWdKpi" text="{assess>/routeInfo/routeWidthLimitText}" state="None"/>
+                            </VBox>
+                            <VBox width="120px" class="sapUiSmallMarginEnd">
+                                <Label text="Total Distance" design="Bold"/>
+                                <Text text="{assess>/routeInfo/distanceText}"/>
+                            </VBox>
+                            <VBox width="120px" class="sapUiSmallMarginEnd">
+                                <Label text="Assets on Route" design="Bold"/>
+                                <Text text="{assess>/routeInfo/bridgeCount}"/>
+                            </VBox>
+                            <VBox width="160px" class="sapUiSmallMarginEnd">
+                                <Label text="Limiting Asset" design="Bold"/>
+                                <Text text="{assess>/routeInfo/limitingBridgeId}"/>
+                            </VBox>
+                        </HBox>
+                    </content>
+                </Panel>
+
+                <!-- ── Overall Result Banner ───────────────────────── -->
+                <MessageStrip id="overallResult"
+                    text="{assess>/overallResultText}"
+                    type="{assess>/overallResultType}"
+                    showIcon="true"
+                    visible="{= !!${assess>/overallResultText}}"
+                    class="sapUiSmallMarginBeginEnd sapUiTinyMarginTop"/>
+
+                <!-- ── Loading Indicators ─────────────────────────── -->
+                <BusyIndicator id="assessBusy"
+                    visible="{assess>/loading}"
+                    size="1rem"
+                    class="sapUiMediumMarginBeginEnd sapUiSmallMarginTopBottom"/>
+                <BusyIndicator id="altBusy"
+                    visible="{assess>/altLoading}"
+                    size="1rem"
+                    class="sapUiMediumMarginBeginEnd sapUiSmallMarginTopBottom"/>
+
+                <!-- ── Result Summary KPIs ─────────────────────────── -->
+                <Panel visible="{= ${assess>/results}.length > 0}"
+                    expandable="false" class="sapUiSmallMarginBeginEnd sapUiTinyMarginTop">
+                    <content>
+                        <HBox wrap="Wrap" class="sapUiSmallMarginBeginEnd sapUiSmallMarginTopBottom" alignItems="Center">
+                            <VBox class="sapUiLargeMarginEnd">
+                                <Label text="Total Assets" design="Bold"/>
+                                <ObjectStatus id="resTotalAssets" text="—" state="None"/>
+                            </VBox>
+                            <VBox class="sapUiLargeMarginEnd">
+                                <Label text="Pass" design="Bold"/>
+                                <ObjectStatus id="resPass" text="—" state="Success"/>
+                            </VBox>
+                            <VBox class="sapUiLargeMarginEnd">
+                                <Label text="Permit Required" design="Bold"/>
+                                <ObjectStatus id="resPermit" text="—" state="Warning"/>
+                            </VBox>
+                            <VBox class="sapUiLargeMarginEnd">
+                                <Label text="Fail / Blocked" design="Bold"/>
+                                <ObjectStatus id="resFail" text="—" state="Error"/>
+                            </VBox>
+                            <VBox class="sapUiLargeMarginEnd">
+                                <Label text="Active Restrictions" design="Bold"/>
+                                <ObjectStatus id="resRestrictions" text="—" state="Warning"/>
+                            </VBox>
+                            <VBox class="sapUiLargeMarginEnd">
+                                <Label text="Limiting Asset" design="Bold"/>
+                                <ObjectStatus id="resLimitingAsset" text="—" state="None"/>
+                            </VBox>
+                            <VBox>
+                                <Label text="Min GVM Capacity on Route" design="Bold"/>
+                                <ObjectStatus id="resMinGVM" text="—" state="None"/>
+                            </VBox>
+                        </HBox>
+                    </content>
+                </Panel>
+
+                <!-- ── Per-Bridge Results Table ────────────────────── -->
+                <Panel visible="{= ${assess>/results}.length > 0}"
+                    headerText="Per-Asset Assessment Results"
+                    expandable="false" class="sapUiSmallMarginBeginEnd sapUiTinyMarginTop">
+                    <content>
+                        <Table id="resultsTable"
+                            items="{assess>/results}"
+                            growing="false"
+                            alternateRowColors="true"
+                            noDataText="No assessment results."
+                            class="sapUiTinyMarginTop">
+                            <columns>
+                                <Column width="50px" hAlign="Center"><Text text="#"/></Column>
+                                <Column width="110px"><Text text="Asset ID"/></Column>
+                                <Column><Text text="Asset Name"/></Column>
+                                <Column width="100px" hAlign="Center"><Text text="Overall"/></Column>
+                                <Column width="100px" hAlign="Center"><Text text="Permit Req."/></Column>
+                                <Column width="90px" hAlign="End"><Text text="Capacity (t)"/></Column>
+                                <Column width="90px" hAlign="End"><Text text="Vehicle GVM (t)"/></Column>
+                                <Column width="90px" hAlign="End"><Text text="Margin (t)"/></Column>
+                                <Column width="90px" hAlign="Center"><Text text="Height Clear."/></Column>
+                                <Column width="90px" hAlign="Center"><Text text="Width Clear."/></Column>
+                                <Column width="80px" hAlign="Center"><Text text="Active Rest."/></Column>
+                                <Column width="110px" hAlign="Center"><Text text="Condition"/></Column>
+                                <Column width="150px"><Text text="Key Notes"/></Column>
+                                <Column width="90px" hAlign="Center"><Text text="Action"/></Column>
+                            </columns>
+                            <items>
+                                <ColumnListItem type="Inactive"
+                                    highlight="{= ${assess>eligible} === false ? 'Error' : ${assess>permitRequired} ? 'Warning' : 'Success'}">
+                                    <cells>
+                                        <Text text="{assess>sequence}"/>
+                                        <Text text="{assess>bridgeId}"/>
+                                        <Link text="{assess>bridgeName}" press="onAssetLinkPress" wrapping="false"/>
+                                        <ObjectStatus
+                                            text="{= ${assess>eligible} === false ? 'FAIL' : ${assess>permitRequired} ? 'PERMIT' : 'PASS'}"
+                                            state="{= ${assess>eligible} === false ? 'Error' : ${assess>permitRequired} ? 'Warning' : 'Success'}"
+                                            icon="{= ${assess>eligible} === false ? 'sap-icon://decline' : ${assess>permitRequired} ? 'sap-icon://message-warning' : 'sap-icon://accept'}"/>
+                                        <core:Icon
+                                            src="{= ${assess>permitRequired} ? 'sap-icon://document-text' : 'sap-icon://decline'}"
+                                            color="{= ${assess>permitRequired} ? '#E9730C' : '#107E3E'}"/>
+                                        <ObjectNumber number="{assess>capacityGVM_t}" unit="t"/>
+                                        <ObjectNumber number="{assess>vehicleGVM_t}" unit="t"/>
+                                        <ObjectStatus
+                                            text="{path:'assess>massMargin_t', formatter:'.formatMargin'}"
+                                            state="{path:'assess>massMargin_t', formatter:'.formatMarginState'}"/>
+                                        <ObjectStatus
+                                            text="{path:'assess>heightMargin_m', formatter:'.formatClearance'}"
+                                            state="{path:'assess>heightMargin_m', formatter:'.formatClearanceState'}"/>
+                                        <ObjectStatus
+                                            text="{path:'assess>widthMargin_m', formatter:'.formatClearance'}"
+                                            state="{path:'assess>widthMargin_m', formatter:'.formatClearanceState'}"/>
+                                        <ObjectStatus
+                                            text="{assess>activeRestrictionCount}"
+                                            state="{= ${assess>activeRestrictionCount} > 0 ? 'Error' : 'Success'}"/>
+                                        <ObjectStatus
+                                            text="{assess>conditionRating}"
+                                            state="{= ${assess>conditionRating} === 'CRITICAL' || ${assess>conditionRating} === 'FAILED' ? 'Error' : ${assess>conditionRating} === 'POOR' ? 'Warning' : ${assess>conditionRating} === 'GOOD' || ${assess>conditionRating} === 'EXCELLENT' ? 'Success' : 'None'}"/>
+                                        <Text text="{assess>keyNotes}" wrapping="true"/>
+                                        <Button text="View" icon="sap-icon://detail-view" press="onAssetLinkPress" type="Transparent"/>
+                                    </cells>
+                                </ColumnListItem>
+                            </items>
+                        </Table>
+                    </content>
+                </Panel>
+
+                <!-- ── Alternative Routes Panel ──────────────────── -->
+                <Panel id="altRoutesPanel"
+                    visible="{= ${assess>/altRoutes}.length > 0}"
+                    expandable="true"
+                    expanded="true"
+                    class="sapUiSmallMarginBeginEnd sapUiTinyMarginTop">
+                    <headerToolbar>
+                        <Toolbar>
+                            <Title text="Alternative Routes" level="H3"/>
+                            <ToolbarSpacer/>
+                            <Text id="altCount" text=""/>
+                            <Button text="Close" icon="sap-icon://decline" press="onCloseAltRoutes" type="Transparent"/>
+                        </Toolbar>
+                    </headerToolbar>
+                    <content>
+                        <MessageStrip
+                            text="Internal approved routes match your vehicle's mass/height/width criteria. External OSM routes are road alternatives — bridge compliance on those routes has NOT been assessed and must be verified before use."
+                            type="Information" showIcon="true"
+                            class="sapUiSmallMarginBeginEnd sapUiTinyMarginTopBottom"/>
+                        <Table id="altRoutesTable"
+                            items="{assess>/altRoutes}"
+                            growing="false"
+                            alternateRowColors="true"
+                            noDataText="No alternatives found.">
+                            <columns>
+                                <Column width="130px"><Text text="Source"/></Column>
+                                <Column width="100px"><Text text="Route ID"/></Column>
+                                <Column><Text text="Name"/></Column>
+                                <Column width="100px" hAlign="End"><Text text="Distance"/></Column>
+                                <Column width="90px" hAlign="End"><Text text="Mass Limit"/></Column>
+                                <Column width="90px" hAlign="End"><Text text="Height Limit"/></Column>
+                                <Column width="110px" hAlign="Center"><Text text="Feasibility"/></Column>
+                                <Column><Text text="Notes"/></Column>
+                                <Column width="90px" hAlign="Center"><Text text="Action"/></Column>
+                            </columns>
+                            <items>
+                                <ColumnListItem type="Inactive">
+                                    <cells>
+                                        <ObjectStatus text="{assess>sourceBadge}"
+                                            state="{= ${assess>source} === 'INTERNAL' ? 'Success' : ${assess>source} === 'OSRM' ? 'Information' : 'None'}"/>
+                                        <Text text="{assess>routeCode}"/>
+                                        <Text text="{assess>name}" wrapping="false"/>
+                                        <Text text="{assess>distanceKm}"/>
+                                        <Text text="{assess>massLimit}"/>
+                                        <Text text="{assess>heightLimit}"/>
+                                        <ObjectStatus text="{assess>feasibility}"
+                                            state="{= ${assess>feasibility} === 'VIABLE' ? 'Success' : ${assess>feasibility} === 'UNASSESSED' ? 'Warning' : 'Error'}"/>
+                                        <Text text="{assess>notes}" wrapping="true"/>
+                                        <Button text="Assess" icon="sap-icon://process" press="onAssessAlternativeRoute"
+                                            type="Transparent" visible="{= !!${assess>routeId}}"/>
+                                    </cells>
+                                </ColumnListItem>
+                            </items>
+                        </Table>
+                    </content>
+                </Panel>
+
+                <!-- ── Assessment Map Panel ──────────────────────── -->
+                <Panel id="assessMapPanel" visible="false" expandable="false"
+                    class="sapUiSmallMarginBeginEnd sapUiTinyMarginTop nhvrFraMapPanel">
+                    <headerToolbar>
+                        <Toolbar>
+                            <Title text="Route Map" level="H3"/>
+                            <ToolbarSpacer/>
+                            <Label text="Basemap:" class="sapUiTinyMarginEnd"/>
+                            <Select id="assessBaseMapSel" change="onAssessBaseMapChange" width="150px"
+                                class="sapUiTinyMarginEnd">
+                                <core:Item key="osm"       text="OpenStreetMap"/>
+                                <core:Item key="satellite" text="Satellite (Esri)"/>
+                                <core:Item key="topo"      text="Topo"/>
+                            </Select>
+                            <Button icon="sap-icon://zoom-in" tooltip="Fit to route" press="onFitAssessMap" type="Transparent"/>
+                            <Button icon="sap-icon://decline" tooltip="Hide map" press="onToggleAssessMap" type="Transparent"/>
+                        </Toolbar>
+                    </headerToolbar>
+                    <content>
+                        <HBox class="nhvrFraMapLayerRow" alignItems="Center" wrap="Wrap">
+                            <CheckBox id="chkAssessRoute"    text="Approved Route"      selected="true"  select="onAssessLayerToggle"/>
+                            <CheckBox id="chkAssessBridges"  text="Assessed Bridges"    selected="true"  select="onAssessLayerToggle" class="sapUiSmallMarginBegin"/>
+                            <CheckBox id="chkAssessAltRoutes" text="Alternative Routes" selected="true"  select="onAssessLayerToggle" class="sapUiSmallMarginBegin"/>
+                        </HBox>
+                        <core:HTML id="assessMapHolder"
+                            content="&lt;div id='nhvr-assess-map' class='nhvrAssessMapDiv'&gt;&lt;/div&gt;"
+                            afterRendering="onAssessMapHolderRendered"
+                            preferDOM="true"/>
+                    </content>
+                </Panel>
+
+                <!-- ── No Route Selected Placeholder ──────────────── -->
+                <VBox visible="{= !${assess>/selectedRouteId} &amp;&amp; !${assess>/loading}}"
+                    class="sapUiMediumMarginBeginEnd sapUiLargeMarginTop" alignItems="Center">
+                    <core:Icon src="sap-icon://map-2" size="4rem" color="#d9d9d9"/>
+                    <Title text="Select a Route to Assess" level="H3" class="sapUiSmallMarginTop" titleStyle="H4"/>
+                    <Text text="Choose an approved route and vehicle configuration above, then click Assess Route."
+                        class="sapUiSmallMarginTop" wrapping="true" textAlign="Center"/>
+                    <Text text="The system will check each asset on the route for structural capacity, active restrictions, height and width clearances, and condition risk."
+                        class="sapUiTinyMarginTop" wrapping="true" textAlign="Center"/>
+                </VBox>
+
+                <!-- ── Detail Dialog (per-bridge full assessment) ──── -->
+                <!-- Opened by onAssetLinkPress via MessageBox or Dialog -->
+
+            </VBox>
+        </f:content>
+    </f:DynamicPage>
+</mvc:View>

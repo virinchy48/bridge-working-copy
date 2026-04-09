@@ -1,0 +1,11 @@
+{
+    "name": "nhvr-bridge-app-router",
+    "version": "1.0.0",
+    "description": "App Router for NHVR Bridge Management Application",
+    "dependencies": {
+        "@sap/approuter": "^16.0.0"
+    },
+    "scripts": {
+        "start": "node node_modules/@sap/approuter/approuter.js"
+    }
+}

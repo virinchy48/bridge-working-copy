@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NHVR Bridge Management — OPA5 Integration Tests</title>
+    <meta charset="utf-8">
+    <script id="sap-ushell-config">
+        window["sap-ushell-config"] = {
+            defaultRenderer: "fiori2"
+        };
+    </script>
+    <script
+        src="https://ui5.sap.com/resources/sap-ui-core.js"
+        data-sap-ui-theme="sap_horizon"
+        data-sap-ui-libs="sap.m, sap.f, sap.ui.test"
+        data-sap-ui-resourceroots='{"nhvr.bridgemanagement": "../../"}'
+        data-sap-ui-preload="async"
+        data-sap-ui-compatVersion="edge"
+        data-sap-ui-frameOptions="trusted">
+    </script>
+    <script>
+        sap.ui.require(["sap/ui/test/Opa5", "sap/ui/test/opaQunit"], function (Opa5) {
+            Opa5.extendConfig({
+                timeout: 60,
+                pollingInterval: 300,
+                viewNamespace: "nhvr.bridgemanagement.view."
+            });
+        });
+    </script>
+    <script src="AllJourneys.js"></script>
+</head>
+<body class="sapUiBody" id="body"></body>
+</html>

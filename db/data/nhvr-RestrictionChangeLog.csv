@@ -1,0 +1,7 @@
+ID,restriction_ID,changedAt,changedBy,changeType,oldStatus,newStatus,reason,notes
+90000000-0000-0000-0000-000000000001,40000000-0000-0000-0000-000000000001,2024-01-01T00:00:00Z,system,CREATED,,ACTIVE,Initial restriction created from bridge inspection findings,Mass restriction applied following condition assessment of Goulburn River Bridge
+90000000-0000-0000-0000-000000000002,40000000-0000-0000-0000-000000000002,2023-11-10T18:00:00Z,r.patel,CREATED,,ACTIVE,Height restriction applied following special inspection,Clearance height restricted due to concrete soffit degradation - Jugiong Creek Bridge
+90000000-0000-0000-0000-000000000003,40000000-0000-0000-0000-000000000003,2023-11-10T18:00:00Z,r.patel,CREATED,,ACTIVE,Mass restriction applied following special inspection,Significantly restricted B-Double mass - structural assessment identified deficiencies
+90000000-0000-0000-0000-000000000004,40000000-0000-0000-0000-000000000004,2023-11-10T18:00:00Z,r.patel,CREATED,,ACTIVE,Road Train prohibition applied,Structure cannot support road train loads - emergency restriction
+90000000-0000-0000-0000-000000000005,40000000-0000-0000-0000-000000000001,2024-07-01T10:00:00Z,m.chen,TEMP_APPLIED,ACTIVE,ACTIVE,Flood event temporary reduction applied,Additional mass restriction during flood monitoring period
+90000000-0000-0000-0000-000000000006,40000000-0000-0000-0000-000000000001,2024-07-31T10:00:00Z,m.chen,TEMP_EXTENDED,ACTIVE,ACTIVE,Flood waters still elevated - extension approved,Temporary restriction extended pending scour works completion

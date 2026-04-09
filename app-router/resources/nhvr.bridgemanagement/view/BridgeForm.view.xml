@@ -1,0 +1,675 @@
+<!-- ============================================================
+     NHVR Bridge Form — Create / Edit Bridge
+     ============================================================ -->
+<mvc:View
+    controllerName="nhvr.bridgemanagement.controller.BridgeForm"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.f"
+    xmlns:l="sap.ui.layout.form"
+    xmlns:table="sap.ui.table"
+    displayBlock="true">
+
+    <f:DynamicPage id="bridgeFormPage" toggleHeaderOnTitleClick="false">
+        <f:title>
+            <f:DynamicPageTitle>
+                <f:heading>
+                    <Title id="formTitle" text="Add Bridge" level="H1"/>
+                </f:heading>
+                <f:snappedHeading>
+                    <Title id="formTitleSnapped" text="Bridge Form" level="H2"/>
+                </f:snappedHeading>
+                <f:breadcrumbs>
+                    <Breadcrumbs>
+                        <Link text="Home" press="onNavHome"/>
+                        <Link text="Bridges" press="onNavToBridges"/>
+                        <Link id="breadcrumbForm" text="New Bridge"/>
+                    </Breadcrumbs>
+                </f:breadcrumbs>
+                <f:actions>
+                    <Button id="btnSave" text="Save Bridge" icon="sap-icon://save"
+                        press="onSave" type="Emphasized"/>
+                    <Button text="Cancel" icon="sap-icon://decline"
+                        press="onCancel" type="Transparent"/>
+                    <Button id="btnSyncBams" text="Sync BAMS" icon="sap-icon://synchronize"
+                        press="onSyncBams" type="Transparent"
+                        tooltip="Synchronise this bridge record with the Bridge Asset Management System (BAMS) / BANC national register. Pushes current BMS data to the state road authority system and records the sync timestamp."/>
+                    <ObjectStatus id="bamsSyncStatus" text="BAMS: Never synced"
+                        state="None" class="sapUiSmallMarginEnd"/>
+                    <Button icon="sap-icon://hint" type="Transparent" press="onInfoPressBridgeForm"
+                        tooltip="Bridge form field guide"/>
+                </f:actions>
+            </f:DynamicPageTitle>
+        </f:title>
+
+        <f:content>
+            <VBox class="sapUiSmallMarginBeginEnd sapUiSmallMarginTop sapUiMediumMarginBottom">
+
+                <!-- ── Error Strip ── -->
+                <MessageStrip id="formErrorStrip" text="" type="Error"
+                    showIcon="true" visible="false" class="sapUiSmallMarginBottom"/>
+
+                <!-- ═══════════════════════════════════════════
+                     Section 1 — Identity & Location
+                     ═══════════════════════════════════════════ -->
+                <Panel headerText="1 — Identity &amp; Location" expandable="true" expanded="true"
+                    class="sapUiSmallMarginBottom">
+                    <content>
+                        <HBox wrap="Wrap" class="sapUiSmallMargin">
+                            <VBox width="280px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Bridge ID *" design="Bold" labelFor="fBridgeId"/>
+                                <Input id="fBridgeId" placeholder="BRG-NSW001-001" maxLength="20"
+                                    valueLiveUpdate="true" liveChange="onBridgeIdChange"/>
+                                <Text id="fBridgeIdHint" text="Auto-generated if left blank"
+                                    class="sapUiTinyMarginTop nhvrSubText"/>
+                            </VBox>
+                            <VBox width="320px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Bridge Name *" design="Bold" labelFor="fName"/>
+                                <Input id="fName" placeholder="e.g. Hawkesbury River Bridge" maxLength="200"/>
+                            </VBox>
+                            <VBox width="200px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Asset Class" design="Bold" labelFor="fAssetClass"/>
+                                <Select id="fAssetClass">
+                                    <core:Item key="BRIDGE"             text="Bridge"/>
+                                    <core:Item key="CULVERT"            text="Culvert"/>
+                                    <core:Item key="TUNNEL"             text="Tunnel"/>
+                                    <core:Item key="FORD"               text="Ford"/>
+                                    <core:Item key="CAUSEWAY"           text="Causeway"/>
+                                    <core:Item key="RETAINING_WALL"     text="Retaining Wall"/>
+                                    <core:Item key="OVERHEAD_STRUCTURE" text="Overhead Structure"/>
+                                    <core:Item key="PEDESTRIAN_BRIDGE"  text="Pedestrian Bridge"/>
+                                    <core:Item key="RAILWAY_OVERPASS"   text="Railway Overpass"/>
+                                    <core:Item key="SIGN_GANTRY"        text="Sign Gantry"/>
+                                    <core:Item key="OTHER"              text="Other"/>
+                                </Select>
+                            </VBox>
+                            <VBox width="160px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="State *" design="Bold" labelFor="fState"/>
+                                <Select id="fState" change="onStateChanged">
+                                    <core:Item key="" text="— Select —"/>
+                                    <core:Item key="NSW" text="NSW"/>
+                                    <core:Item key="VIC" text="VIC"/>
+                                    <core:Item key="QLD" text="QLD"/>
+                                    <core:Item key="WA"  text="WA"/>
+                                    <core:Item key="SA"  text="SA"/>
+                                    <core:Item key="TAS" text="TAS"/>
+                                    <core:Item key="ACT" text="ACT"/>
+                                    <core:Item key="NT"  text="NT"/>
+                                </Select>
+                            </VBox>
+                            <VBox width="200px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Region" design="Bold" labelFor="fRegion"/>
+                                <Select id="fRegion" width="200px">
+                                    <core:Item key="" text="— Select State First —"/>
+                                </Select>
+                            </VBox>
+                            <VBox width="240px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="LGA" design="Bold" labelFor="fLga"/>
+                                <Input id="fLga" placeholder="Local Government Area" maxLength="100"/>
+                            </VBox>
+                            <VBox width="240px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Road Route" design="Bold" labelFor="fRoadRoute"/>
+                                <Input id="fRoadRoute" placeholder="e.g. Great Western Highway" maxLength="100"/>
+                            </VBox>
+                            <VBox width="160px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Route Number" design="Bold" labelFor="fRouteNumber"/>
+                                <Input id="fRouteNumber" placeholder="e.g. A32" maxLength="20"/>
+                            </VBox>
+                            <VBox width="200px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Latitude *" design="Bold" labelFor="fLatitude"/>
+                                <Input id="fLatitude" placeholder="-33.8688" type="Number"
+                                    description="° (−90 to 90)"/>
+                            </VBox>
+                            <VBox width="200px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Longitude *" design="Bold" labelFor="fLongitude"/>
+                                <Input id="fLongitude" placeholder="151.2093" type="Number"
+                                    description="° (−180 to 180)"/>
+                            </VBox>
+                        </HBox>
+                    </content>
+                </Panel>
+
+                <!-- ═══════════════════════════════════════════
+                     Section 2 — Asset Ownership
+                     ═══════════════════════════════════════════ -->
+                <Panel headerText="2 — Asset Ownership" expandable="true" expanded="true"
+                    class="sapUiSmallMarginBottom">
+                    <content>
+                        <HBox wrap="Wrap" class="sapUiSmallMargin">
+                            <VBox width="320px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Asset Owner *" design="Bold" labelFor="fAssetOwner"/>
+                                <Input id="fAssetOwner" placeholder="e.g. Transport for NSW" maxLength="200"/>
+                            </VBox>
+                            <VBox width="320px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Maintenance Authority" design="Bold" labelFor="fMaintAuth"/>
+                                <Input id="fMaintAuth" placeholder="e.g. Council or TMC" maxLength="200"/>
+                            </VBox>
+                        </HBox>
+                    </content>
+                </Panel>
+
+                <!-- ═══════════════════════════════════════════
+                     Section 3 — Physical Attributes
+                     ═══════════════════════════════════════════ -->
+                <Panel headerText="3 — Physical Attributes" expandable="true" expanded="true"
+                    class="sapUiSmallMarginBottom">
+                    <content>
+                        <HBox wrap="Wrap" class="sapUiSmallMargin">
+                            <VBox width="220px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Structure Type" design="Bold" labelFor="fStructureType"/>
+                                <Select id="fStructureType">
+                                    <core:Item key="" text="— Select —"/>
+                                    <core:Item key="BEAM"         text="Beam"/>
+                                    <core:Item key="BOX_GIRDER"   text="Box Girder"/>
+                                    <core:Item key="ARCH"         text="Arch"/>
+                                    <core:Item key="TRUSS"        text="Truss"/>
+                                    <core:Item key="CABLE_STAYED" text="Cable Stayed"/>
+                                    <core:Item key="CULVERT"      text="Culvert"/>
+                                    <core:Item key="BASCULE"      text="Bascule"/>
+                                    <core:Item key="SUSPENSION"   text="Suspension"/>
+                                    <core:Item key="SLAB"         text="Slab"/>
+                                </Select>
+                            </VBox>
+                            <VBox width="200px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Material" design="Bold" labelFor="fMaterial"/>
+                                <Input id="fMaterial" placeholder="e.g. Concrete, Steel" maxLength="100"/>
+                            </VBox>
+                            <VBox width="120px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Year Built" design="Bold" labelFor="fYearBuilt"/>
+                                <Input id="fYearBuilt" placeholder="e.g. 1965" type="Number" maxLength="4"/>
+                            </VBox>
+                            <VBox width="200px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Design Load" design="Bold" labelFor="fDesignLoad"/>
+                                <Select id="fDesignLoad">
+                                    <core:Item key=""      text="— Select —"/>
+                                    <core:Item key="T44"    text="T44"/>
+                                    <core:Item key="M1600"  text="M1600"/>
+                                    <core:Item key="SM1600" text="SM1600"/>
+                                    <core:Item key="S1600"  text="S1600"/>
+                                    <core:Item key="Historic" text="Historic"/>
+                                    <core:Item key="Other"  text="Other"/>
+                                </Select>
+                            </VBox>
+                            <VBox width="220px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Design Standard" design="Bold" labelFor="fDesignStandard"/>
+                                <Input id="fDesignStandard" placeholder="e.g. AS 5100, AUSTROADS" maxLength="100"/>
+                            </VBox>
+                            <VBox width="160px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Clearance Height (m)" design="Bold" labelFor="fClearance"/>
+                                <Input id="fClearance" placeholder="4.60" type="Number"/>
+                            </VBox>
+                            <VBox width="160px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Span Length (m)" design="Bold" labelFor="fSpanLength"/>
+                                <Input id="fSpanLength" placeholder="30.5" type="Number"/>
+                            </VBox>
+                            <VBox width="160px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Total Length (m)" design="Bold" labelFor="fTotalLength"/>
+                                <Input id="fTotalLength" placeholder="45.0" type="Number"/>
+                            </VBox>
+                            <VBox width="140px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Width (m)" design="Bold" labelFor="fWidth"/>
+                                <Input id="fWidth" placeholder="8.5" type="Number"/>
+                            </VBox>
+                            <VBox width="120px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Number of Spans" design="Bold" labelFor="fSpans"/>
+                                <Input id="fSpans" placeholder="3" type="Number"/>
+                            </VBox>
+                            <VBox width="120px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Number of Lanes" design="Bold" labelFor="fLanes"/>
+                                <Input id="fLanes" placeholder="2" type="Number"/>
+                            </VBox>
+                        </HBox>
+                    </content>
+                </Panel>
+
+                <!-- ═══════════════════════════════════════════
+                     Section 4 — Condition
+                     ═══════════════════════════════════════════ -->
+                <Panel headerText="4 — Condition &amp; Status" expandable="true" expanded="true"
+                    class="sapUiSmallMarginBottom">
+                    <content>
+                        <HBox wrap="Wrap" class="sapUiSmallMargin">
+                            <VBox width="260px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Condition Rating (1–10) *" design="Bold" labelFor="fRatingSlider"/>
+                                <Slider id="fRatingSlider" min="1" max="10" step="1" value="7"
+                                    enableTickmarks="true" liveChange="onRatingSliderChange"
+                                    class="sapUiSmallMarginTop"/>
+                                <ObjectStatus id="fRatingLabel" text="7 / 10 — Good"
+                                    state="Success" class="sapUiTinyMarginTop"/>
+                            </VBox>
+                            <VBox width="180px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Structural Adequacy (1–10)" design="Bold" labelFor="fStructuralAdequacy"/>
+                                <Input id="fStructuralAdequacy" placeholder="e.g. 6" type="Number"/>
+                                <Text text="AustRoads BIMM sub-rating"
+                                    class="sapUiTinyMarginTop nhvrSubText"/>
+                            </VBox>
+                            <VBox width="200px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Posting Status *" design="Bold" labelFor="fPostingStatus"/>
+                                <Select id="fPostingStatus">
+                                    <core:Item key="UNRESTRICTED"     text="Unrestricted"/>
+                                    <core:Item key="POSTED"           text="Posted"/>
+                                    <core:Item key="RESTRICTED"       text="Restricted"/>
+                                    <core:Item key="HEIGHT_RESTRICTED" text="Height Restricted"/>
+                                    <core:Item key="WEIGHT_RESTRICTED" text="Weight Restricted"/>
+                                    <core:Item key="CLOSED"           text="Closed"/>
+                                </Select>
+                            </VBox>
+                            <VBox width="180px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Scour Risk" design="Bold" labelFor="fScourRisk"/>
+                                <Select id="fScourRisk">
+                                    <core:Item key=""         text="— Unknown —"/>
+                                    <core:Item key="LOW"      text="Low"/>
+                                    <core:Item key="MEDIUM"   text="Medium"/>
+                                    <core:Item key="HIGH"     text="High"/>
+                                    <core:Item key="CRITICAL" text="Critical"/>
+                                </Select>
+                            </VBox>
+                            <VBox width="200px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Inspection Date" design="Bold" labelFor="fInspectionDate"/>
+                                <DatePicker id="fInspectionDate" valueFormat="yyyy-MM-dd" displayFormat="dd MMM yyyy"/>
+                            </VBox>
+                            <VBox width="200px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Next Inspection Due" design="Bold" labelFor="fNextInspDue"/>
+                                <DatePicker id="fNextInspDue" valueFormat="yyyy-MM-dd" displayFormat="dd MMM yyyy"/>
+                            </VBox>
+                            <VBox width="240px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Condition Standard" design="Bold" labelFor="fConditionStandard"/>
+                                <Input id="fConditionStandard" placeholder="e.g. AS 5100.7" maxLength="100"/>
+                            </VBox>
+                            <VBox width="160px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Seismic Zone" design="Bold" labelFor="fSeismicZone"/>
+                                <Input id="fSeismicZone" placeholder="e.g. Zone 1" maxLength="20"/>
+                            </VBox>
+                            <VBox width="280px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="As-Built Drawing Reference" design="Bold" labelFor="fAsBuiltRef"/>
+                                <Input id="fAsBuiltRef" placeholder="e.g. TfNSW-DRG-2024-0042" maxLength="200"/>
+                            </VBox>
+                            <VBox width="180px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Scour Depth Last Measured (m)" design="Bold" labelFor="fScourDepth"/>
+                                <Input id="fScourDepth" placeholder="e.g. 0.8" type="Number"/>
+                            </VBox>
+                            <VBox width="180px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Flood Immunity ARI (yrs)" design="Bold" labelFor="fFloodImmunityARI"/>
+                                <Input id="fFloodImmunityARI" placeholder="e.g. 100" type="Number"/>
+                                <Text text="1% AEP = 100-year ARI"
+                                    class="sapUiTinyMarginTop nhvrSubText"/>
+                            </VBox>
+                        </HBox>
+                        <HBox wrap="Wrap" class="sapUiSmallMarginBegin sapUiSmallMarginBottom">
+                            <CheckBox id="fFloodImpacted" text="Flood Impacted" class="sapUiSmallMarginEnd"/>
+                            <CheckBox id="fHighPriority"  text="High Priority Asset" class="sapUiSmallMarginEnd"/>
+                        </HBox>
+                        <HBox wrap="Wrap" class="sapUiSmallMarginBegin sapUiSmallMarginBottom">
+                            <Label text="Remarks" design="Bold" class="sapUiSmallMarginEnd" width="100%" labelFor="fRemarks"/>
+                            <TextArea id="fRemarks" rows="3" width="100%" maxLength="2000"
+                                placeholder="Any additional remarks or condition notes…"/>
+                        </HBox>
+                    </content>
+                </Panel>
+
+                <!-- ═══════════════════════════════════════════
+                     Section 5 — NHVR &amp; Traffic
+                     ═══════════════════════════════════════════ -->
+                <Panel headerText="5 — NHVR &amp; Traffic" expandable="true" expanded="false"
+                    class="sapUiSmallMarginBottom">
+                    <content>
+                        <HBox wrap="Wrap" class="sapUiSmallMargin">
+                            <VBox width="180px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Load Rating (t)" design="Bold" labelFor="fLoadRating"/>
+                                <Input id="fLoadRating" placeholder="e.g. 42.5" type="Number"/>
+                                <Text text="Gross vehicle mass limit"
+                                    class="sapUiTinyMarginTop nhvrSubText"/>
+                            </VBox>
+                            <VBox width="220px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="NHVR PBS Approval Class" design="Bold" labelFor="fNhvrApprovalClass"/>
+                                <Select id="fNhvrApprovalClass">
+                                    <core:Item key=""        text="— Not Assessed —"/>
+                                    <core:Item key="CLASS1"  text="Class 1"/>
+                                    <core:Item key="CLASS2"  text="Class 2"/>
+                                    <core:Item key="CLASS3"  text="Class 3"/>
+                                    <core:Item key="CLASS4"  text="Class 4"/>
+                                    <core:Item key="HML"     text="HML"/>
+                                    <core:Item key="B_DOUBLE" text="B-Double"/>
+                                    <core:Item key="B_TRIPLE" text="B-Triple"/>
+                                    <core:Item key="NONE"    text="None"/>
+                                </Select>
+                            </VBox>
+                            <VBox width="140px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Importance Level (AS 1170)" design="Bold" labelFor="fImportanceLevel"/>
+                                <Input id="fImportanceLevel" placeholder="e.g. 2" type="Number"/>
+                                <Text text="1=low, 4=exceptional"
+                                    class="sapUiTinyMarginTop nhvrSubText"/>
+                            </VBox>
+                            <VBox width="180px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="AADT (vehicles/day)" design="Bold" labelFor="fAadt"/>
+                                <Input id="fAadt" placeholder="12000" type="Number"/>
+                            </VBox>
+                            <VBox width="180px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Heavy Vehicle % of AADT" design="Bold" labelFor="fHeavyVehiclePct"/>
+                                <Input id="fHeavyVehiclePct" placeholder="e.g. 12.5" type="Number"/>
+                                <Text text="% of AADT with GVM &gt; 4.5t"
+                                    class="sapUiTinyMarginTop nhvrSubText"/>
+                            </VBox>
+                            <VBox width="280px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Gazette Reference" design="Bold" labelFor="fGazetteRef"/>
+                                <Input id="fGazetteRef" placeholder="e.g. NSW Gazette 2024/123" maxLength="100"/>
+                            </VBox>
+                            <VBox width="360px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="NHVR Reference URL" design="Bold" labelFor="fNhvrRef"/>
+                                <Input id="fNhvrRef" placeholder="https://www.nhvr.gov.au/…" maxLength="1000"/>
+                            </VBox>
+                        </HBox>
+                        <HBox wrap="Wrap" class="sapUiSmallMarginBegin sapUiSmallMarginBottom">
+                            <CheckBox id="fNhvrAssessed"   text="NHVR Route Assessed" class="sapUiSmallMarginEnd"/>
+                            <CheckBox id="fFreightRoute"   text="Freight Route" class="sapUiSmallMarginEnd"/>
+                            <CheckBox id="fOverMassRoute"  text="Over Mass Route" class="sapUiSmallMarginEnd"/>
+                            <CheckBox id="fHmlApproved"    text="HML Approved" class="sapUiSmallMarginEnd"/>
+                            <CheckBox id="fBdoubleApproved" text="B-Double Approved" class="sapUiSmallMarginEnd"/>
+                        </HBox>
+                    </content>
+                </Panel>
+
+                <!-- ═══════════════════════════════════════════
+                     Section 6 — Data Provenance
+                     ═══════════════════════════════════════════ -->
+                <Panel headerText="6 — Data Provenance" expandable="true" expanded="false"
+                    class="sapUiSmallMarginBottom">
+                    <content>
+                        <HBox wrap="Wrap" class="sapUiSmallMargin">
+                            <VBox width="360px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Data Source" design="Bold" labelFor="fDataSource"/>
+                                <Input id="fDataSource" placeholder="e.g. NSW OpenData Bridge Asset Register" maxLength="500"/>
+                            </VBox>
+                            <VBox width="360px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Source Reference URL" design="Bold" labelFor="fSourceRefUrl"/>
+                                <Input id="fSourceRefUrl" placeholder="https://…" maxLength="1000"/>
+                            </VBox>
+                            <VBox width="360px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Open Data Reference" design="Bold" labelFor="fOpenDataRef"/>
+                                <Input id="fOpenDataRef" placeholder="https://…" maxLength="200"/>
+                            </VBox>
+                        </HBox>
+                    </content>
+                </Panel>
+
+                <!-- ═══════════════════════════════════════════
+                     Section 6b — Financial &amp; Investment
+                     ═══════════════════════════════════════════ -->
+                <Panel headerText="6b — Financial &amp; Investment" expandable="true" expanded="false"
+                    class="sapUiSmallMarginBottom">
+                    <content>
+                        <HBox wrap="Wrap" class="sapUiSmallMargin">
+                            <VBox width="220px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Replacement Cost (AUD)" design="Bold" labelFor="fCurrentReplacementCost"/>
+                                <Input id="fCurrentReplacementCost" placeholder="e.g. 2500000" type="Number"/>
+                                <Text text="Current estimated replacement cost"
+                                    class="sapUiTinyMarginTop nhvrSubText"/>
+                            </VBox>
+                            <VBox width="200px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Remaining Useful Life (yrs)" design="Bold" labelFor="fRemainingUsefulLife"/>
+                                <Input id="fRemainingUsefulLife" placeholder="e.g. 25" type="Number"/>
+                                <Text text="Years before replacement required"
+                                    class="sapUiTinyMarginTop nhvrSubText"/>
+                            </VBox>
+                            <VBox width="200px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Design Life (yrs)" design="Bold" labelFor="fDesignLife"/>
+                                <Input id="fDesignLife" placeholder="e.g. 100" type="Number"/>
+                                <Text text="AS 5100 intended service life"
+                                    class="sapUiTinyMarginTop nhvrSubText"/>
+                            </VBox>
+                        </HBox>
+                    </content>
+                </Panel>
+
+                <!-- ═══════════════════════════════════════════
+                     Section 7 — External System References
+                     ═══════════════════════════════════════════ -->
+                <Panel headerText="7 — External System References" expandable="true" expanded="false"
+                    class="sapUiSmallMarginBottom">
+                    <content>
+                        <HBox wrap="Wrap" class="sapUiSmallMargin">
+                            <VBox width="240px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="BANC ID" design="Bold" labelFor="fBancId"/>
+                                <Input id="fBancId" placeholder="BANC bridge ID" maxLength="100"/>
+                            </VBox>
+                            <VBox width="360px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="BANC URL" design="Bold" labelFor="fBancUrl"/>
+                                <Input id="fBancUrl" placeholder="https://banc.austroads.com.au/…" maxLength="500"/>
+                            </VBox>
+                            <VBox width="200px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Primary External System" design="Bold" labelFor="fExtSystem"/>
+                                <Select id="fExtSystem">
+                                    <core:Item key=""         text="— None —"/>
+                                    <core:Item key="BANC"     text="BANC"/>
+                                    <core:Item key="RMS"      text="RMS/TfNSW"/>
+                                    <core:Item key="VICROADS" text="VicRoads"/>
+                                    <core:Item key="MRWA"     text="MRWA"/>
+                                    <core:Item key="TMR"      text="TMR QLD"/>
+                                    <core:Item key="DPTI"     text="DPTI SA"/>
+                                    <core:Item key="OTHER"    text="Other"/>
+                                </Select>
+                            </VBox>
+                            <VBox width="240px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Primary External ID" design="Bold" labelFor="fExtId"/>
+                                <Input id="fExtId" placeholder="ID in that system" maxLength="200"/>
+                            </VBox>
+                            <VBox width="360px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                                <Label text="Primary External URL" design="Bold" labelFor="fExtUrl"/>
+                                <Input id="fExtUrl" placeholder="https://…" maxLength="500"/>
+                            </VBox>
+                        </HBox>
+                    </content>
+                </Panel>
+
+                <!-- ═══════════════════════════════════════════
+                     Section 8 — Bridge Geometry (GeoJSON)
+                     ═══════════════════════════════════════════ -->
+                <Panel headerText="8 — Bridge Geometry (GeoJSON)" expandable="true" expanded="false"
+                    class="sapUiSmallMarginBottom">
+                    <content>
+                        <VBox class="sapUiSmallMargin">
+                            <Label text="GeoJSON Geometry" design="Bold" labelFor="fGeometry"/>
+                            <Text text="Paste a GeoJSON LineString, Polygon or Point representing the bridge deck geometry. Used for detailed map rendering."
+                                class="sapUiTinyMarginBottom nhvrSubText"/>
+                            <TextArea id="fGeometry" rows="8" width="100%" growing="false"
+                                placeholder='\{"type":"LineString","coordinates":[[151.2093,-33.8688],[151.2100,-33.8695]]\}'
+                                class="sapUiSmallMarginBottom"/>
+                            <MessageStrip type="Information" showIcon="true" visible="true"
+                                text="Supported formats: GeoJSON Point, LineString, Polygon. Coordinate order: [longitude, latitude]. WGS84 (EPSG:4326)."/>
+                        </VBox>
+                    </content>
+                </Panel>
+
+                <!-- ═══════════════════════════════════════════
+                     Section 9 — Custom Attributes (Dynamic)
+                     Populated at runtime from AttributeDefinitions
+                     ═══════════════════════════════════════════ -->
+                <Panel id="dynAttrPanel" headerText="Custom Attributes" expandable="true" expanded="true"
+                    visible="false" class="sapUiSmallMarginBottom">
+                    <content>
+                        <VBox id="dynAttrContainer" class="sapUiSmallMargin">
+                            <!-- Dynamic fields injected here by BridgeForm.controller.js _renderDynAttrs() -->
+                            <Text text="Loading custom attributes…" class="sapUiTinyMarginTop nhvrSubText"/>
+                        </VBox>
+                    </content>
+                </Panel>
+
+                <!-- ═══════════════════════════════════════════
+                     Section 10 — Load Ratings (AS 5100.7)
+                     Visible in Edit mode for existing bridges.
+                     ═══════════════════════════════════════════ -->
+                <Panel id="loadRatingsPanel" headerText="10 — Load Ratings (AS 5100.7)"
+                    expandable="true" expanded="false"
+                    visible="false" class="sapUiSmallMarginBottom">
+                    <headerToolbar>
+                        <Toolbar>
+                            <Title text="10 — Load Ratings (AS 5100.7)" level="H4"/>
+                            <ToolbarSpacer/>
+                            <Button id="addLoadRatingBtn"
+                                text="Add Rating"
+                                icon="sap-icon://add"
+                                type="Emphasized"
+                                press=".onAddLoadRating"
+                                visible="false"/>
+                        </Toolbar>
+                    </headerToolbar>
+                    <content>
+                        <VBox class="sapUiSmallMargin">
+                            <MessageStrip
+                                id="loadRatingGuide"
+                                text="Load ratings record the maximum permitted gross vehicle mass for specific vehicle types, as assessed per AS 5100.7. Multiple ratings can exist for different vehicle types or assessment dates."
+                                type="Information"
+                                showIcon="true"
+                                showCloseButton="true"
+                                class="sapUiSmallMarginBottom"/>
+                            <table:Table
+                                id="loadRatingsTable"
+                                visibleRowCount="5"
+                                selectionMode="None"
+                                alternateRowColors="true"
+                                noData="No load ratings recorded. Click 'Add Rating' to record the first assessment.">
+                                <table:columns>
+                                    <table:Column width="12rem"><Label text="Rating Standard"/><table:template>
+                                        <Text text="{loadRatings>ratingStandard}"/>
+                                    </table:template></table:Column>
+                                    <table:Column width="14rem"><Label text="Vehicle Type / Class"/><table:template>
+                                        <Text text="{loadRatings>vehicleTypeDesc}"/>
+                                    </table:template></table:Column>
+                                    <table:Column width="9rem"><Label text="Max Mass (t)"/><table:template>
+                                        <ObjectNumber
+                                            number="{loadRatings>maxGrossMass_t}"
+                                            unit="t"
+                                            state="{= ${loadRatings>status} === 'ADEQUATE' ? 'Success' : (${loadRatings>status} === 'INADEQUATE' ? 'Error' : 'None') }"/>
+                                    </table:template></table:Column>
+                                    <table:Column width="8rem"><Label text="Rating Factor"/><table:template>
+                                        <Text text="{loadRatings>ratingFactor}"/>
+                                    </table:template></table:Column>
+                                    <table:Column width="9rem"><Label text="Assessment Date"/><table:template>
+                                        <Text text="{path:'loadRatings>assessmentDate', type:'sap.ui.model.type.Date', formatOptions:{style:'medium'}}"/>
+                                    </table:template></table:Column>
+                                    <table:Column width="14rem"><Label text="Assessed By"/><table:template>
+                                        <Text text="{loadRatings>assessedBy}"/>
+                                    </table:template></table:Column>
+                                    <table:Column width="8rem"><Label text="Status"/><table:template>
+                                        <ObjectStatus
+                                            text="{loadRatings>status}"
+                                            state="{= ${loadRatings>status} === 'ADEQUATE' ? 'Success' : (${loadRatings>status} === 'INADEQUATE' ? 'Error' : (${loadRatings>status} === 'CONDITIONAL' ? 'Warning' : 'None') ) }"/>
+                                    </table:template></table:Column>
+                                    <table:Column width="6rem"><Label text="Actions"/><table:template>
+                                        <HBox>
+                                            <Button icon="sap-icon://edit"
+                                                type="Transparent"
+                                                tooltip="Edit this load rating"
+                                                press=".onEditLoadRating"/>
+                                            <Button icon="sap-icon://delete"
+                                                type="Transparent"
+                                                tooltip="Delete this load rating"
+                                                press=".onDeleteLoadRating"/>
+                                        </HBox>
+                                    </table:template></table:Column>
+                                </table:columns>
+                            </table:Table>
+                        </VBox>
+                    </content>
+                </Panel>
+
+                <!-- ═══════════════════════════════════════════
+                     Section 11 — Scour Risk (AustRoads BIMM §7)
+                     ═══════════════════════════════════════════ -->
+                <Panel id="scourRiskPanel" headerText="11 — Scour Risk Assessment (AustRoads BIMM §7)"
+                    expandable="true" expanded="false"
+                    visible="false" class="sapUiSmallMarginBottom">
+                    <content>
+                        <VBox class="sapUiSmallMargin">
+                            <HBox wrap="Wrap" alignItems="Center" class="sapUiTinyMarginBottom">
+                                <ObjectStatus id="scourRiskStatus" title="Risk Level" text="Not assessed"
+                                    state="None" class="sapUiSmallMarginEnd"/>
+                                <ObjectStatus id="scourRiskScore" title="Score (0-100)" text="—"
+                                    class="sapUiSmallMarginEnd"/>
+                                <ObjectStatus id="scourMitigationStatus" title="Mitigation" text="—"
+                                    state="None"/>
+                            </HBox>
+                            <Button text="Run Scour Assessment" icon="sap-icon://activity-2"
+                                type="Emphasized" press=".onOpenScourDialog"
+                                class="sapUiTinyMarginBottom"/>
+                        </VBox>
+                    </content>
+                </Panel>
+
+                <!-- Scour Assessment Dialog (declared inline, opened programmatically) -->
+
+                <!-- ═══════════════════════════════════════════
+                     Section 12 — Condition Forecast (10-Year)
+                     ═══════════════════════════════════════════ -->
+                <Panel id="forecastPanel" headerText="12 — Condition Forecast (10-Year)"
+                    expandable="true" expanded="false"
+                    visible="false" class="sapUiSmallMarginBottom">
+                    <content>
+                        <VBox class="sapUiSmallMargin">
+                            <MessageStrip
+                                text="Condition Forecast projects the bridge's structural condition over 10 years using the current condition rating, asset age, traffic loading, and AustRoads deterioration curves. It helps prioritise maintenance investment and capital works planning. Ratings below 5 within the forecast period trigger a maintenance priority flag."
+                                type="Information" showIcon="true" showCloseButton="false"
+                                class="sapUiSmallMarginBottom"/>
+                            <HBox alignItems="Center" class="sapUiTinyMarginBottom">
+                                <Button text="Run Forecast" icon="sap-icon://trend-up"
+                                    type="Emphasized" press=".onRunForecast"/>
+                                <Text id="forecastConfidence" text="" class="sapUiSmallMarginBegin"/>
+                            </HBox>
+                            <List id="forecastList"
+                                noDataText="Click 'Run Forecast' to generate prediction"
+                                class="sapUiTinyMarginTop">
+                                <items>
+                                    <StandardListItem
+                                        title="{forecast>year}"
+                                        description="Score: {forecast>predictedScore} | Rating: {forecast>predictedRating}/10 | Confidence: {forecast>confidence}"
+                                        icon="sap-icon://line-chart"/>
+                                </items>
+                            </List>
+                        </VBox>
+                    </content>
+                </Panel>
+
+                <!-- ═══════════════════════════════════════════════════════
+                     Section 13 — Live IoT Sensors
+                     ═══════════════════════════════════════════ -->
+                <Panel id="sensorsPanel" headerText="13 — Live IoT Sensors"
+                    expandable="true" expanded="false"
+                    visible="false" class="sapUiSmallMarginBottom">
+                    <content>
+                        <VBox class="sapUiSmallMargin">
+                            <Table id="sensorDevicesTable"
+                                items="{sensors>/value}"
+                                noDataText="No IoT sensors installed on this bridge"
+                                growing="true" growingThreshold="10"
+                                class="sapUiTinyMarginTop">
+                                <columns>
+                                    <Column><Text text="Device ID"/></Column>
+                                    <Column><Text text="Type"/></Column>
+                                    <Column><Text text="Location"/></Column>
+                                    <Column><Text text="Last Reading"/></Column>
+                                    <Column><Text text="Value"/></Column>
+                                    <Column><Text text="Alert Status"/></Column>
+                                </columns>
+                                <items>
+                                    <ColumnListItem>
+                                        <cells>
+                                            <Text text="{sensors>deviceId}"/>
+                                            <Text text="{sensors>sensorType}"/>
+                                            <Text text="{sensors>location}"/>
+                                            <Text text="{sensors>lastReading}"/>
+                                            <Text text="{= ${sensors>lastValue} !== null ? ${sensors>lastValue} + ' ' + ${sensors>unit} : '—'}"/>
+                                            <ObjectStatus text="{sensors>alertLevel}"
+                                                state="{= ${sensors>alertLevel} === 'CRITICAL' ? 'Error' : ${sensors>alertLevel} === 'WARNING' ? 'Warning' : ${sensors>alertLevel} === 'OFFLINE' ? 'None' : 'Success'}"/>
+                                        </cells>
+                                    </ColumnListItem>
+                                </items>
+                            </Table>
+                        </VBox>
+                    </content>
+                </Panel>
+
+            </VBox>
+        </f:content>
+    </f:DynamicPage>
+</mvc:View>

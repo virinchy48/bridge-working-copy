@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+.npm
+
+# SAP CAP build artifacts
+gen/
+dist/
+
+# MTA build artifacts
+*.mtar
+mta-op-*/
+
+# SQLite local dev database
+db.sqlite
+*.db
+*.sqlite
+
+# Environment / secrets
+.env
+.env.*
+default-env.json
+default-services.json
+private-key.pem
+*.key
+*.pem
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Test coverage
+coverage/
+.claude/worktrees/
+node_modules
+infra/smoke-tester/.local/

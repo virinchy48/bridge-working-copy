@@ -1,0 +1,22 @@
+{
+    "welcomeFile": "/nhvr.bridgemanagement/index.html",
+    "authenticationMethod": "route",
+    "sessionTimeout": 15,
+    "logout": {
+        "logoutEndpoint": "/do/logout",
+        "logoutPage": "/nhvr.bridgemanagement/index.html"
+    },
+    "routes": [
+        {
+            "source"            : "^/bridge-management/(.*)$",
+            "destination"       : "srv-api",
+            "authenticationType": "xsuaa",
+            "csrfProtection"    : true
+        },
+        {
+            "source"            : "^/(.*)$",
+            "localDir"          : "resources",
+            "authenticationType": "xsuaa"
+        }
+    ]
+}

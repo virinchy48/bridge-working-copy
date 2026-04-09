@@ -1,0 +1,218 @@
+<!-- ============================================================
+     NHVR Mass Upload — Universal CSV Import for all Data Objects
+     Supports: Bridges, Restrictions, Routes, Vehicle Classes,
+               Inspection Orders, Bridge Defects, Lookups
+     ============================================================ -->
+<mvc:View
+    controllerName="nhvr.bridgemanagement.controller.MassUpload"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.f"
+    displayBlock="true">
+
+    <f:DynamicPage id="uploadPage" toggleHeaderOnTitleClick="false">
+        <f:title>
+            <f:DynamicPageTitle>
+                <f:heading>
+                    <Title text="Mass Upload" level="H1"/>
+                </f:heading>
+                <f:breadcrumbs>
+                    <Breadcrumbs>
+                        <Link text="Home" press="onNavHome"/>
+                        <Link text="Mass Upload"/>
+                    </Breadcrumbs>
+                </f:breadcrumbs>
+                <f:actions>
+                    <Button text="Help" icon="sap-icon://sys-help" press="onOpenHelp" type="Transparent"/>
+                    <Button text="Home" icon="sap-icon://home" press="onNavHome" type="Transparent"/>
+                </f:actions>
+            </f:DynamicPageTitle>
+        </f:title>
+
+        <f:content>
+            <VBox class="nhvrApp sapUiSmallMarginBeginEnd sapUiSmallMarginTop">
+
+                <!-- ── Training Mode Guide ─────────────────────── -->
+                <MessageStrip id="uploadGuideStrip"
+                    text="Mass Upload lets you create or update any data object in bulk using a CSV file. Download a template, fill it in, then upload. Existing records are updated; new records are created automatically."
+                    type="Information" showIcon="true" showCloseButton="true"
+                    visible="false" class="sapUiSmallMarginBottom nhvrAlertStrip"/>
+
+                <!-- ── Upload Type Selector ────────────────────── -->
+                <VBox class="nhvrExecCard sapUiSmallMarginBottom">
+                    <HBox alignItems="Center" class="sapUiSmallMarginBottom">
+                        <Title text="1. Select Data Type" level="H4"/>
+                        <Button id="btnTypeHelp" icon="sap-icon://sys-help-2"
+                            type="Transparent" tooltip="Learn about each upload type"
+                            press="onTypeHelp" class="sapUiTinyMarginBegin"/>
+                    </HBox>
+                    <Select id="uploadTypeSelect" change="onUploadTypeChange" width="280px">
+                        <core:Item key="bridges"          text="Bridges"/>
+                        <core:Item key="restrictions"     text="Restrictions"/>
+                        <core:Item key="routes"           text="Routes"/>
+                        <core:Item key="vehicleClasses"   text="Vehicle Classes"/>
+                        <core:Item key="inspectionOrders" text="Inspection Orders"/>
+                        <core:Item key="bridgeDefects"    text="Bridge Defects"/>
+                        <core:Item key="lookups"          text="Lookup Values (Admin)"/>
+                    </Select>
+                    <Text id="typeDescription"
+                        text="Upload bridge asset records. Existing bridges are matched by bridgeId and updated. New bridgeIds create new records."
+                        class="sapUiTinyMarginTop nhvrSubText" wrapping="true"/>
+                </VBox>
+
+                <!-- ── Step 2: Download Template ────────────────── -->
+                <VBox class="nhvrExecCard nhvrUploadStep sapUiSmallMarginBottom">
+                    <HBox alignItems="Center" class="sapUiSmallMarginBottom">
+                        <VBox class="nhvrUploadStepNum"><Text text="2"/></VBox>
+                        <Title text="Download Template" level="H4" class="sapUiSmallMarginBegin"/>
+                    </HBox>
+                    <Text id="templateDescription"
+                        text="Download the full CSV template with all supported columns and a sample row."
+                        class="sapUiSmallMarginBottom" wrapping="true"/>
+                    <HBox wrap="Wrap">
+                        <Button id="btnDownloadTemplate"
+                            text="Download Template CSV"
+                            icon="sap-icon://download"
+                            press="onDownloadTemplate"
+                            type="Emphasized"
+                            class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                    </HBox>
+                    <MessageStrip id="templateHint"
+                        text="Required columns: bridgeId, name, state, assetOwner, latitude, longitude."
+                        type="Information" showIcon="true" class="sapUiSmallMarginTop"/>
+                </VBox>
+
+                <!-- ── Step 3: Drag & Drop Upload ──────────────── -->
+                <VBox class="nhvrExecCard nhvrUploadStep sapUiSmallMarginBottom">
+                    <HBox alignItems="Center" class="sapUiSmallMarginBottom">
+                        <VBox class="nhvrUploadStepNum"><Text text="3"/></VBox>
+                        <Title text="Upload CSV File" level="H4" class="sapUiSmallMarginBegin"/>
+                    </HBox>
+
+                    <core:HTML id="dropZone"
+                        content="&lt;div id='nhvr-drop-zone' class='nhvrDropZone' ondragover='event.preventDefault();this.classList.add(&quot;nhvrDropZoneActive&quot;)' ondragleave='this.classList.remove(&quot;nhvrDropZoneActive&quot;)' ondrop='sap.ui.getCore().byId(window.__uploadViewId).getController().onFileDrop(event);this.classList.remove(&quot;nhvrDropZoneActive&quot;)'&gt;&lt;div class='nhvrDropZoneIcon'&gt;&#128194;&lt;/div&gt;&lt;div class='nhvrDropZoneText'&gt;Drag &amp; drop your CSV file here&lt;/div&gt;&lt;div class='nhvrDropZoneSubtext'&gt;or click Browse below&lt;/div&gt;&lt;/div&gt;"
+                        afterRendering="onDropZoneRendered"/>
+
+                    <HBox alignItems="Center" class="sapUiSmallMarginTop">
+                        <Button id="btnBrowse" text="Browse File" icon="sap-icon://upload"
+                            press="onBrowseFile" type="Emphasized" class="sapUiTinyMarginEnd"/>
+                        <Text id="selectedFileName" text="No file selected" class="sapUiSmallMarginBegin"/>
+                        <core:HTML id="fileInputHolder"
+                            content="&lt;input type='file' id='nhvrFileInput' accept='.csv' style='display:none' /&gt;"/>
+                    </HBox>
+                </VBox>
+
+                <!-- ── Step 4: Preview & Validate ──────────────── -->
+                <VBox id="previewSection" class="nhvrExecCard nhvrUploadStep sapUiSmallMarginBottom" visible="false">
+                    <HBox alignItems="Center" class="sapUiSmallMarginBottom">
+                        <VBox class="nhvrUploadStepNum nhvrStepSuccess"><Text text="4"/></VBox>
+                        <Title text="Preview &amp; Validate" level="H4" class="sapUiSmallMarginBegin"/>
+                    </HBox>
+
+                    <HBox wrap="Wrap" class="sapUiSmallMarginBottom">
+                        <ObjectStatus id="validRows"   text="— Valid rows"   state="Success" class="sapUiSmallMarginEnd"/>
+                        <ObjectStatus id="invalidRows" text="— Invalid rows" state="Error"   class="sapUiSmallMarginEnd"/>
+                        <ObjectStatus id="totalRows"   text="— Total rows"   state="None"    class="sapUiSmallMarginEnd"/>
+                        <ObjectStatus id="updateRows"  text="— Updates"      state="Information"/>
+                    </HBox>
+
+                    <!-- Dynamic preview table — columns driven by upload type -->
+                    <Table id="previewTable"
+                        items="{upload>/rows}"
+                        fixedLayout="false"
+                        growing="true"
+                        growingThreshold="20"
+                        alternateRowColors="true"
+                        noDataText="No data to preview">
+                        <headerToolbar>
+                            <OverflowToolbar>
+                                <Title id="previewTitle" text="Preview" level="H4"/>
+                                <ToolbarSpacer/>
+                                <ToggleButton id="btnShowErrors" text="Show Errors Only"
+                                    press="onToggleErrorFilter" type="Transparent"/>
+                            </OverflowToolbar>
+                        </headerToolbar>
+                        <columns>
+                            <Column width="50px"  hAlign="Center"><Text text="#"/></Column>
+                            <Column width="80px"  hAlign="Center"><Text text="Status"/></Column>
+                            <Column id="col1" width="130px"><Text id="colHdr1" text="Key"/></Column>
+                            <Column id="col2" width="160px"><Text id="colHdr2" text="Name/Type"/></Column>
+                            <Column id="col3" width="110px" minScreenWidth="Tablet" demandPopin="true"><Text id="colHdr3" text="Field 3"/></Column>
+                            <Column id="col4" width="110px" minScreenWidth="Tablet" demandPopin="true"><Text id="colHdr4" text="Field 4"/></Column>
+                            <Column id="col5" width="110px" minScreenWidth="Desktop" demandPopin="true"><Text id="colHdr5" text="Field 5"/></Column>
+                            <Column width="170px"><Text text="Validation Error"/></Column>
+                        </columns>
+                        <items>
+                            <ColumnListItem highlight="{= ${upload>hasError} ? 'Error' : 'Success'}" vAlign="Middle">
+                                <cells>
+                                    <Text text="{upload>rowNum}"/>
+                                    <ObjectStatus
+                                        text="{= ${upload>hasError} ? 'Error' : 'OK'}"
+                                        state="{= ${upload>hasError} ? 'Error' : 'Success'}"/>
+                                    <Text text="{upload>_c1}" wrapping="true"/>
+                                    <Text text="{upload>_c2}" wrapping="true"/>
+                                    <Text text="{upload>_c3}" wrapping="true"/>
+                                    <Text text="{upload>_c4}" wrapping="true"/>
+                                    <Text text="{upload>_c5}" wrapping="true"/>
+                                    <Text text="{upload>error}" wrapping="true"/>
+                                </cells>
+                            </ColumnListItem>
+                        </items>
+                    </Table>
+                </VBox>
+
+                <!-- ── Step 5: Submit ────────────────────────────── -->
+                <VBox id="submitSection" class="nhvrExecCard nhvrUploadStep sapUiMediumMarginBottom" visible="false">
+                    <HBox alignItems="Center" class="sapUiSmallMarginBottom">
+                        <VBox class="nhvrUploadStepNum"><Text text="5"/></VBox>
+                        <Title text="Submit Upload" level="H4" class="sapUiSmallMarginBegin"/>
+                    </HBox>
+                    <MessageStrip id="submitWarning"
+                        text="Review the preview above before submitting. Invalid rows will be skipped."
+                        type="Warning" showIcon="true" class="sapUiSmallMarginBottom"/>
+                    <HBox wrap="Wrap">
+                        <Button id="btnSubmit" text="Submit Upload" icon="sap-icon://accept"
+                            press="onSubmitUpload" type="Emphasized" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                        <Button text="Clear" icon="sap-icon://clear-all"
+                            press="onClearUpload" type="Transparent" class="sapUiTinyMarginBottom"/>
+                    </HBox>
+                    <BusyIndicator id="uploadBusy" visible="false" size="1rem" class="sapUiSmallMarginTop"/>
+                </VBox>
+
+                <!-- ── Upload Result Summary ───────────────────── -->
+                <MessageStrip id="uploadResult"
+                    text="" type="Success" showIcon="true" visible="false"
+                    class="sapUiSmallMarginBottom"/>
+
+                <!-- ── Detailed Result Panel ────────────────────── -->
+                <VBox id="uploadResultPanel" class="nhvrExecCard sapUiMediumMarginBottom" visible="false">
+                    <Title text="Upload Results" level="H4" class="sapUiSmallMarginBottom"/>
+                    <HBox wrap="Wrap" class="sapUiSmallMarginBottom">
+                        <VBox class="sapUiSmallMarginEnd">
+                            <Label text="Total Sent" design="Bold"/>
+                            <ObjectStatus id="resultTotal" text="0" state="None"/>
+                        </VBox>
+                        <VBox class="sapUiSmallMarginEnd">
+                            <Label text="Created (New)" design="Bold"/>
+                            <ObjectStatus id="resultCreated" text="0" state="Success"/>
+                        </VBox>
+                        <VBox class="sapUiSmallMarginEnd">
+                            <Label text="Updated (Existing)" design="Bold"/>
+                            <ObjectStatus id="resultUpdated" text="0" state="Information"/>
+                        </VBox>
+                        <VBox>
+                            <Label text="Failed" design="Bold"/>
+                            <ObjectStatus id="resultFailed" text="0" state="None"/>
+                        </VBox>
+                    </HBox>
+                    <Title text="Audit Trail" level="H5" class="sapUiSmallMarginTop sapUiTinyMarginBottom"/>
+                    <Text id="resultAuditInfo" text="" class="sapUiSmallMarginBottom" wrapping="true"/>
+                    <TextArea id="resultErrors" rows="4" width="100%" editable="false"
+                        visible="false" class="sapUiSmallMarginTop"/>
+                </VBox>
+
+            </VBox>
+        </f:content>
+    </f:DynamicPage>
+</mvc:View>

@@ -1,0 +1,192 @@
+<!-- ============================================================
+     NHVR Permit Register Report
+     Statutory register of all NHVR-issued heavy vehicle permits
+     HVNL compliance — exportable for public disclosure
+     ============================================================ -->
+<mvc:View
+    controllerName="nhvr.bridgemanagement.controller.PermitRegisterReport"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.f"
+    xmlns:ui5table="sap.ui.table"
+    displayBlock="true">
+
+    <f:DynamicPage id="permitRegisterPage" toggleHeaderOnTitleClick="false">
+        <f:title>
+            <f:DynamicPageTitle>
+                <f:heading>
+                    <Title text="Permit Register" level="H1"/>
+                </f:heading>
+                <f:snappedHeading>
+                    <Title text="Permit Register" level="H2"/>
+                </f:snappedHeading>
+                <f:breadcrumbs>
+                    <Breadcrumbs>
+                        <Link text="Home" press="onNavHome"/>
+                        <Link text="Reports" press="onNavToReports"/>
+                        <Link text="Permit Register"/>
+                    </Breadcrumbs>
+                </f:breadcrumbs>
+                <f:actions>
+                    <Button text="Export Excel" icon="sap-icon://excel-attachment" press="onAlvExportExcel" type="Emphasized"
+                        tooltip="Export permit register to Excel"/>
+                    <Button text="Export CSV" icon="sap-icon://download" press="onAlvExportCsv" type="Default"
+                        tooltip="Export all permits to CSV"/>
+                    <Button icon="sap-icon://pdf-attachment" text="Print" press="onAlvExportPdf" type="Transparent"
+                        tooltip="Print permit register"/>
+                    <Button icon="sap-icon://hint" type="Transparent" press="onInfoPress"
+                        tooltip="About the Permit Register — statutory requirements"/>
+                    <Button text="Reports" icon="sap-icon://nav-back" press="onNavToReports" type="Transparent"/>
+                    <Button text="Home" icon="sap-icon://home" press="onNavHome" type="Transparent"/>
+                </f:actions>
+            </f:DynamicPageTitle>
+        </f:title>
+
+        <f:header>
+            <f:DynamicPageHeader pinnable="true">
+                <HBox wrap="Wrap" class="sapUiSmallMarginBeginEnd sapUiSmallMarginTopBottom" alignItems="Center">
+                    <VBox class="sapUiSmallMarginEnd">
+                        <Label text="Status" design="Bold"/>
+                        <Select id="filterStatus" change="onFilterChange" width="160px">
+                            <core:Item key="ALL" text="All Statuses"/>
+                            <core:Item key="APPROVED" text="Approved"/>
+                            <core:Item key="PENDING" text="Pending"/>
+                            <core:Item key="UNDER_ASSESSMENT" text="Under Assessment"/>
+                            <core:Item key="REJECTED" text="Rejected"/>
+                            <core:Item key="EXPIRED" text="Expired"/>
+                            <core:Item key="REVOKED" text="Revoked"/>
+                        </Select>
+                    </VBox>
+                    <VBox class="sapUiSmallMarginEnd">
+                        <Label text="Permit Type" design="Bold"/>
+                        <Select id="filterType" change="onFilterChange" width="160px">
+                            <core:Item key="ALL" text="All Types"/>
+                            <core:Item key="OVERSIZE" text="Oversize"/>
+                            <core:Item key="OVERMASS" text="Overmass"/>
+                            <core:Item key="PILOT" text="Pilot Required"/>
+                            <core:Item key="ROUTE" text="Route Permit"/>
+                        </Select>
+                    </VBox>
+                    <VBox class="sapUiSmallMarginEnd">
+                        <Label text="Issued From" design="Bold"/>
+                        <DatePicker id="filterDateFrom" change="onFilterChange" width="140px"
+                            valueFormat="yyyy-MM-dd" displayFormat="dd/MM/yyyy"
+                            placeholder="DD/MM/YYYY"/>
+                    </VBox>
+                    <VBox class="sapUiSmallMarginEnd">
+                        <Label text="Issued To" design="Bold"/>
+                        <DatePicker id="filterDateTo" change="onFilterChange" width="140px"
+                            valueFormat="yyyy-MM-dd" displayFormat="dd/MM/yyyy"
+                            placeholder="DD/MM/YYYY"/>
+                    </VBox>
+                    <VBox class="sapUiSmallMarginEnd">
+                        <Label text="Search" design="Bold"/>
+                        <SearchField id="searchField" width="220px" placeholder="Permit no., vehicle, route…"
+                            search="onSearch" liveChange="onLiveSearch"/>
+                    </VBox>
+                    <VBox alignItems="End" class="sapUiSmallMarginTop">
+                        <Button text="Clear Filters" icon="sap-icon://clear-filter"
+                            press="onClearFilters" type="Transparent"/>
+                    </VBox>
+                </HBox>
+            </f:DynamicPageHeader>
+        </f:header>
+
+        <f:content>
+            <VBox class="nhvrApp">
+
+                <!-- KPI Summary -->
+                <HBox wrap="Wrap" class="sapUiSmallMarginBeginEnd sapUiTinyMarginTop sapUiSmallMarginBottom">
+                    <ObjectStatus id="kpiTotal"    text="— Total"      state="None"    class="sapUiSmallMarginEnd"/>
+                    <ObjectStatus id="kpiApproved" text="— Approved"   state="Success" class="sapUiSmallMarginEnd"/>
+                    <ObjectStatus id="kpiPending"  text="— Pending"    state="Warning" class="sapUiSmallMarginEnd"/>
+                    <ObjectStatus id="kpiExpired"  text="— Expired"    state="None"    class="sapUiSmallMarginEnd"/>
+                    <ObjectStatus id="kpiRejected" text="— Rejected"   state="Error"   class="sapUiSmallMarginEnd"/>
+                </HBox>
+
+                <MessageStrip
+                    text="This is the statutory NHVR Permit Register under the Heavy Vehicle National Law (HVNL). All issued permits are recorded here with their approval date, expiry, and route details."
+                    type="Information" showIcon="true" showCloseButton="false"
+                    class="sapUiSmallMarginBeginEnd sapUiSmallMarginBottom"/>
+
+                <!-- Permit Register Table -->
+                <ui5table:Table id="permitRegisterTable"
+                    rows="{permitRegister>/items}"
+                    visibleRowCountMode="Auto"
+                    minAutoRowCount="10"
+                    alternateRowColors="true"
+                    enableSelectAll="false"
+                    class="sapUiSmallMarginBeginEnd">
+
+                    <ui5table:extension>
+                        <OverflowToolbar>
+                            <Text id="alvRecordCount" text="" class="nhvrSubText"/>
+                            <ToolbarSeparator/>
+                            <Title id="tableTitle" text="Permit Register" level="H3"/>
+                            <ToolbarSpacer/>
+                            <Button icon="sap-icon://sort" text="Sort" press="onAlvSort" type="Transparent"/>
+                            <ToolbarSeparator/>
+                            <Button icon="sap-icon://excel-attachment" text="Excel" press="onAlvExportExcel" type="Transparent"/>
+                            <Button icon="sap-icon://download" text="CSV" press="onAlvExportCsv" type="Transparent"/>
+                            <Button icon="sap-icon://pdf-attachment" text="Print" press="onAlvExportPdf" type="Transparent"/>
+                            <ToolbarSeparator/>
+                            <Button icon="sap-icon://refresh" text="Refresh" press="onAlvRefresh" type="Transparent"/>
+                        </OverflowToolbar>
+                    </ui5table:extension>
+
+                    <ui5table:noData>
+                        <VBox alignItems="Center" class="nhvrEmptyState">
+                            <core:Icon src="sap-icon://document" size="3rem" color="#B0BEC5"/>
+                            <Title text="No permits found" level="H3" class="sapUiSmallMarginTop"/>
+                            <Text text="Adjust your filters or date range to see results." class="nhvrSubText"/>
+                            <Button text="Clear Filters" icon="sap-icon://clear-filter"
+                                press="onClearFilters" type="Emphasized" class="sapUiSmallMarginTop"/>
+                        </VBox>
+                    </ui5table:noData>
+
+                    <ui5table:columns>
+                        <ui5table:Column width="150px" sortProperty="permitNumber">
+                            <Label text="Permit Number"/>
+                        </ui5table:Column>
+                        <ui5table:Column width="130px">
+                            <Label text="Type"/>
+                        </ui5table:Column>
+                        <ui5table:Column width="100px">
+                            <Label text="Status"/>
+                        </ui5table:Column>
+                        <ui5table:Column width="200px">
+                            <Label text="Applicant / Operator"/>
+                        </ui5table:Column>
+                        <ui5table:Column width="200px">
+                            <Label text="Vehicle / Configuration"/>
+                        </ui5table:Column>
+                        <ui5table:Column width="180px">
+                            <Label text="Route"/>
+                        </ui5table:Column>
+                        <ui5table:Column width="120px">
+                            <Label text="Issue Date"/>
+                        </ui5table:Column>
+                        <ui5table:Column width="120px">
+                            <Label text="Expiry Date"/>
+                        </ui5table:Column>
+                        <ui5table:Column width="120px">
+                            <Label text="Approved By"/>
+                        </ui5table:Column>
+                        <ui5table:Column width="120px">
+                            <Label text="Max Mass (t)"/>
+                        </ui5table:Column>
+                        <ui5table:Column width="120px">
+                            <Label text="Max Width (m)"/>
+                        </ui5table:Column>
+                        <ui5table:Column width="200px">
+                            <Label text="Conditions"/>
+                        </ui5table:Column>
+                    </ui5table:columns>
+                </ui5table:Table>
+
+            </VBox>
+        </f:content>
+    </f:DynamicPage>
+
+</mvc:View>

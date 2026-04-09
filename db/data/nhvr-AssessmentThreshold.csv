@@ -1,0 +1,14 @@
+ID,thresholdKey,value,unit,description,jurisdiction,isActive
+a0000001-0001-0001-0001-000000000001,MASS_MARGIN_WARNING_T,2.000,t,Mass margin below which permit is required,,true
+a0000001-0001-0001-0001-000000000002,HEIGHT_MARGIN_WARNING_M,0.300,m,Height clearance margin below which warning triggered,,true
+a0000001-0001-0001-0001-000000000003,WIDTH_MARGIN_WARNING_M,0.600,m,Width margin safety buffer,,true
+a0000001-0001-0001-0001-000000000004,FATIGUE_WARNING_PCT,20.000,%,Fatigue life remaining below which fail triggered,,true
+a0000001-0001-0001-0001-000000000005,SCOUR_CRITICAL_MARGIN_M,0.000,m,Scour margin at or below which fail triggered,,true
+a0000001-0001-0001-0001-000000000006,PROXIMITY_RADIUS_M,500.000,m,Bridge proximity threshold for geometry-based assessment,,true
+a0000001-0001-0001-0001-000000000007,CROSSING_SPEED_DEFAULT_KMH,40.000,km/h,Default crossing speed if not specified,,true
+a0000001-0001-0001-0001-000000000008,MASS_MARGIN_WARNING_T,2.500,t,NSW stricter mass margin,NSW,true
+a0000001-0001-0001-0001-000000000009,HEIGHT_MARGIN_WARNING_M,0.250,m,NSW stricter height margin,NSW,true
+a0000001-0001-0001-0001-000000000010,MASS_MARGIN_WARNING_T,1.500,t,QLD relaxed mass margin,QLD,true
+a0000001-0001-0001-0001-000000000011,HEIGHT_MARGIN_WARNING_M,0.350,m,QLD standard height margin,QLD,true
+a0000001-0001-0001-0001-000000000012,MASS_MARGIN_WARNING_T,2.000,t,VIC standard mass margin,VIC,true
+a0000001-0001-0001-0001-000000000013,HEIGHT_MARGIN_WARNING_M,0.300,m,VIC standard height margin,VIC,true

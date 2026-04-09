@@ -1,0 +1,67 @@
+name: HANA Cloud Keep-Alive
+
+# Runs every 4 hours to prevent free-tier HANA Cloud from auto-stopping.
+# Sends cf update-service to keep the instance awake and verifies it is ready.
+
+on:
+  schedule:
+    - cron: '0 6,18 * * *'   # every 12 hours (06:00 and 18:00 UTC)
+  workflow_dispatch:          # allow manual trigger from GitHub UI
+
+jobs:
+  keepalive:
+    name: Keep HANA Cloud Alive
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install CF CLI v8
+        run: |
+          curl -sL "https://packages.cloudfoundry.org/stable?release=linux64-binary&version=v8&source=github" | tar -zx
+          sudo mv cf8 /usr/local/bin/cf
+          cf --version
+
+      - name: Login to SAP BTP Cloud Foundry
+        env:
+          CF_API:      ${{ secrets.CF_API }}
+          CF_USERNAME: ${{ secrets.CF_USERNAME }}
+          CF_PASSWORD: ${{ secrets.CF_PASSWORD }}
+          CF_ORG:      ${{ secrets.CF_ORG }}
+          CF_SPACE:    ${{ secrets.CF_SPACE }}
+        run: |
+          cf login \
+            -a "$CF_API" \
+            -u "$CF_USERNAME" \
+            -p "$CF_PASSWORD" \
+            -o "$CF_ORG" \
+            -s "$CF_SPACE"
+
+      - name: Keep HANA Cloud running
+        run: |
+          echo "=== Current HANA status ==="
+          cf service Hanaclouddb | grep -E "status:|message:" | head -3
+
+          echo ""
+          echo "=== Sending keep-alive (serviceStopped: false) ==="
+          cf update-service Hanaclouddb -c '{"data": {"serviceStopped": false}}'
+
+      - name: Wait and verify HANA is ready
+        run: |
+          echo "Waiting 90 seconds for HANA to confirm ready state..."
+          sleep 90
+
+          STATUS=$(cf service Hanaclouddb | grep "status:" | head -1 | awk '{print $2}')
+          echo "HANA status after keep-alive: $STATUS"
+
+          if [ "$STATUS" = "succeeded" ]; then
+            echo "HANA Cloud is ready."
+          else
+            echo "WARNING: HANA not yet ready (status=$STATUS). It may still be starting."
+            echo "Full status:"
+            cf service Hanaclouddb | grep -E "status:|message:"
+            # Don't fail the job — HANA may just need more time
+          fi
+
+      - name: Verify apps are still running
+        run: |
+          echo "=== App status ==="
+          cf apps | grep nhvr

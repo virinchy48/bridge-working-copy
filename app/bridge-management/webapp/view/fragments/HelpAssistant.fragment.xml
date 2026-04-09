@@ -1,0 +1,223 @@
+<!-- ============================================================
+     NHVR Help Assistant — Context-aware help, field search,
+     AI-like assistant, and text-to-speech audio support.
+     Available in both training and production modes.
+     ============================================================ -->
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:l="sap.ui.layout"
+    xmlns:data="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1">
+
+    <Dialog id="helpAssistantDialog"
+        title="NHVR Help &amp; Guide"
+        contentWidth="520px"
+        contentHeight="640px"
+        resizable="true"
+        draggable="true"
+        class="nhvrHelpDialog"
+        afterClose="onHelpDialogClose">
+
+        <customHeader>
+            <Bar>
+                <contentLeft>
+                    <HBox alignItems="Center">
+                        <core:Icon src="sap-icon://sys-help" size="1.2rem" color="#1065B4"
+                            class="sapUiSmallMarginEnd"/>
+                        <Title text="Help &amp; Guide" level="H3"/>
+                    </HBox>
+                </contentLeft>
+                <contentRight>
+                    <!-- Audio toggle (only shown when TTS available) -->
+                    <ToggleButton id="btnAudioToggle"
+                        icon="{= ${help>/audioEnabled} ? 'sap-icon://headset' : 'sap-icon://headset'}"
+                        text="{= ${help>/isPlaying} ? 'Stop Audio' : 'Read Aloud'}"
+                        pressed="{help>/isPlaying}"
+                        press="onToggleAudio"
+                        visible="{help>/audioEnabled}"
+                        type="Transparent"
+                        tooltip="Read the current help text aloud"
+                        class="sapUiTinyMarginEnd"/>
+                    <Button icon="sap-icon://decline" type="Transparent" press="onCloseHelp"/>
+                </contentRight>
+            </Bar>
+        </customHeader>
+
+        <content>
+            <IconTabBar id="helpTabBar" select="onHelpTabChange" class="nhvrHelpTabBar" expandable="false">
+            <items>
+
+                <!-- ── Tab 1: Screen Guide ──────────────────────── -->
+                <IconTabFilter id="tabGuide" icon="sap-icon://learning-assistant"
+                    text="Screen Guide" key="guide">
+                    <VBox class="sapUiSmallMarginBeginEnd sapUiSmallMarginTop">
+                        <HBox alignItems="Center" class="sapUiSmallMarginBottom">
+                            <core:Icon src="sap-icon://learning-assistant" size="1.4rem"
+                                color="#107E3E" class="sapUiSmallMarginEnd"/>
+                            <Title id="helpScreenTitle"
+                                text="{help>/screenTitle}" level="H4"/>
+                        </HBox>
+                        <Text id="helpScreenGuide"
+                            text="{help>/screenGuide}"
+                            wrapping="true"
+                            class="nhvrHelpGuideText"/>
+
+                        <!-- Training Tips (shown in demo/training mode) -->
+                        <VBox id="trainingTipsBox" visible="false" class="nhvrTrainingTips sapUiSmallMarginTop">
+                            <HBox alignItems="Center" class="sapUiTinyMarginBottom">
+                                <core:Icon src="sap-icon://education" size="1rem" color="#E9730C"
+                                    class="sapUiTinyMarginEnd"/>
+                                <Title text="Training Tips" level="H5"/>
+                            </HBox>
+                            <Text id="helpTrainingTips" text="" wrapping="true" class="nhvrSubText"/>
+                        </VBox>
+
+                        <Button id="btnReadGuide"
+                            text="Read Guide Aloud"
+                            icon="sap-icon://headset"
+                            type="Transparent"
+                            press="onReadGuide"
+                            visible="{help>/audioEnabled}"
+                            class="sapUiSmallMarginTop"/>
+                    </VBox>
+                </IconTabFilter>
+
+                <!-- ── Tab 2: Field Help ────────────────────────── -->
+                <IconTabFilter id="tabFields" icon="sap-icon://form"
+                    text="Field Help" key="fields">
+                    <VBox class="sapUiSmallMarginBeginEnd sapUiSmallMarginTop">
+                        <Text text="Search for any field to get its description, rules, and examples."
+                            class="sapUiSmallMarginBottom nhvrSubText" wrapping="true"/>
+
+                        <SearchField id="helpFieldSearch"
+                            placeholder="e.g. conditionRating, bridgeId, latitude..."
+                            search="onSearchFieldHelp"
+                            width="100%"
+                            class="sapUiSmallMarginBottom"/>
+
+                        <!-- Quick links -->
+                        <HBox wrap="Wrap" class="sapUiTinyMarginBottom">
+                            <Button text="bridgeId"        type="Transparent" press="onQuickFieldHelp" class="sapUiTinyMarginEnd nhvrFieldChip"/>
+                            <Button text="conditionRating" type="Transparent" press="onQuickFieldHelp" class="sapUiTinyMarginEnd nhvrFieldChip"/>
+                            <Button text="restrictionType" type="Transparent" press="onQuickFieldHelp" class="sapUiTinyMarginEnd nhvrFieldChip"/>
+                            <Button text="latitude"        type="Transparent" press="onQuickFieldHelp" class="sapUiTinyMarginEnd nhvrFieldChip"/>
+                            <Button text="defectSeverity"  type="Transparent" press="onQuickFieldHelp" class="sapUiTinyMarginEnd nhvrFieldChip"/>
+                        </HBox>
+
+                        <!-- Field Help Result Card -->
+                        <VBox id="fieldHelpResult"
+                            class="nhvrHelpResultCard sapUiSmallMarginTop"
+                            visible="{= !!${help>/fieldResult}}">
+                            <HBox alignItems="Center" justifyContent="SpaceBetween"
+                                class="sapUiTinyMarginBottom">
+                                <Title id="fieldHelpLabel" text="{help>/fieldResult/label}" level="H5"/>
+                                <Button icon="sap-icon://headset"
+                                    type="Transparent"
+                                    press="onReadFieldHelp"
+                                    visible="{help>/audioEnabled}"
+                                    tooltip="Read field help aloud"/>
+                            </HBox>
+                            <Label text="Helper Text" design="Bold" class="sapUiTinyMarginBottom"/>
+                            <Text id="fieldHelperText" text="{help>/fieldResult/helperText}"
+                                wrapping="true" class="sapUiSmallMarginBottom"/>
+                            <Label text="Full Explanation" design="Bold" class="sapUiTinyMarginBottom"/>
+                            <Text id="fieldTooltip" text="{help>/fieldResult/tooltip}"
+                                wrapping="true" class="sapUiSmallMarginBottom nhvrSubText"/>
+                            <Label text="Placeholder / Example" design="Bold" class="sapUiTinyMarginBottom"/>
+                            <Text id="fieldPlaceholder"
+                                text="{help>/fieldResult/placeholder}"
+                                wrapping="true" class="nhvrSubText"/>
+                        </VBox>
+
+                        <Text id="fieldHelpEmpty"
+                            text="Enter a field name above to see detailed help."
+                            class="nhvrSubText sapUiSmallMarginTop"
+                            visible="{= !${help>/fieldResult}}"/>
+                    </VBox>
+                </IconTabFilter>
+
+                <!-- ── Tab 3: Assistant ─────────────────────────── -->
+                <IconTabFilter id="tabAssistant" icon="sap-icon://ai"
+                    text="Assistant" key="assistant">
+                    <VBox class="nhvrAssistantPanel sapUiSmallMarginTop">
+
+                        <!-- Chat messages -->
+                        <ScrollContainer id="chatScroll"
+                            height="340px" horizontal="false" vertical="true"
+                            class="nhvrChatScroll">
+                            <VBox id="chatMessages" class="sapUiSmallMarginBeginEnd sapUiSmallMarginTop">
+                                <!-- Welcome message always shown -->
+                                <HBox class="nhvrChatMsg nhvrChatMsgBot sapUiTinyMarginBottom">
+                                    <core:Icon src="sap-icon://sys-help" size="1rem"
+                                        color="#1065B4" class="nhvrChatAvatar"/>
+                                    <VBox class="nhvrChatBubble nhvrChatBubbleBot">
+                                        <Text text="Hello! I'm the NHVR Help Assistant. I can explain any screen, field, or feature in this system. Ask me anything — e.g. 'What is a condition rating?' or 'How do I add a restriction?'"
+                                            wrapping="true"/>
+                                    </VBox>
+                                </HBox>
+                            </VBox>
+                        </ScrollContainer>
+
+                        <!-- Input row -->
+                        <HBox alignItems="Center"
+                            class="nhvrChatInputRow sapUiSmallMarginBeginEnd sapUiTinyMarginBottom">
+                            <Input id="chatInput"
+                                placeholder="Ask a question about the system..."
+                                width="100%"
+                                submit="onChatSubmit"
+                                class="nhvrChatInput"/>
+                            <Button icon="sap-icon://paper-plane"
+                                type="Emphasized"
+                                press="onChatSubmit"
+                                tooltip="Send"
+                                class="sapUiTinyMarginBegin"/>
+                            <Button id="btnStopSpeech"
+                                icon="sap-icon://stop"
+                                type="Transparent"
+                                press="onStopSpeech"
+                                visible="{help>/audioEnabled}"
+                                tooltip="Stop speaking"
+                                class="sapUiTinyMarginBegin"/>
+                        </HBox>
+                        <Text text="Tip: Ask about any field name, screen name, or NHVR concept."
+                            class="nhvrSubText sapUiTinyMarginBeginEnd sapUiTinyMarginBottom"/>
+                    </VBox>
+                </IconTabFilter>
+
+                <!-- ── Tab 4: Full Help Index ───────────────────── -->
+                <IconTabFilter id="tabIndex" icon="sap-icon://list"
+                    text="Help Index" key="index">
+                    <VBox class="sapUiSmallMarginBeginEnd sapUiSmallMarginTop">
+                        <Text text="Quick reference for all main screens in the NHVR Bridge Management System."
+                            class="nhvrSubText sapUiSmallMarginBottom" wrapping="true"/>
+                        <List id="helpIndexList" mode="SingleSelectMaster"
+                            itemPress="onHelpIndexItemPress">
+                            <StandardListItem title="Home Dashboard"        description="KPIs, alerts, quick navigation"       icon="sap-icon://home"           data:screenKey="home"/>
+                            <StandardListItem title="Bridge List"           description="Search, filter, view all bridges"     icon="sap-icon://building"       data:screenKey="bridges"/>
+                            <StandardListItem title="Bridge Detail"         description="8-tab bridge record detail view"      icon="sap-icon://detail-view"    data:screenKey="bridgeDetail"/>
+                            <StandardListItem title="Bridge Form"           description="Create or edit a bridge record"       icon="sap-icon://edit"           data:screenKey="bridgeForm"/>
+                            <StandardListItem title="Restrictions"          description="View and manage restrictions"         icon="sap-icon://alert"          data:screenKey="restrictions"/>
+                            <StandardListItem title="Inspection Dashboard"  description="Inspection orders and scheduling"     icon="sap-icon://calendar"       data:screenKey="inspectionDashboard"/>
+                            <StandardListItem title="Inspection Create"     description="Create a new inspection order"        icon="sap-icon://add-document"   data:screenKey="inspectionCreate"/>
+                            <StandardListItem title="Defects Register"      description="Bridge defects and structural issues" icon="sap-icon://warning2"       data:screenKey="defects"/>
+                            <StandardListItem title="Mass Upload"           description="Bulk CSV import for all data types"   icon="sap-icon://upload"         data:screenKey="massUpload"/>
+                            <StandardListItem title="Mass Edit"             description="Bulk update bridge fields"            icon="sap-icon://multiselect-all" data:screenKey="massEdit"/>
+                            <StandardListItem title="Map View"              description="Geospatial bridge map"                icon="sap-icon://map"            data:screenKey="mapView"/>
+                            <StandardListItem title="Reports"               description="Compliance and condition reports"     icon="sap-icon://bar-chart"      data:screenKey="reports"/>
+                            <StandardListItem title="Admin Config"          description="Roles, lookups, attribute setup"      icon="sap-icon://settings"       data:screenKey="adminConfig"/>
+                            <StandardListItem title="Integration Hub"       description="External system connections"          icon="sap-icon://connected"      data:screenKey="integrationHub"/>
+                            <StandardListItem title="Vehicle Combinations"  description="NHVR vehicle class management"        icon="sap-icon://car-rental"     data:screenKey="vehicleCombinations"/>
+                            <StandardListItem title="Route Assessment"      description="Route accessibility checks"           icon="sap-icon://navigation-right-arrow" data:screenKey="routeAssessment"/>
+                        </List>
+                    </VBox>
+                </IconTabFilter>
+
+            </items>
+            </IconTabBar>
+        </content>
+
+        <buttons>
+            <Button text="Close" press="onCloseHelp" type="Transparent"/>
+        </buttons>
+    </Dialog>
+</core:FragmentDefinition>

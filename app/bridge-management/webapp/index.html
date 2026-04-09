@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NHVR Bridge Asset Management</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <!-- Leaflet MarkerCluster CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css" />
+
+    <!-- CDN case-fix: SAP UI5 1.133 module loader requests sap/m/toolbar.js      -->
+    <!-- (lowercase) but CDN only serves sap/m/Toolbar.js (uppercase) → 404.      -->
+    <!-- Fix: intercept document.createElement('script') and redirect the URL.    -->
+    <script>
+        (function () {
+            var _lower2upper = {
+                "sap/m/toolbar.js"         : "sap/m/Toolbar.js",
+                "sap/m/overflowToolbar.js" : "sap/m/OverflowToolbar.js",
+                "sap/m/toolbarSpacer.js"   : "sap/m/ToolbarSpacer.js",
+                "sap/m/toolbarSeparator.js": "sap/m/ToolbarSeparator.js",
+                "sap/m/text.js"            : "sap/m/Text.js",
+                "sap/m/label.js"           : "sap/m/Label.js",
+                "sap/m/button.js"          : "sap/m/Button.js",
+                "sap/m/input.js"           : "sap/m/Input.js"
+            };
+            var _orig = document.createElement.bind(document);
+            document.createElement = function (tag) {
+                var el = _orig(tag);
+                if (tag && tag.toLowerCase() === "script") {
+                    var _origSet = Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, "src").set;
+                    Object.defineProperty(el, "src", {
+                        configurable: true,
+                        get: function () {
+                            return el.getAttribute("src") || "";
+                        },
+                        set: function (v) {
+                            if (typeof v === "string") {
+                                // Match CDN paths: /resources/sap/m/*.js (BTP) or /ui5cdn/sap/m/*.js (local)
+                                var match = v.match(/(.*\/(?:resources|ui5cdn)\/)(sap\/m\/\w+\.js)$/);
+                                if (match && _lower2upper[match[2]]) {
+                                    v = match[1] + _lower2upper[match[2]];
+                                }
+                            }
+                            _origSet.call(el, v);
+                        }
+                    });
+                }
+                return el;
+            };
+        })();
+    </script>
+
+    <!-- SAP UI5 Bootstrap — env-aware: local uses /ui5cdn/ proxy, BTP uses SAP CDN -->
+    <script>
+        (function() {
+            var isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            var ui5Src = isLocal
+                ? '/ui5cdn/sap-ui-core.js'
+                : 'https://sapui5.hana.ondemand.com/1.133.1/resources/sap-ui-core.js';
+            document.write(
+                '<script id="sap-ui-bootstrap" src="' + ui5Src + '"' +
+                ' data-sap-ui-theme="sap_horizon"' +
+                ' data-sap-ui-resourceroots=\'{"nhvr.bridgemanagement": "./"}\''+
+                ' data-sap-ui-compatVersion="edge"' +
+                ' data-sap-ui-async="true"' +
+                ' data-sap-ui-frameOptions="trusted"' +
+                ' data-sap-ui-libs="sap.m,sap.ui.core,sap.f,sap.ui.layout,sap.tnt,sap.ui.table"' +
+                '><\/script>'
+            );
+        })();
+    </script>
+
+    <!-- Leaflet JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <!-- Leaflet MarkerCluster JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
+    <!-- Leaflet.Draw — polygon/rectangle/circle selection tool (MIT license) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+    <!-- Turf.js — spatial analysis (area, centroid, etc.) — MIT license -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.5.0/turf.min.js"></script>
+
+    <!-- Dev auth shim: auto-adds Basic auth in local dev ONLY. BTP uses session cookie (XSUAA). -->
+    <!-- Also handles CSRF token fetching for write operations. -->
+    <script>
+        (function () {
+            var _isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            var _fetch = window.fetch;
+
+            // CSRF token cache for write operations
+            var _csrfToken = null;
+            var _csrfFetching = null;
+
+            function getCsrfToken() {
+                if (_csrfToken) return Promise.resolve(_csrfToken);
+                if (_csrfFetching) return _csrfFetching;
+                var fetchOpts = { method: 'GET', headers: { 'x-csrf-token': 'fetch' } };
+                if (_isLocal) {
+                    fetchOpts.headers['Authorization'] = 'Basic ' + btoa('admin:admin');
+                } else {
+                    fetchOpts.credentials = 'include';
+                }
+                _csrfFetching = _fetch('/bridge-management/', fetchOpts).then(function(r) {
+                    _csrfToken = r.headers.get('x-csrf-token');
+                    _csrfFetching = null;
+                    return _csrfToken;
+                }).catch(function() {
+                    _csrfFetching = null;
+                    return null;
+                });
+                return _csrfFetching;
+            }
+
+            window.fetch = function (url, opts) {
+                var u = url && url.toString ? url.toString() : String(url);
+                if (u.indexOf('/bridge-management/') !== -1) {
+                    opts = Object.assign({}, opts);
+                    if (_isLocal) {
+                        // Local development — use Basic auth (mock user)
+                        opts.headers = Object.assign({ 'Authorization': 'Basic ' + btoa('admin:admin') }, opts.headers || {});
+                    } else {
+                        // BTP / App Router — use session cookie from XSUAA login
+                        opts.credentials = opts.credentials || 'include';
+                    }
+                    var method = (opts.method || 'GET').toUpperCase();
+                    if (method !== 'GET' && method !== 'HEAD') {
+                        return getCsrfToken().then(function(token) {
+                            if (token) {
+                                opts.headers = Object.assign({}, opts.headers || {}, { 'x-csrf-token': token });
+                            }
+                            return _fetch.call(this, url, opts);
+                        }.bind(this));
+                    }
+                }
+                return _fetch.call(this, url, opts);
+            };
+        })();
+    </script>
+
+    <script>
+        sap.ui.getCore().attachInit(function () {
+            // Pre-load toolbar modules so their lowercase AMD aliases are registered
+            // in the module registry before BridgeDetail lazy-loads them.
+            // Without this, the CDN returns 404 for sap/m/toolbar.js (lowercase)
+            // because CDN 1.133 only serves Toolbar.js (uppercase).
+            sap.ui.require([
+                "sap/m/Toolbar",
+                "sap/m/OverflowToolbar",
+                "sap/m/ToolbarSpacer",
+                "sap/m/ToolbarSeparator",
+                "sap/m/Button",
+                "sap/m/Title",
+                "sap/m/Text",
+                "sap/m/Label",
+                "sap/m/ObjectStatus"
+            ], function () {
+                new sap.m.Shell({
+                    app: new sap.ui.core.ComponentContainer({
+                        name    : "nhvr.bridgemanagement",
+                        settings: { id: "nhvr-bridge-mgmt" },
+                        manifest: true,
+                        height  : "100%",
+                        width   : "100%",
+                        async   : true
+                    })
+                }).placeAt("content");
+            });
+        });
+    </script>
+</head>
+<body class="sapUiBody" id="content"></body>
+</html>

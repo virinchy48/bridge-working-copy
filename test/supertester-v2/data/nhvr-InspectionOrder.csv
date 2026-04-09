@@ -1,0 +1,1 @@
+ID,bridge_ID,orderNumber,inspectionType,status,plannedDate,startedAt,completedAt,inspector,inspectorOrg,accessMethod,ratingMethod,overallConditionRating,structuralAdequacy,maintenanceUrgency,scourAssessment,recommendations,reportRef,nextInspectionDue,notes

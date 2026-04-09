@@ -1,0 +1,2 @@
+ID,mapProvider,geocodeProvider,routingProvider,defaultCenter_lat,defaultCenter_lng,defaultZoom,clusterEnabled,clusterRadius,trafficLayerEnabled,streetViewEnabled,isActive
+c0000001-0001-0001-0001-000000000001,osm-leaflet,nominatim,osrm,-25.00000000,134.00000000,4,true,50,false,false,true

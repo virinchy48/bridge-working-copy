@@ -1,0 +1,225 @@
+<!-- ============================================================
+     NHVR Vehicle Combinations & Route Query Tool
+     ============================================================ -->
+<mvc:View
+    controllerName="nhvr.bridgemanagement.controller.VehicleCombinations"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.f"
+    xmlns:l="sap.ui.layout"
+    displayBlock="true">
+
+    <f:DynamicPage id="vehiclePage" toggleHeaderOnTitleClick="false">
+        <f:title>
+            <f:DynamicPageTitle>
+                <f:heading>
+                    <Title text="Vehicle Access" level="H1"/>
+                </f:heading>
+                <f:snappedHeading>
+                    <Title text="Vehicle Access" level="H2"/>
+                </f:snappedHeading>
+                <f:breadcrumbs>
+                    <Breadcrumbs>
+                        <Link text="Home" press="onNavHome"/>
+                        <Link text="Vehicle Access"/>
+                    </Breadcrumbs>
+                </f:breadcrumbs>
+                <f:actions>
+                    <Button text="Refresh" icon="sap-icon://refresh" type="Transparent" press="onRefresh"/>
+                    <Button text="Home" icon="sap-icon://home" type="Transparent" press="onNavHome"/>
+                </f:actions>
+            </f:DynamicPageTitle>
+        </f:title>
+
+        <f:content>
+            <VBox class="nhvrApp sapUiSmallMarginBeginEnd sapUiSmallMarginTop">
+
+                <!-- ============================================================
+                     SECTION 1: Per-Bridge Allowed Vehicle Combinations
+                     ============================================================ -->
+                <VBox class="nhvrExecCard sapUiSmallMarginBottom">
+                    <Title text="Per-Bridge Allowed Vehicle Combinations" level="H3"
+                        class="sapUiSmallMarginBottom"/>
+                    <Text text="Search for a bridge and view the allowed vehicle combinations derived from its active restrictions."
+                        class="sapUiSmallMarginBottom"/>
+
+                    <!-- Bridge search bar -->
+                    <HBox alignItems="Center" wrap="Wrap" class="sapUiSmallMarginBottom">
+                        <VBox class="sapUiSmallMarginEnd">
+                            <Label text="Bridge Search" design="Bold"/>
+                            <SearchField id="bridgeSearchField" width="300px"
+                                placeholder="Bridge name or ID…"
+                                search="onBridgeSearch"
+                                liveChange="onBridgeLiveSearch"/>
+                        </VBox>
+                        <VBox class="sapUiSmallMarginEnd">
+                            <Label text="Select Bridge" design="Bold"/>
+                            <Select id="bridgeSelect" change="onBridgeSelect" width="300px">
+                                <core:Item key="" text="— Select a bridge —"/>
+                            </Select>
+                        </VBox>
+                    </HBox>
+
+                    <!-- Bridge summary panel -->
+                    <VBox id="bridgeSummaryPanel" visible="false" class="sapUiSmallMarginBottom">
+                        <HBox wrap="Wrap" class="sapUiTinyMarginBottom">
+                            <ObjectStatus id="bridgeSummaryName"   text="" state="None"    class="sapUiSmallMarginEnd"/>
+                            <ObjectStatus id="bridgeSummaryStatus" text="" state="Warning" class="sapUiSmallMarginEnd"/>
+                            <ObjectStatus id="bridgeSummaryCond"   text="" state="None"    class="sapUiSmallMarginEnd"/>
+                        </HBox>
+                    </VBox>
+
+                    <!-- Allowed combinations table -->
+                    <Table id="combinationsTable"
+                        items="{vehicle>/combinations}"
+                        noDataText="Select a bridge above to view allowed vehicle combinations."
+                        fixedLayout="false"
+                        alternateRowColors="true"
+                        growing="true" growingThreshold="50">
+                        <headerToolbar>
+                            <OverflowToolbar>
+                                <Title id="combinationsTitle" text="Allowed Vehicle Combinations" level="H4"/>
+                                <ToolbarSpacer/>
+                            </OverflowToolbar>
+                        </headerToolbar>
+                        <columns>
+                            <Column width="160px"><Text text="Restriction Type"/></Column>
+                            <Column width="110px" hAlign="End"><Text text="Max Mass (t)"/></Column>
+                            <Column width="110px" hAlign="End"><Text text="Max Height (m)"/></Column>
+                            <Column width="110px" hAlign="End"><Text text="Max Width (m)"/></Column>
+                            <Column width="110px" hAlign="End"><Text text="Max Length (m)"/></Column>
+                            <Column width="110px" hAlign="Center"><Text text="Permit Required"/></Column>
+                            <Column width="110px" hAlign="Center"><Text text="Status"/></Column>
+                            <Column width="200px" minScreenWidth="Tablet" demandPopin="true"><Text text="Notes"/></Column>
+                        </columns>
+                        <items>
+                            <ColumnListItem type="Inactive" vAlign="Middle">
+                                <cells>
+                                    <Text text="{vehicle>restrictionType}" wrapping="true"/>
+                                    <ObjectNumber number="{vehicle>maxMass}" unit="t"
+                                        state="{= ${vehicle>maxMass} ? 'None' : 'None'}"/>
+                                    <ObjectNumber number="{vehicle>maxHeight}" unit="m"/>
+                                    <ObjectNumber number="{vehicle>maxWidth}" unit="m"/>
+                                    <ObjectNumber number="{vehicle>maxLength}" unit="m"/>
+                                    <ObjectStatus
+                                        text="{= ${vehicle>permitRequired} ? 'Required' : 'No'}"
+                                        state="{= ${vehicle>permitRequired} ? 'Warning' : 'Success'}"/>
+                                    <ObjectStatus
+                                        text="{vehicle>status}"
+                                        state="{= ${vehicle>status} === 'ACTIVE' ? 'Error' : 'None'}"/>
+                                    <Text text="{vehicle>notes}" wrapping="true"/>
+                                </cells>
+                            </ColumnListItem>
+                        </items>
+                    </Table>
+                </VBox>
+
+                <!-- ============================================================
+                     SECTION 2: Route/Bridge Query Tool
+                     ============================================================ -->
+                <VBox class="nhvrExecCard sapUiSmallMarginBottom">
+                    <Title text="Find Allowed Bridges for Vehicle" level="H3"
+                        class="sapUiSmallMarginBottom"/>
+                    <Text text="Enter your vehicle parameters to find bridges where this vehicle can travel. Results show bridges where all restrictions allow the specified vehicle."
+                        class="sapUiSmallMarginBottom"/>
+
+                    <!-- Vehicle parameter inputs -->
+                    <HBox wrap="Wrap" class="sapUiSmallMarginBottom" alignItems="End">
+                        <VBox class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                            <Label text="Vehicle Mass (t)" design="Bold"/>
+                            <Input id="vehMass" type="Number" placeholder="e.g. 42.5" width="130px"/>
+                        </VBox>
+                        <VBox class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                            <Label text="Vehicle Height (m)" design="Bold"/>
+                            <Input id="vehHeight" type="Number" placeholder="e.g. 4.3" width="130px"/>
+                        </VBox>
+                        <VBox class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                            <Label text="Vehicle Width (m)" design="Bold"/>
+                            <Input id="vehWidth" type="Number" placeholder="e.g. 2.5" width="130px"/>
+                        </VBox>
+                        <VBox class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                            <Label text="Vehicle Length (m)" design="Bold"/>
+                            <Input id="vehLength" type="Number" placeholder="e.g. 19.0" width="130px"/>
+                        </VBox>
+                        <VBox class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                            <Label text="State (optional)" design="Bold"/>
+                            <Select id="vehState" width="120px">
+                                <core:Item key="" text="All States"/>
+                                <core:Item key="NSW" text="NSW"/>
+                                <core:Item key="VIC" text="VIC"/>
+                                <core:Item key="QLD" text="QLD"/>
+                                <core:Item key="WA"  text="WA"/>
+                                <core:Item key="SA"  text="SA"/>
+                                <core:Item key="TAS" text="TAS"/>
+                                <core:Item key="ACT" text="ACT"/>
+                                <core:Item key="NT"  text="NT"/>
+                            </Select>
+                        </VBox>
+                        <VBox class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                            <Label text="Region (optional)" design="Bold"/>
+                            <Input id="vehRegion" placeholder="e.g. Central Victoria" width="180px"/>
+                        </VBox>
+                        <VBox class="sapUiSmallMarginBottom">
+                            <Label text=" " design="Bold"/>
+                            <Button text="Search Bridges" icon="sap-icon://search"
+                                press="onVehicleSearch" type="Emphasized"/>
+                        </VBox>
+                    </HBox>
+
+                    <!-- Results KPI strip -->
+                    <HBox wrap="Wrap" class="sapUiSmallMarginBottom">
+                        <ObjectStatus id="vehicleKpiTotal"   text="— Bridges found"   state="None"    class="sapUiSmallMarginEnd"/>
+                        <ObjectStatus id="vehicleKpiOpen"    text="— Unrestricted"     state="Success" class="sapUiSmallMarginEnd"/>
+                        <ObjectStatus id="vehicleKpiPosted"  text="— Posted"          state="Warning" class="sapUiSmallMarginEnd"/>
+                    </HBox>
+
+                    <!-- Results table -->
+                    <Table id="vehicleSearchTable"
+                        items="{vehicle>/searchResults}"
+                        noDataText="Enter vehicle parameters above and click Search."
+                        fixedLayout="false"
+                        alternateRowColors="true"
+                        growing="true" growingThreshold="50">
+                        <headerToolbar>
+                            <OverflowToolbar>
+                                <Title id="vehicleSearchTitle" text="Matching Bridges" level="H4"/>
+                                <ToolbarSpacer/>
+                            </OverflowToolbar>
+                        </headerToolbar>
+                        <columns>
+                            <Column width="130px"><Text text="Bridge ID"/></Column>
+                            <Column width="200px"><Text text="Bridge Name"/></Column>
+                            <Column width="120px" minScreenWidth="Tablet" demandPopin="true"><Text text="Region"/></Column>
+                            <Column width="80px"  minScreenWidth="Tablet" demandPopin="true"><Text text="State"/></Column>
+                            <Column width="130px" hAlign="Center"><Text text="Posting Status"/></Column>
+                            <Column width="110px" hAlign="End" minScreenWidth="Tablet" demandPopin="true"><Text text="Max Mass (t)"/></Column>
+                            <Column width="120px" hAlign="End" minScreenWidth="Tablet" demandPopin="true"><Text text="Clearance (m)"/></Column>
+                            <Column width="90px"  hAlign="Center" minScreenWidth="Desktop" demandPopin="true"><Text text="Restrictions"/></Column>
+                        </columns>
+                        <items>
+                            <ColumnListItem type="Active" press="onNavToBridge" vAlign="Middle">
+                                <cells>
+                                    <ObjectIdentifier title="{vehicle>bridgeId}"/>
+                                    <Text text="{vehicle>name}" wrapping="true"/>
+                                    <Text text="{vehicle>region}" wrapping="true"/>
+                                    <Text text="{vehicle>state}" wrapping="true"/>
+                                    <ObjectStatus
+                                        text="{vehicle>postingStatus}"
+                                        state="{= ${vehicle>postingStatus} === 'UNRESTRICTED' ? 'Success' : ${vehicle>postingStatus} === 'POSTED' ? 'Warning' : 'Error'}"/>
+                                    <ObjectNumber number="{vehicle>maxAllowedMass}" unit="t"/>
+                                    <ObjectNumber number="{vehicle>clearanceHeightM}" unit="m"/>
+                                    <ObjectStatus
+                                        text="{vehicle>restrictionCount}"
+                                        state="{= ${vehicle>restrictionCount} > 0 ? 'Warning' : 'None'}"/>
+                                </cells>
+                            </ColumnListItem>
+                        </items>
+                    </Table>
+                </VBox>
+
+            </VBox>
+        </f:content>
+    </f:DynamicPage>
+
+</mvc:View>

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "description": "NHVR Bridge App — shared project settings. Enforces UI mirror sync automatically after any edit under app/bridge-management/webapp/.",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash scripts/sync-ui-mirror.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

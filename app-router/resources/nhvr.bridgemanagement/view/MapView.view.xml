@@ -1,0 +1,458 @@
+<!-- ============================================================
+     NHVR Map View v2 — Leaflet.js Bridge Intelligence Map
+     Features:
+       • Collapsible left filter sidebar (state, condition, year,
+         structure type, scour risk, status, freight, NHVR)
+       • Map / Split / List view toggle
+       • Elegant glassmorphism popups
+       • Polygon / Rectangle / Circle draw with stats overlay
+       • CSV + GeoJSON export from selection
+       • Base layer switcher (OSM, Satellite, Topo, Dark, custom)
+       • Reference layer manager (WMS / GeoJSON / XYZ / ESRI)
+       • Dynamic legend + right detail panel
+       • Map configuration loaded from OData MapConfigs entity
+     ============================================================ -->
+<mvc:View
+    controllerName="nhvr.bridgemanagement.controller.MapView"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.f"
+    xmlns:layout="sap.ui.layout"
+    xmlns:data="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1"
+    displayBlock="true">
+
+    <Page showHeader="false" class="nhvrApp nhvrMapPage" backgroundDesign="Transparent">
+        <content>
+            <VBox class="nhvrMapRoot">
+
+                <!-- ══════════════════════════════════════════════
+                     TOP TOOLBAR
+                ══════════════════════════════════════════════ -->
+                <OverflowToolbar id="mapToolbar" design="Solid" class="nhvrMapToolbar">
+
+                    <!-- Home + Title -->
+                    <Button icon="sap-icon://home" tooltip="Home" press="onNavHome" type="Transparent"/>
+                    <Title text="Bridge Map — Australia" class="nhvrMapTitle"/>
+                    <ToolbarSeparator/>
+
+                    <!-- View mode toggle: Map | Split | List -->
+                    <SegmentedButton id="viewModeToggle" selectedKey="map" selectionChange="onViewModeChange">
+                        <items>
+                            <SegmentedButtonItem key="map"   icon="sap-icon://map-2"      text="Map"   tooltip="Map view only"/>
+                            <SegmentedButtonItem key="split" icon="sap-icon://split"       text="Split" tooltip="Map + List side by side"/>
+                            <SegmentedButtonItem key="list"  icon="sap-icon://table-view"  text="List"  tooltip="List view only"/>
+                        </items>
+                    </SegmentedButton>
+                    <ToolbarSeparator/>
+
+                    <!-- Layer representation -->
+                    <SegmentedButton id="layerToggle" selectedKey="points" selectionChange="onLayerToggle">
+                        <items>
+                            <SegmentedButtonItem key="points" icon="sap-icon://map-2"                tooltip="Point markers"/>
+                            <SegmentedButtonItem key="lines"  icon="sap-icon://horizontal-bar-chart" tooltip="Bridge spans (lines)"/>
+                            <SegmentedButtonItem key="zones"  icon="sap-icon://area-chart"           tooltip="Restricted zones"/>
+                        </items>
+                    </SegmentedButton>
+
+                    <!-- Symbology mode -->
+                    <Select id="symbologyMode" change="onSymbologyChange" width="145px" tooltip="Feature colour coding">
+                        <core:Item key="condition"     text="By Condition"/>
+                        <core:Item key="structureType" text="By Structure"/>
+                        <core:Item key="scourRisk"     text="By Scour Risk"/>
+                        <core:Item key="yearBuilt"     text="By Year Built"/>
+                    </Select>
+
+                    <!-- Base layer switcher -->
+                    <Select id="baseLayerSelect" change="onBaseLayerChange" width="120px" tooltip="Base map">
+                        <core:Item key="osm"       text="Street"/>
+                        <core:Item key="satellite" text="Satellite"/>
+                        <core:Item key="topo"      text="Topo"/>
+                        <core:Item key="dark"      text="Dark"/>
+                    </Select>
+                    <ToolbarSeparator/>
+
+                    <!-- Filter sidebar toggle -->
+                    <Button id="btnToggleFilters"
+                        icon="sap-icon://filter"
+                        text="Filters"
+                        tooltip="Toggle filter sidebar"
+                        press="onToggleFilterSidebar"
+                        type="Transparent"/>
+
+                    <!-- Selected bridges count badge (appears after filter) -->
+                    <Text id="filterCountBadge" text="" class="nhvrMapFilterBadge"/>
+
+                    <ToolbarSeparator/>
+
+                    <!-- Draw toolbar group -->
+                    <Button id="btnDrawPolygon"
+                        icon="sap-icon://draw-freehand"
+                        tooltip="Draw polygon to select bridges"
+                        press="onDrawPolygon"
+                        type="Transparent"/>
+                    <Button id="btnDrawRect"
+                        icon="sap-icon://border"
+                        tooltip="Draw rectangle selection"
+                        press="onDrawRectangle"
+                        type="Transparent"/>
+                    <Button id="btnDrawCircle"
+                        icon="sap-icon://circle-task"
+                        tooltip="Draw circle selection"
+                        press="onDrawCircle"
+                        type="Transparent"/>
+                    <Button id="btnClearDraw"
+                        icon="sap-icon://sys-cancel"
+                        tooltip="Clear polygon selection"
+                        press="onClearDrawing"
+                        type="Transparent"
+                        visible="false"/>
+
+                    <!-- Export -->
+                    <Button id="btnExportMap"
+                        icon="sap-icon://download"
+                        tooltip="Export bridges to CSV"
+                        press="onExport"
+                        type="Transparent"/>
+                    <Button id="btnExportGeoJSON"
+                        icon="sap-icon://geographic-bubble-chart"
+                        tooltip="Export selection as GeoJSON"
+                        press="onExportGeoJSON"
+                        type="Transparent"/>
+
+                    <!-- Reference layers -->
+                    <Button id="btnLayers"
+                        icon="sap-icon://activate"
+                        tooltip="Reference / overlay layers"
+                        press="onOpenLayerManager"
+                        type="Transparent"/>
+
+                    <ToolbarSeparator/>
+                    <Button id="btnCenterMap" icon="sap-icon://locate-me" tooltip="Re-centre on Australia" press="onCenterMap" type="Transparent"/>
+                    <Button icon="sap-icon://refresh" tooltip="Refresh bridge data" press="onRefresh" type="Transparent"/>
+                </OverflowToolbar>
+
+                <!-- ══════════════════════════════════════════════
+                     MAIN BODY — filter sidebar + content area + detail panel
+                ══════════════════════════════════════════════ -->
+                <HBox id="mapMainRow" class="nhvrMapMainRow">
+
+                    <!-- ── LEFT: Collapsible filter sidebar ───────── -->
+                    <VBox id="filterSidebar" class="nhvrMapFilterSidebar" visible="true">
+
+                        <Toolbar design="Transparent" class="nhvrFilterSidebarHeader">
+                            <Title text="Filter Bridges" level="H4"/>
+                            <ToolbarSpacer/>
+                            <Button icon="sap-icon://decline" type="Transparent" tooltip="Close filters" press="onToggleFilterSidebar"/>
+                        </Toolbar>
+
+                        <!-- Filter result count -->
+                        <HBox class="nhvrFilterResultRow" alignItems="Center" justifyContent="SpaceBetween">
+                            <Text id="sidebarResultCount" text="2,126 bridges" class="nhvrFilterResultCount"/>
+                            <Link text="Clear all" press="onClearAllFilters" class="nhvrFilterClearLink"/>
+                        </HBox>
+
+                        <ScrollContainer id="filterScroll" vertical="true" horizontal="false" class="nhvrFilterScrollArea">
+                            <VBox class="nhvrFilterPanelBody">
+
+                                <!-- ─ State ───────────────────────── -->
+                                <Panel id="filterPanelState" headerText="State / Territory" expandable="true" expanded="true" class="nhvrFilterPanel">
+                                    <content>
+                                        <VBox class="nhvrFilterGroup">
+                                            <CheckBox id="chkStateNSW" text="NSW"  select="onFilterChange"/>
+                                            <CheckBox id="chkStateVIC" text="VIC"  select="onFilterChange"/>
+                                            <CheckBox id="chkStateQLD" text="QLD"  select="onFilterChange"/>
+                                            <CheckBox id="chkStateWA"  text="WA"   select="onFilterChange"/>
+                                            <CheckBox id="chkStateSA"  text="SA"   select="onFilterChange"/>
+                                            <CheckBox id="chkStateTAS" text="TAS"  select="onFilterChange"/>
+                                            <CheckBox id="chkStateNT"  text="NT"   select="onFilterChange"/>
+                                            <CheckBox id="chkStateACT" text="ACT"  select="onFilterChange"/>
+                                        </VBox>
+                                    </content>
+                                </Panel>
+
+                                <!-- ─ Posting Status ──────────────── -->
+                                <Panel headerText="Posting Status" expandable="true" expanded="true" class="nhvrFilterPanel">
+                                    <content>
+                                        <VBox class="nhvrFilterGroup">
+                                            <CheckBox id="chkStatusUnrestricted" text="Unrestricted" select="onFilterChange"/>
+                                            <CheckBox id="chkStatusPosted"       text="Posted"       select="onFilterChange"/>
+                                            <CheckBox id="chkStatusClosed"       text="Closed"       select="onFilterChange"/>
+                                        </VBox>
+                                    </content>
+                                </Panel>
+
+                                <!-- ─ Condition Rating ────────────── -->
+                                <Panel headerText="Condition Rating (1–10)" expandable="true" expanded="true" class="nhvrFilterPanel">
+                                    <content>
+                                        <VBox class="nhvrFilterGroup">
+                                            <HBox alignItems="Center" class="sapUiTinyMarginBottom">
+                                                <Label text="Min" width="32px"/>
+                                                <Input id="condRatingMin" type="Number" value="1" width="60px"
+                                                    liveChange="onFilterChange" class="nhvrFilterNumInput"/>
+                                                <Label text=" – " class="sapUiTinyMarginBegin sapUiTinyMarginEnd"/>
+                                                <Label text="Max" width="32px"/>
+                                                <Input id="condRatingMax" type="Number" value="10" width="60px"
+                                                    liveChange="onFilterChange" class="nhvrFilterNumInput"/>
+                                            </HBox>
+                                            <HBox wrap="Wrap" class="nhvrFilterCondPills">
+                                                <Button class="nhvrCondPill nhvrCondPillGood"  text="Good (7–10)" press="onCondPreset" data:value="7,10"/>
+                                                <Button class="nhvrCondPill nhvrCondPillFair"  text="Fair (5–6)"  press="onCondPreset" data:value="5,6"/>
+                                                <Button class="nhvrCondPill nhvrCondPillPoor"  text="Poor (1–4)"  press="onCondPreset" data:value="1,4"/>
+                                            </HBox>
+                                        </VBox>
+                                    </content>
+                                </Panel>
+
+                                <!-- ─ Year Built ──────────────────── -->
+                                <Panel headerText="Year Built" expandable="true" expanded="false" class="nhvrFilterPanel">
+                                    <content>
+                                        <VBox class="nhvrFilterGroup">
+                                            <HBox alignItems="Center">
+                                                <Label text="From" width="36px"/>
+                                                <Input id="yearBuiltMin" type="Number" value="1900" width="70px"
+                                                    liveChange="onFilterChange" class="nhvrFilterNumInput"/>
+                                                <Label text=" – " class="sapUiTinyMarginBegin sapUiTinyMarginEnd"/>
+                                                <Label text="To" width="24px"/>
+                                                <Input id="yearBuiltMax" type="Number" value="2025" width="70px"
+                                                    liveChange="onFilterChange" class="nhvrFilterNumInput"/>
+                                            </HBox>
+                                        </VBox>
+                                    </content>
+                                </Panel>
+
+                                <!-- ─ Structure Type ──────────────── -->
+                                <Panel headerText="Structure Type" expandable="true" expanded="false" class="nhvrFilterPanel">
+                                    <content>
+                                        <VBox class="nhvrFilterGroup">
+                                            <CheckBox id="chkTypeCBeam"   text="Concrete Beam"    select="onFilterChange"/>
+                                            <CheckBox id="chkTypeSBeam"   text="Steel Beam"       select="onFilterChange"/>
+                                            <CheckBox id="chkTypeTimber"  text="Timber"           select="onFilterChange"/>
+                                            <CheckBox id="chkTypePrecast" text="Precast Concrete"  select="onFilterChange"/>
+                                            <CheckBox id="chkTypeArch"    text="Arch"             select="onFilterChange"/>
+                                            <CheckBox id="chkTypeTruss"   text="Truss"            select="onFilterChange"/>
+                                            <CheckBox id="chkTypeCulvert" text="Culvert / Box"    select="onFilterChange"/>
+                                            <CheckBox id="chkTypeOther"   text="Other"            select="onFilterChange"/>
+                                        </VBox>
+                                    </content>
+                                </Panel>
+
+                                <!-- ─ Scour Risk ──────────────────── -->
+                                <Panel headerText="Scour Risk" expandable="true" expanded="false" class="nhvrFilterPanel">
+                                    <content>
+                                        <VBox class="nhvrFilterGroup">
+                                            <CheckBox id="chkScourExtreme" text="Extreme"     select="onFilterChange"/>
+                                            <CheckBox id="chkScourHigh"    text="High"        select="onFilterChange"/>
+                                            <CheckBox id="chkScourMedium"  text="Medium"      select="onFilterChange"/>
+                                            <CheckBox id="chkScourLow"     text="Low"         select="onFilterChange"/>
+                                            <CheckBox id="chkScourNone"    text="Not Assessed" select="onFilterChange"/>
+                                        </VBox>
+                                    </content>
+                                </Panel>
+
+                                <!-- ─ Freight / NHVR ──────────────── -->
+                                <Panel headerText="Route Flags" expandable="true" expanded="false" class="nhvrFilterPanel">
+                                    <content>
+                                        <VBox class="nhvrFilterGroup">
+                                            <CheckBox id="chkFreightRoute"    text="Freight Route only"    select="onFilterChange"/>
+                                            <CheckBox id="chkOverMassRoute"   text="Over-Mass Route only"  select="onFilterChange"/>
+                                            <CheckBox id="chkNhvrAssessed"    text="NHVR Assessed only"    select="onFilterChange"/>
+                                            <CheckBox id="chkHighPriority"    text="High Priority only"    select="onFilterChange"/>
+                                            <CheckBox id="chkFloodImpacted"   text="Flood Impacted"        select="onFilterChange"/>
+                                        </VBox>
+                                    </content>
+                                </Panel>
+
+                                <!-- ─ Vehicle class quick filter ────── -->
+                                <Panel headerText="Vehicle Class" expandable="true" expanded="false" class="nhvrFilterPanel">
+                                    <content>
+                                        <VBox class="nhvrFilterGroup">
+                                            <Select id="filterVehicle" change="onFilterChange" width="100%">
+                                                <core:Item key="ALL" text="All Vehicle Classes"/>
+                                            </Select>
+                                        </VBox>
+                                    </content>
+                                </Panel>
+
+                            </VBox>
+                        </ScrollContainer>
+
+                        <!-- Filter action buttons (sticky bottom) -->
+                        <VBox class="nhvrFilterActions">
+                            <Button text="Apply Filters" type="Emphasized" press="onApplyFilters"
+                                icon="sap-icon://filter" width="100%" class="sapUiTinyMarginBottom"/>
+                            <Button text="Clear All" type="Default" press="onClearAllFilters"
+                                icon="sap-icon://sys-cancel" width="100%"/>
+                        </VBox>
+                    </VBox>
+
+                    <!-- ── CENTRE: Map + optional list pane ───────── -->
+                    <HBox id="mapContentArea" class="nhvrMapContent">
+
+                        <!-- Map area (always rendered; width controlled by view mode) -->
+                        <VBox id="mapSection" class="nhvrMapSection">
+                            <!-- Leaflet renders into the inner div -->
+                            <core:HTML id="mapHolder"
+                                content="&lt;div id='nhvr-leaflet-map'&gt;&lt;/div&gt;"
+                                afterRendering="onMapHolderRendered"
+                                preferDOM="true"/>
+                        </VBox>
+
+                        <!-- Bridge list pane (visible in Split and List modes) -->
+                        <VBox id="listSection" visible="false" class="nhvrMapListSection">
+                            <Toolbar design="Transparent" class="nhvrListSectionHeader">
+                                <Title id="listSectionTitle" text="Bridges" level="H4"/>
+                                <ToolbarSpacer/>
+                                <Text id="listSectionCount" text="" class="nhvrFilterResultCount"/>
+                                <Button id="btnViewSelectionInList"
+                                    text="View in Bridge List"
+                                    icon="sap-icon://list"
+                                    press="onViewSelectionInList"
+                                    type="Emphasized"
+                                    visible="false"
+                                    tooltip="Open selected bridges in the full Bridge List view"
+                                    class="sapUiTinyMarginEnd"/>
+                                <Button icon="sap-icon://download" tooltip="Export list to CSV"
+                                    press="onExportList" type="Transparent"/>
+                                <Button id="btnHideTable"
+                                    icon="sap-icon://close-command-field"
+                                    text="Hide Table"
+                                    tooltip="Collapse table — show map only"
+                                    press="onHideListSection"
+                                    type="Transparent"
+                                    class="nhvrHideTableBtn"/>
+                            </Toolbar>
+                            <SearchField id="listSearchField" width="100%" search="onListSearch"
+                                placeholder="Search bridge name, ID, region..." class="nhvrListSearch"/>
+                            <Table id="bridgeListTable"
+                                items="{listModel>/bridges}"
+                                growing="true"
+                                growingThreshold="50"
+                                growingScrollToLoad="true"
+                                noDataText="No bridges match the current filters"
+                                class="nhvrMapListTable"
+                                itemPress="onListItemPress"
+                                mode="None">
+                                <columns>
+                                    <Column width="100px"><Text text="Bridge ID"/></Column>
+                                    <Column><Text text="Name"/></Column>
+                                    <Column width="55px" minScreenWidth="Tablet" demandPopin="true"><Text text="State"/></Column>
+                                    <Column width="90px" hAlign="Center" minScreenWidth="Tablet" demandPopin="true"><Text text="Condition"/></Column>
+                                    <Column width="130px" minScreenWidth="Tablet" demandPopin="true"><Text text="Status"/></Column>
+                                    <Column width="44px" hAlign="End"><Text text=""/></Column>
+                                </columns>
+                                <items>
+                                    <ColumnListItem type="Active">
+                                        <cells>
+                                            <Text text="{listModel>bridgeId}"/>
+                                            <VBox>
+                                                <Text text="{listModel>name}" maxLines="1"/>
+                                                <Text text="{listModel>region}" class="nhvrListSubtext"/>
+                                            </VBox>
+                                            <Text text="{listModel>state}"/>
+                                            <ObjectStatus
+                                                text="{= ${listModel>conditionRating} ? ${listModel>conditionRating} : '—' }"
+                                                state="{= ${listModel>conditionRating} ? (parseInt(${listModel>conditionRating}) >= 7 ? 'Success' : parseInt(${listModel>conditionRating}) >= 5 ? 'Warning' : 'Error') : 'None' }"/>
+                                            <ObjectStatus
+                                                text="{= ${listModel>postingStatus} === 'UNRESTRICTED' ? 'Unrestricted' : ${listModel>postingStatus} === 'POSTED' ? 'Posted' : ${listModel>postingStatus} === 'CLOSED' ? 'Closed' : (${listModel>postingStatus} || '—') }"
+                                                state="{= ${listModel>postingStatus} === 'UNRESTRICTED' ? 'Success' : ${listModel>postingStatus} === 'POSTED' ? 'Warning' : ${listModel>postingStatus} === 'CLOSED' ? 'Error' : 'None' }"/>
+                                            <Button icon="sap-icon://locate-me" tooltip="Show on map"
+                                                press="onLocateBridgeOnMap" type="Transparent"/>
+                                        </cells>
+                                    </ColumnListItem>
+                                </items>
+                            </Table>
+                        </VBox>
+
+                    </HBox>
+
+                    <!-- ── RIGHT: Detail side panel ───────────────── -->
+                    <VBox id="detailPanel" visible="false"
+                        class="nhvrDetailPanel nhvrDetailPanelV2"
+                        backgroundDesign="Solid">
+
+                        <!-- Panel header with close -->
+                        <Toolbar design="Solid" class="nhvrDetailPanelHeader">
+                            <Title id="detPanelTitle" text="Bridge Details" level="H3"/>
+                            <ToolbarSpacer/>
+                            <Button icon="sap-icon://decline" type="Transparent" press="onCloseDetail"/>
+                        </Toolbar>
+
+                        <!-- Condition + status chips -->
+                        <HBox class="sapUiSmallMargin" alignItems="Center">
+                            <ObjectStatus id="detConditionStatus" text="" state="None" class="sapUiSmallMarginEnd"/>
+                            <ObjectStatus id="detPostingStatus"   text="" state="None"/>
+                        </HBox>
+
+                        <!-- Key metrics strip -->
+                        <HBox id="detMetricsStrip" class="nhvrDetailMetricsStrip" justifyContent="SpaceBetween">
+                            <VBox alignItems="Center" class="nhvrDetailMetric">
+                                <Title id="detMetricRating" text="—" level="H3"/>
+                                <Text text="Rating" class="nhvrDetailMetricLabel"/>
+                            </VBox>
+                            <VBox alignItems="Center" class="nhvrDetailMetric">
+                                <Title id="detMetricClearance" text="—" level="H3"/>
+                                <Text text="Clearance" class="nhvrDetailMetricLabel"/>
+                            </VBox>
+                            <VBox alignItems="Center" class="nhvrDetailMetric">
+                                <Title id="detMetricYear" text="—" level="H3"/>
+                                <Text text="Built" class="nhvrDetailMetricLabel"/>
+                            </VBox>
+                        </HBox>
+
+                        <VBox class="sapUiSmallMarginBegin sapUiSmallMarginEnd sapUiSmallMarginTop">
+                            <Label text="Bridge ID"       design="Bold"/>
+                            <Text id="detBridgeId"        class="sapUiTinyMarginBottom"/>
+                            <Label text="Region / State"  design="Bold"/>
+                            <Text id="detRegion"          class="sapUiTinyMarginBottom"/>
+                            <Label text="Route"           design="Bold"/>
+                            <Text id="detRoute"           class="sapUiTinyMarginBottom"/>
+                            <Label text="Structure Type"  design="Bold"/>
+                            <Text id="detStructureType"   class="sapUiTinyMarginBottom"/>
+                            <Label text="Clearance Height" design="Bold"/>
+                            <Text id="detClearance"       class="sapUiTinyMarginBottom"/>
+                            <Label text="Span Length"     design="Bold"/>
+                            <Text id="detSpan"            class="sapUiTinyMarginBottom"/>
+                            <Label text="Last Inspection" design="Bold"/>
+                            <Text id="detInspection"      class="sapUiTinyMarginBottom"/>
+                            <Label text="Coordinates (WGS84)" design="Bold"/>
+                            <Text id="detCoords"          class="sapUiTinyMarginBottom"/>
+                        </VBox>
+
+                        <!-- Scour / freight badges -->
+                        <HBox class="sapUiSmallMarginBegin sapUiTinyMarginTop" wrap="Wrap">
+                            <ObjectStatus id="detScourStatus"   text="" state="None" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                            <ObjectStatus id="detFreightStatus" text="" state="None" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                            <ObjectStatus id="detNhvrStatus"    text="" state="None" class="sapUiTinyMarginBottom"/>
+                        </HBox>
+
+                        <!-- Active restrictions list -->
+                        <VBox class="sapUiSmallMarginBegin sapUiSmallMarginEnd sapUiSmallMarginTop">
+                            <Text text="ACTIVE RESTRICTIONS" class="nhvrDashSectionTitle sapUiTinyMarginBottom"/>
+                            <List id="detRestrictionList"
+                                noDataText="No active restrictions"
+                                showSeparators="None"
+                                class="sapUiTinyMarginTop"/>
+                        </VBox>
+
+                        <!-- Actions -->
+                        <HBox class="sapUiSmallMargin" wrap="Wrap">
+                            <Button id="btnOpenBridge" text="Full Record" icon="sap-icon://document"
+                                press="onOpenBridgeDetail" type="Emphasized"
+                                class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                            <Button text="Inspect" icon="sap-icon://inspect"
+                                press="onNavToInspection" type="Transparent"
+                                class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                            <Button text="Map Nearby" icon="sap-icon://map-2"
+                                press="onZoomToSelected" type="Transparent"
+                                class="sapUiTinyMarginBottom"/>
+                        </HBox>
+                    </VBox>
+
+                </HBox>
+                <!-- /mapMainRow -->
+
+            </VBox>
+        </content>
+    </Page>
+</mvc:View>

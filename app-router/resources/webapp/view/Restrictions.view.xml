@@ -1,0 +1,432 @@
+<!-- ============================================================
+     NHVR Restrictions List View — Active & Scheduled
+     ============================================================ -->
+<mvc:View
+    controllerName="nhvr.bridgemanagement.controller.Restrictions"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.f"
+    xmlns:t="sap.ui.table"
+    displayBlock="true">
+
+    <f:DynamicPage id="restrictionsPage" toggleHeaderOnTitleClick="false">
+        <f:title>
+            <f:DynamicPageTitle>
+                <f:heading>
+                    <Title text="Restrictions Registry" level="H1"/>
+                </f:heading>
+                <f:snappedHeading>
+                    <Title text="Restrictions" level="H2"/>
+                </f:snappedHeading>
+                <f:actions>
+                    <Button icon="sap-icon://hint" type="Transparent" press="onInfoPressRestrictions"
+                        tooltip="Restriction types and field guide"/>
+                    <Button text="Home" icon="sap-icon://home" press="onNavHome" type="Transparent"/>
+                </f:actions>
+                <f:breadcrumbs>
+                    <Breadcrumbs>
+                        <Link text="Home" press="onNavHome"/>
+                        <Link text="Restrictions"/>
+                    </Breadcrumbs>
+                </f:breadcrumbs>
+            </f:DynamicPageTitle>
+        </f:title>
+
+        <f:header>
+            <f:DynamicPageHeader pinnable="true">
+                <!-- ── Filter Bar ──────────────────────────── -->
+                <HBox wrap="Wrap" class="sapUiSmallMarginBeginEnd sapUiSmallMarginTop sapUiSmallMarginBottom" alignItems="Center">
+                    <VBox class="sapUiSmallMarginEnd">
+                        <Label text="Search" design="Bold"/>
+                        <SearchField id="searchField" width="300px" placeholder="Restriction ref, bridge, type, value…"
+                            search="onSearch" liveChange="onLiveSearch"/>
+                    </VBox>
+                    <VBox class="sapUiSmallMarginEnd">
+                        <Label text="Status" design="Bold"/>
+                        <Select id="filterStatus" change="onFilterChange" width="160px">
+                            <core:Item key="ALL"      text="All Statuses"/>
+                            <core:Item key="ACTIVE"   text="Active"/>
+                            <core:Item key="SCHEDULED" text="Scheduled"/>
+                            <core:Item key="EXPIRED"  text="Expired"/>
+                        </Select>
+                    </VBox>
+                    <VBox class="sapUiSmallMarginEnd">
+                        <Label text="Type" design="Bold"/>
+                        <Select id="filterType" change="onFilterChange" width="180px">
+                            <core:Item key="ALL"            text="All Types"/>
+                            <core:Item key="MASS"           text="Mass"/>
+                            <core:Item key="GROSS_MASS"     text="Gross Mass"/>
+                            <core:Item key="AXLE_LOAD"      text="Axle Load"/>
+                            <core:Item key="AXLE_MASS"      text="Axle Mass"/>
+                            <core:Item key="HEIGHT"         text="Height"/>
+                            <core:Item key="WIDTH"          text="Width"/>
+                            <core:Item key="LENGTH"         text="Length"/>
+                            <core:Item key="SPEED"          text="Speed"/>
+                            <core:Item key="WIND_SPEED"     text="Wind Speed"/>
+                            <core:Item key="WEIGHT"         text="Weight"/>
+                            <core:Item key="CLEARANCE"      text="Clearance"/>
+                            <core:Item key="COMBINATION_MASS" text="Combination Mass"/>
+                            <core:Item key="VEHICLE_TYPE"   text="Vehicle Type"/>
+                            <core:Item key="FLOOD_CLOSURE"  text="Flood Closure"/>
+                        </Select>
+                    </VBox>
+                    <VBox class="sapUiSmallMarginEnd">
+                        <Label text="Permit" design="Bold"/>
+                        <Select id="filterPermit" change="onFilterChange" width="140px">
+                            <core:Item key="ALL"   text="All"/>
+                            <core:Item key="YES"   text="Required"/>
+                            <core:Item key="NO"    text="Not Required"/>
+                        </Select>
+                    </VBox>
+                    <VBox class="sapUiSmallMarginEnd">
+                        <Label text="Temporary" design="Bold"/>
+                        <Select id="filterTemporary" change="onFilterChange" width="130px">
+                            <core:Item key="ALL" text="All"/>
+                            <core:Item key="YES" text="Temporary Only"/>
+                            <core:Item key="NO"  text="Permanent Only"/>
+                        </Select>
+                    </VBox>
+                    <VBox alignItems="End" class="sapUiSmallMarginTop">
+                        <Button text="Clear Filters" icon="sap-icon://clear-filter"
+                            press="onClearFilters" type="Transparent"/>
+                    </VBox>
+                </HBox>
+
+                <!-- ── Advanced Filter Panel ──────────────────── -->
+                <Panel id="advFilterPanel" expandable="true" expanded="false"
+                    headerText="⚙ Advanced Filter — Slice restriction data by any field"
+                    class="sapUiSmallMarginTop">
+                    <content>
+                        <VBox class="sapUiSmallMarginBeginEnd sapUiSmallMarginTopBottom">
+                            <VBox id="advRestFilterCriteria"/>
+                            <HBox class="sapUiSmallMarginTop">
+                                <Button text="+ Add Criteria" icon="sap-icon://add"
+                                    press="onAddRestFilterCriteria" type="Ghost" class="sapUiTinyMarginEnd"/>
+                                <Button text="Apply Filter" icon="sap-icon://filter"
+                                    press="onApplyAdvRestFilter" type="Emphasized" class="sapUiTinyMarginEnd"/>
+                                <Button text="Clear" icon="sap-icon://clear-filter"
+                                    press="onClearAdvRestFilter" type="Transparent"/>
+                            </HBox>
+                        </VBox>
+                    </content>
+                </Panel>
+            </f:DynamicPageHeader>
+        </f:header>
+
+        <f:content>
+            <VBox class="nhvrApp">
+
+                <!-- ── Map-polygon filter banner (v4.7.6) ─────────────── -->
+                <MessageStrip id="mapFilterBanner"
+                    text=""
+                    type="Information"
+                    showIcon="true"
+                    showCloseButton="true"
+                    close="onClearMapFilter"
+                    visible="false"
+                    class="sapUiSmallMarginBeginEnd sapUiTinyMarginTop"/>
+
+                <!-- ── KPI Strip ────────────────────────────────────── -->
+                <HBox wrap="Wrap" class="sapUiSmallMarginBeginEnd sapUiTinyMarginTop sapUiSmallMarginBottom">
+                    <ObjectStatus id="kpiTotal"    text="— Total"     state="None"    class="sapUiSmallMarginEnd"/>
+                    <ObjectStatus id="kpiActive"   text="— Active"    state="Success" class="sapUiSmallMarginEnd"/>
+                    <ObjectStatus id="kpiScheduled" text="— Scheduled" state="Warning" class="sapUiSmallMarginEnd"/>
+                    <ObjectStatus id="kpiPermit"   text="— Permit Req" state="Warning" class="sapUiSmallMarginEnd"/>
+                </HBox>
+
+                <!-- ── Quick-filter preset chips ────────────────────── -->
+                <HBox class="sapUiSmallMarginBeginEnd sapUiSmallMarginBottom" wrap="Wrap">
+                    <Button text="Active" icon="sap-icon://accept" press="onQuickFilter" type="Transparent" class="sapUiTinyMarginEnd">
+                        <customData>
+                            <core:CustomData key="filterKey" value="active"/>
+                        </customData>
+                    </Button>
+                    <Button text="Expiring This Week" icon="sap-icon://alert" press="onQuickFilter" type="Transparent" class="sapUiTinyMarginEnd">
+                        <customData>
+                            <core:CustomData key="filterKey" value="expiringWeek"/>
+                        </customData>
+                    </Button>
+                    <Button text="Temporary" icon="sap-icon://date-time" press="onQuickFilter" type="Transparent" class="sapUiTinyMarginEnd">
+                        <customData>
+                            <core:CustomData key="filterKey" value="temporary"/>
+                        </customData>
+                    </Button>
+                    <Button text="Permit Required" icon="sap-icon://document" press="onQuickFilter" type="Transparent" class="sapUiTinyMarginEnd">
+                        <customData>
+                            <core:CustomData key="filterKey" value="permit"/>
+                        </customData>
+                    </Button>
+                    <Button text="Missing Gazette Ref" icon="sap-icon://warning" press="onQuickFilter" type="Transparent" class="sapUiTinyMarginEnd">
+                        <customData>
+                            <core:CustomData key="filterKey" value="noGazette"/>
+                        </customData>
+                    </Button>
+                    <Button text="Disabled" icon="sap-icon://cancel" press="onQuickFilter" type="Transparent" class="sapUiTinyMarginEnd">
+                        <customData>
+                            <core:CustomData key="filterKey" value="disabled"/>
+                        </customData>
+                    </Button>
+                    <Button text="Clear" icon="sap-icon://clear-filter" press="onClearQuickFilter" type="Transparent"/>
+                </HBox>
+
+                <!-- ── Restrictions Table (sap.ui.table.Table — desktop grid) ── -->
+                <t:Table id="restrictionTable"
+                    rows="{restrictions>/items}"
+                    visibleRowCountMode="Auto"
+                    minAutoRowCount="8"
+                    selectionMode="None"
+                    alternateRowColors="true"
+                    enableColumnReordering="true"
+                    enableColumnFreeze="true"
+                    rowHeight="40"
+                    class="sapUiSmallMarginBeginEnd">
+
+                    <t:extension>
+                        <OverflowToolbar>
+                            <VariantManagement id="restVariantMgmt"
+                                save="onVariantSave"
+                                select="onVariantSelect"
+                                manage="onVariantManage"
+                                showSetAsDefault="true"/>
+                            <ToolbarSeparator/>
+                            <Text id="alvRecordCount" text="" class="nhvrSubText"/>
+                            <ToolbarSeparator/>
+                            <Title id="tableTitle" text="Restrictions" level="H3"/>
+                            <ToolbarSpacer/>
+                            <Button text="Add Restriction" icon="sap-icon://add" press="onAddRestriction" type="Emphasized"
+                                visible="{ui>/canAddRestriction}"/>
+                            <Button icon="sap-icon://sort" text="Sort"
+                                press="onAlvSort" type="Transparent" tooltip="Sort options"/>
+                            <Button icon="sap-icon://table-column" text="Columns"
+                                press="onColumnChooser" type="Transparent" tooltip="Show/hide columns"/>
+                            <ToolbarSeparator/>
+                            <Button id="btnExportRestrictions" icon="sap-icon://excel-attachment"
+                                text="Excel" press="onAlvExportExcel"
+                                type="Transparent" tooltip="Export filtered results to Excel (.xlsx)"/>
+                            <Button id="btnExportRestrictionsCsv" text="CSV" icon="sap-icon://download"
+                                press="onAlvExportCsv" type="Transparent" tooltip="Export to CSV with all fields"/>
+                            <Button icon="sap-icon://pdf-attachment" text="Print"
+                                press="onAlvExportPdf" type="Transparent" tooltip="Print or save as PDF"/>
+                            <ToolbarSeparator/>
+                            <Button icon="sap-icon://refresh" text="Refresh"
+                                press="onAlvRefresh" type="Transparent" tooltip="Refresh data from server"/>
+                            <Button icon="sap-icon://save" text="Save View"
+                                press="onSaveNamedView" type="Transparent"
+                                tooltip="Save current filters as a named view"/>
+                            <Button icon="sap-icon://map-2" text="Map" press="onNavToMap" type="Transparent"/>
+                            <Button icon="sap-icon://journey-arrive" text="Bridges" press="onNavToBridges" type="Transparent"/>
+                        </OverflowToolbar>
+                    </t:extension>
+
+                    <!-- Columns and row template are built dynamically by _buildRestrictionColumns() -->
+                </t:Table>
+
+            </VBox>
+        </f:content>
+    </f:DynamicPage>
+
+    <!-- ── Unified Add / Edit Restriction Dialog ─────────── -->
+    <Dialog id="editRestDialog" title="Restriction" contentWidth="560px"
+        draggable="true" resizable="true" verticalScrolling="true" contentHeight="82vh">
+        <customHeader>
+            <Bar>
+                <contentLeft>
+                    <Title id="glRestDlgTitle" text="Restriction" level="H2"/>
+                </contentLeft>
+            </Bar>
+        </customHeader>
+        <content>
+            <VBox class="sapUiSmallMarginBeginEnd sapUiSmallMarginTop">
+
+                <!-- Permanent / Temporary toggle -->
+                <Label text="Restriction Category" design="Bold" class="sapUiTinyMarginBottom"/>
+                <SegmentedButton id="glRestCategory" selectedKey="PERMANENT"
+                    selectionChange="onRestrictionTypeChange" class="sapUiSmallMarginBottom">
+                    <items>
+                        <SegmentedButtonItem key="PERMANENT" text="Permanent"/>
+                        <SegmentedButtonItem key="TEMPORARY" text="Temporary"/>
+                    </items>
+                </SegmentedButton>
+
+                <!-- Temporary header strip -->
+                <MessageStrip id="glTempStrip"
+                    text="Temporary restriction — provide exact date range and approval details."
+                    type="Warning" showIcon="true" visible="false"
+                    class="sapUiSmallMarginBottom"/>
+
+                <MessageStrip id="editRestDlgInfo" text="" type="Information" showIcon="true"
+                    class="sapUiSmallMarginBottom"/>
+
+                <!-- Bridge ID (create mode only) — searchable autocomplete -->
+                <VBox id="glBridgeIdBox" visible="false">
+                    <Label text="Bridge" required="true" class="sapUiTinyMarginBottom"/>
+                    <Input id="glRestBridgeId"
+                        placeholder="Type bridge name or ID to search…"
+                        width="100%"
+                        showSuggestion="true"
+                        filterSuggests="false"
+                        liveChange="onBridgeSuggest"
+                        suggestionItemSelected="onBridgeSuggestionSelected"
+                        class="sapUiSmallMarginBottom">
+                        <suggestionItems>
+                            <core:Item/>
+                        </suggestionItems>
+                    </Input>
+                </VBox>
+
+                <Label text="Restriction Type" required="true" class="sapUiTinyMarginBottom"/>
+                <Select id="glEditRestType" width="100%" class="sapUiSmallMarginBottom">
+                    <core:Item key="GROSS_MASS"    text="Gross Mass Limit"/>
+                    <core:Item key="AXLE_LOAD"     text="Axle Load Limit"/>
+                    <core:Item key="HEIGHT"        text="Height Limit"/>
+                    <core:Item key="WIDTH"         text="Width Limit"/>
+                    <core:Item key="LENGTH"        text="Length Limit"/>
+                    <core:Item key="SPEED"         text="Speed Limit"/>
+                    <core:Item key="WIND_SPEED"    text="Wind Speed Limit"/>
+                    <core:Item key="FLOOD_CLOSURE" text="Flood Closure"/>
+                    <core:Item key="VEHICLE_TYPE"  text="Vehicle Type Restriction"/>
+                </Select>
+
+                <Label text="Value" required="true" class="sapUiTinyMarginBottom"/>
+                <Input id="glEditRestValue" type="Number" placeholder="e.g. 4.5" width="100%" class="sapUiSmallMarginBottom"/>
+
+                <Label text="Unit" required="true" class="sapUiTinyMarginBottom"/>
+                <Select id="glEditRestUnit" width="100%" class="sapUiSmallMarginBottom">
+                    <core:Item key="t"    text="tonnes (t)"/>
+                    <core:Item key="kN"   text="kilonewtons (kN)"/>
+                    <core:Item key="m"    text="metres (m)"/>
+                    <core:Item key="km/h" text="km/h"/>
+                </Select>
+
+                <Label text="Vehicle Class" class="sapUiTinyMarginBottom"/>
+                <ComboBox id="glEditRestVehicleClass"
+                    placeholder="Select vehicle class (optional)…"
+                    width="100%"
+                    items="{restrictions>/vehicleClasses}"
+                    class="sapUiSmallMarginBottom">
+                    <core:ListItem key="{restrictions>ID}" text="{restrictions>name}" additionalText="{restrictions>code}"/>
+                </ComboBox>
+
+                <Label text="Status" class="sapUiTinyMarginBottom"/>
+                <Select id="glEditRestStatus" width="100%" class="sapUiSmallMarginBottom">
+                    <core:Item key="ACTIVE"    text="Active"/>
+                    <core:Item key="SCHEDULED" text="Scheduled"/>
+                    <core:Item key="EXPIRED"   text="Expired"/>
+                    <core:Item key="INACTIVE"  text="Inactive"/>
+                </Select>
+
+                <Label text="Valid From Date" class="sapUiTinyMarginBottom"/>
+                <DatePicker id="glEditRestFrom" width="100%" displayFormat="dd/MM/yyyy" valueFormat="yyyy-MM-dd"
+                    class="sapUiSmallMarginBottom"/>
+
+                <Label text="Valid To Date" class="sapUiTinyMarginBottom"/>
+                <DatePicker id="glEditRestTo" width="100%" displayFormat="dd/MM/yyyy" valueFormat="yyyy-MM-dd"
+                    class="sapUiSmallMarginBottom"/>
+
+                <Label text="Gazette Reference" class="sapUiTinyMarginBottom"/>
+                <HBox alignItems="Center" class="sapUiSmallMarginBottom">
+                    <Input id="glEditRestGazette" placeholder="e.g. NSW-2024/123" width="75%"/>
+                    <Button text="Validate" icon="sap-icon://accept"
+                        type="Default" press="onValidateGazette"
+                        class="sapUiSmallMarginBegin" tooltip="Validate gazette reference format"/>
+                </HBox>
+                <ObjectStatus id="gazetteValidationStatus" title="Gazette Status"
+                    text="" state="None" visible="false" class="sapUiTinyMarginBottom"/>
+                <!-- GAP 2: Auto-validation status from BEFORE hook (shows on list/detail view) -->
+                <ObjectStatus id="gazetteAutoValidStatus" title="Auto-Validated"
+                    text="{restrictions>gazetteValidationStatus}" state="None"
+                    visible="{= !!${restrictions>gazetteValidationStatus} &amp;&amp; ${restrictions>gazetteValidationStatus} !== 'NOT_VALIDATED' }"
+                    class="sapUiTinyMarginBottom"/>
+
+                <Label text="Approved By" class="sapUiTinyMarginBottom"/>
+                <Input id="glEditRestApprovedBy" placeholder="e.g. Chief Engineer, TfNSW" width="100%" class="sapUiSmallMarginBottom"/>
+
+                <Label text="Direction" class="sapUiTinyMarginBottom"/>
+                <Select id="glEditRestDirection" width="100%" class="sapUiSmallMarginBottom">
+                    <core:Item key="BOTH"        text="Both Directions"/>
+                    <core:Item key="NORTHBOUND"  text="Northbound"/>
+                    <core:Item key="SOUTHBOUND"  text="Southbound"/>
+                    <core:Item key="EASTBOUND"   text="Eastbound"/>
+                    <core:Item key="WESTBOUND"   text="Westbound"/>
+                </Select>
+
+                <Label text="Enforcement Authority" class="sapUiTinyMarginBottom"/>
+                <Input id="glEditRestAuthority" placeholder="e.g. NSW RMS" width="100%" class="sapUiSmallMarginBottom"/>
+
+                <CheckBox id="glEditRestPermit" text="Permit Required" class="sapUiSmallMarginBottom"/>
+
+                <Label text="Notes" class="sapUiTinyMarginBottom"/>
+                <TextArea id="glEditRestNotes" rows="2" width="100%" class="sapUiSmallMarginBottom"/>
+
+                <!-- Temporary-only fields -->
+                <VBox id="glTempFields" visible="false">
+                    <Label text="Temporary From Date" required="true" class="sapUiTinyMarginBottom"/>
+                    <DatePicker id="glTempFromDate" width="100%" displayFormat="dd/MM/yyyy" valueFormat="yyyy-MM-dd"
+                        class="sapUiSmallMarginBottom"/>
+
+                    <Label text="Temporary To Date (Expires On)" required="true" class="sapUiTinyMarginBottom"/>
+                    <DatePicker id="glTempToDate" width="100%" displayFormat="dd/MM/yyyy" valueFormat="yyyy-MM-dd"
+                        class="sapUiSmallMarginBottom"/>
+
+                    <Label text="Temporary Reason" required="true" class="sapUiTinyMarginBottom"/>
+                    <TextArea id="glTempReason" rows="2" width="100%" placeholder="Reason for temporary restriction"
+                        class="sapUiSmallMarginBottom"/>
+
+                    <Label text="Approved By" class="sapUiTinyMarginBottom"/>
+                    <Input id="glTempApprovedBy" placeholder="Approver name or role" width="100%" class="sapUiSmallMarginBottom"/>
+
+                    <Label text="Approval Reference" class="sapUiTinyMarginBottom"/>
+                    <Input id="glTempApprovalRef" placeholder="Approval reference number" width="100%" class="sapUiSmallMarginBottom"/>
+                </VBox>
+
+            </VBox>
+        </content>
+        <buttons>
+            <Button id="glRestSaveBtn" text="Save" type="Emphasized" press="onSaveEditRestriction" icon="sap-icon://save"/>
+            <Button text="Cancel" press="onCancelEditRestriction" type="Transparent"/>
+        </buttons>
+    </Dialog>
+
+    <!-- ── Column Chooser Dialog ──────────────────────────── -->
+    <!-- ── Sort Dialog (ViewSettingsDialog) ──────────────────────── -->
+    <ViewSettingsDialog id="sortDialog" confirm="onSortConfirm">
+        <sortItems>
+            <ViewSettingsItem key="nhvrRef"          text="Restriction Ref"/>
+            <ViewSettingsItem key="bridge_bridgeId"  text="Bridge ID"/>
+            <ViewSettingsItem key="restrictionType"  text="Type"/>
+            <ViewSettingsItem key="status"           text="Status"/>
+            <ViewSettingsItem key="value"            text="Value"/>
+            <ViewSettingsItem key="validFromDate"    text="Valid From"/>
+            <ViewSettingsItem key="validToDate"      text="Valid To"/>
+        </sortItems>
+    </ViewSettingsDialog>
+
+    <!-- ── Column Chooser (dynamic, registry-driven) ─────────── -->
+    <Dialog id="columnChooserDialog" title="Show / Hide Columns" contentWidth="400px">
+        <content>
+            <VBox class="sapUiSmallMarginBeginEnd sapUiSmallMarginTop">
+                <SearchField id="colSearchField" placeholder="Search columns…"
+                    liveChange="onColumnSearch" width="100%"
+                    class="sapUiSmallMarginBottom"/>
+                <HBox class="sapUiSmallMarginBottom">
+                    <Button text="Essential" press="onColPresetEssential" type="Ghost" class="sapUiTinyMarginEnd"/>
+                    <Button text="Compliance" press="onColPresetCompliance" type="Ghost" class="sapUiTinyMarginEnd"/>
+                    <Button text="All" press="onColPresetAll" type="Ghost" class="sapUiTinyMarginEnd"/>
+                </HBox>
+                <HBox class="sapUiSmallMarginBottom">
+                    <Button text="Show All" press="onColShowAll" type="Transparent" class="sapUiTinyMarginEnd"/>
+                    <Button text="Hide All" press="onColHideAll" type="Transparent"/>
+                    <ToolbarSpacer/>
+                    <Text id="colCountText" text="" class="nhvrSubText"/>
+                </HBox>
+                <VBox id="colCheckboxContainer"/>
+            </VBox>
+        </content>
+        <buttons>
+            <Button text="Apply" type="Emphasized" press="onApplyColumns"/>
+            <Button text="Close" press="onCloseColumnChooser" type="Transparent"/>
+        </buttons>
+    </Dialog>
+
+</mvc:View>

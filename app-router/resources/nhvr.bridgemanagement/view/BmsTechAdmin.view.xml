@@ -1,0 +1,438 @@
+<!-- ============================================================
+     BMS Tech Admin — Technical Configuration
+     Access: Admin + NHVR_TechAdmin role
+     Contains: Jurisdiction Access, Standards Profile, Map Config,
+               Deployment Configuration
+     ============================================================ -->
+<mvc:View
+    controllerName="nhvr.bridgemanagement.controller.BmsTechAdmin"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:f="sap.f"
+    xmlns:core="sap.ui.core"
+    xmlns:form="sap.ui.layout.form"
+    displayBlock="true">
+
+    <Page id="pageBmsTechAdmin"
+        title="BMS Tech Admin — Technical Configuration"
+        showNavButton="true"
+        navButtonPress="onNavBack"
+        backgroundDesign="List">
+
+        <headerContent>
+            <Button text="Refresh" icon="sap-icon://refresh" press="onRefresh" type="Transparent"/>
+        </headerContent>
+
+        <content>
+            <IconTabBar id="techAdminTabs" expanded="true" class="sapUiNoContentPadding">
+                <items>
+
+                    <!-- ── Tab 1: Jurisdiction Access ─────────────── -->
+                    <IconTabFilter id="tabJurisdiction" icon="sap-icon://employee"
+                        text="Jurisdiction Access" iconColor="Neutral">
+                        <VBox class="sapUiMediumMarginBeginEnd sapUiMediumMarginTopBottom">
+
+                            <MessageStrip
+                                text="Jurisdiction grants control which users can view and edit bridge data for specific Australian states and territories. Grants are applied on top of the user's XSUAA role collection."
+                                type="Information" showIcon="true" class="sapUiSmallMarginBottom"/>
+
+                            <Toolbar>
+                                <Title text="Jurisdiction Access Grants" level="H3"/>
+                                <ToolbarSpacer/>
+                                <Button text="Grant Access" icon="sap-icon://add"
+                                    type="Emphasized" press="onOpenGrantAccessDialog"/>
+                                <Button text="Refresh" icon="sap-icon://refresh"
+                                    type="Transparent" press="onRefreshJurisdiction"
+                                    class="sapUiTinyMarginBegin"/>
+                            </Toolbar>
+
+                            <Table id="jurisdictionAccessTable"
+                                items="{techAdmin>/jurisdictionGrants}"
+                                noDataText="No jurisdiction grants configured. Use 'Grant Access' to add entries."
+                                growing="true" growingThreshold="25"
+                                class="sapUiSmallMarginTop">
+                                <columns>
+                                    <Column><Text text="User Ref"/></Column>
+                                    <Column><Text text="Jurisdiction"/></Column>
+                                    <Column width="120px" hAlign="Center"><Text text="Access Level"/></Column>
+                                    <Column><Text text="Granted By"/></Column>
+                                    <Column width="140px"><Text text="Expires At"/></Column>
+                                    <Column width="80px" hAlign="End"><Text text="Actions"/></Column>
+                                </columns>
+                                <items>
+                                    <ColumnListItem>
+                                        <cells>
+                                            <Text text="{techAdmin>userRef}"/>
+                                            <ObjectStatus text="{techAdmin>jurisdiction}" state="Information"/>
+                                            <ObjectStatus text="{techAdmin>accessLevel}"
+                                                state="{= ${techAdmin>accessLevel} === 'ADMIN' ? 'Error'
+                                                       : ${techAdmin>accessLevel} === 'WRITE' ? 'Warning'
+                                                       : 'Success'}"/>
+                                            <Text text="{techAdmin>grantedBy}"/>
+                                            <Text text="{techAdmin>expiresAt}"/>
+                                            <Button icon="sap-icon://delete" type="Transparent"
+                                                tooltip="Revoke Access"
+                                                press="onRevokeJurisdictionAccess"/>
+                                        </cells>
+                                    </ColumnListItem>
+                                </items>
+                            </Table>
+                        </VBox>
+                    </IconTabFilter>
+
+                    <!-- ── Tab 2: Standards Profile ───────────────── -->
+                    <IconTabFilter id="tabStandards" icon="sap-icon://world"
+                        text="Standards Profile" iconColor="Neutral">
+                        <VBox class="sapUiMediumMarginBeginEnd sapUiMediumMarginTopBottom">
+
+                            <MessageStrip
+                                text="Changing the standards profile updates field labels, units, and rating scale references across the application. Data is not converted — this is a display and labelling change only."
+                                type="Information" showIcon="true" class="sapUiSmallMarginBottom"/>
+
+                            <Panel headerText="Active International Standards Profile" expandable="false">
+                                <content>
+                                    <HBox alignItems="Center" class="sapUiSmallMarginTop sapUiSmallMarginBeginEnd">
+                                        <Label text="Active Standard:" class="sapUiSmallMarginEnd" width="160px" design="Bold"/>
+                                        <Select id="standardsProfileSelect" change="onStandardsProfileChange" width="300px"/>
+                                        <Text id="standardsProfileInfo" text="" class="sapUiSmallMarginBegin"/>
+                                    </HBox>
+                                    <HBox wrap="Wrap" class="sapUiSmallMarginBeginEnd sapUiSmallMarginTop sapUiSmallMarginBottom">
+                                        <VBox class="sapUiSmallMarginEnd">
+                                            <Label text="Mass Unit:" design="Bold"/>
+                                            <Text id="stdMassUnit" text="—"/>
+                                        </VBox>
+                                        <VBox class="sapUiSmallMarginEnd">
+                                            <Label text="Rating Standard:" design="Bold"/>
+                                            <Text id="stdRatingStandard" text="—"/>
+                                        </VBox>
+                                        <VBox class="sapUiSmallMarginEnd">
+                                            <Label text="Condition Scale:" design="Bold"/>
+                                            <Text id="stdConditionScale" text="—"/>
+                                        </VBox>
+                                        <VBox class="sapUiSmallMarginEnd">
+                                            <Label text="Speed Unit:" design="Bold"/>
+                                            <Text id="stdSpeedUnit" text="—"/>
+                                        </VBox>
+                                    </HBox>
+                                    <HBox class="sapUiSmallMarginBeginEnd sapUiSmallMarginBottom">
+                                        <Button text="Apply Standard" icon="sap-icon://accept"
+                                            type="Emphasized" press="onApplyStandard"
+                                            class="sapUiTinyMarginEnd"/>
+                                    </HBox>
+                                </content>
+                            </Panel>
+                        </VBox>
+                    </IconTabFilter>
+
+                    <!-- ── Tab 3: Map Configuration ───────────────── -->
+                    <IconTabFilter id="tabMapConfig" icon="sap-icon://map"
+                        text="Map Config" iconColor="Positive">
+                        <VBox class="sapUiMediumMargin">
+
+                            <Toolbar>
+                                <Title text="Map Configuration" level="H3"/>
+                                <ToolbarSpacer/>
+                                <Button id="btnSaveMapConfig" text="Save Config" icon="sap-icon://save"
+                                    type="Emphasized" press="onSaveMapConfig"/>
+                                <Button text="Reset to Default" icon="sap-icon://reset"
+                                    type="Transparent" press="onResetMapConfig"
+                                    class="sapUiTinyMarginBegin"/>
+                            </Toolbar>
+
+                            <MessageStrip
+                                text="Map configuration is loaded at startup from the DEFAULT record. Changes apply on next Map view open."
+                                type="Information" showIcon="true"
+                                class="sapUiSmallMarginTop sapUiSmallMarginBottom"/>
+
+                            <!-- Viewport -->
+                            <Panel headerText="Default Viewport &amp; Projection"
+                                expandable="true" expanded="true" class="sapUiSmallMarginTop">
+                                <content>
+                                    <form:SimpleForm editable="true" layout="ResponsiveGridLayout"
+                                        labelSpanL="4" labelSpanM="4" columnsL="2" columnsM="1">
+                                        <Label text="Default Centre — Latitude"/>
+                                        <Input id="mapCfgCentreLatInput" value="{mapConfig>/defaultCenter_lat}"
+                                            type="Number" placeholder="-27.0"/>
+                                        <Label text="Default Centre — Longitude"/>
+                                        <Input id="mapCfgCentreLngInput" value="{mapConfig>/defaultCenter_lng}"
+                                            type="Number" placeholder="133.0"/>
+                                        <Label text="Default Zoom Level (1–18)"/>
+                                        <Input id="mapCfgZoomInput" value="{mapConfig>/defaultZoom}"
+                                            type="Number" placeholder="5"/>
+                                        <Label text="Coordinate Reference System"/>
+                                        <HBox alignItems="Center">
+                                            <Input id="mapCfgProjectionInput" value="{mapConfig>/projection}"
+                                                width="160px" placeholder="EPSG:4326"/>
+                                            <Text text="  Leaflet renders WGS84 (EPSG:4326). GDA2020 ≈ EPSG:7843 for HANA spatial."
+                                                class="sapUiTinyMarginBegin" wrapping="true"/>
+                                        </HBox>
+                                        <Label text="Projection Note"/>
+                                        <Input id="mapCfgProjNoteInput" value="{mapConfig>/projectionNote}"
+                                            placeholder="Human-readable note about the CRS in use"/>
+                                    </form:SimpleForm>
+                                </content>
+                            </Panel>
+
+                            <!-- Base Map -->
+                            <Panel headerText="Base Map" expandable="true" expanded="true"
+                                class="sapUiSmallMarginTop">
+                                <content>
+                                    <form:SimpleForm editable="true" layout="ResponsiveGridLayout"
+                                        labelSpanL="4" labelSpanM="4" columnsL="2" columnsM="1">
+                                        <Label text="Default Base Map"/>
+                                        <Select id="mapCfgDefaultBaseMap"
+                                            selectedKey="{mapConfig>/defaultBaseMap}"
+                                            change="onMapConfigChange">
+                                            <core:Item key="osm"       text="OpenStreetMap (Street)"/>
+                                            <core:Item key="satellite" text="ESRI World Imagery (Satellite)"/>
+                                            <core:Item key="topo"      text="ESRI World Topo"/>
+                                            <core:Item key="dark"      text="CartoDB Dark Matter"/>
+                                        </Select>
+                                    </form:SimpleForm>
+
+                                    <Toolbar design="Transparent" class="sapUiTinyMarginTop">
+                                        <Title text="Custom Base Maps" level="H5"/>
+                                        <ToolbarSpacer/>
+                                        <Button text="Add Base Map" icon="sap-icon://add"
+                                            type="Ghost" press="onAddCustomBaseMap"/>
+                                    </Toolbar>
+                                    <MessageStrip
+                                        text="URL must be an XYZ tile template with {z}/{x}/{y} placeholders."
+                                        type="None" showIcon="true" class="sapUiTinyMarginBottom"/>
+                                    <Table id="customBaseMapsTable" items="{mapConfig>/parsedBaseMaps}"
+                                        noDataText="No custom base maps configured"
+                                        class="sapUiTinyMarginTop" growing="false">
+                                        <columns>
+                                            <Column><Text text="Key"/></Column>
+                                            <Column><Text text="Display Name"/></Column>
+                                            <Column><Text text="Tile URL"/></Column>
+                                            <Column width="80px" hAlign="Center"><Text text="Default"/></Column>
+                                            <Column width="60px" hAlign="End"><Text text=""/></Column>
+                                        </columns>
+                                        <items>
+                                            <ColumnListItem>
+                                                <cells>
+                                                    <Text text="{mapConfig>key}"/>
+                                                    <Text text="{mapConfig>name}"/>
+                                                    <Text text="{mapConfig>url}" wrapping="false"/>
+                                                    <CheckBox selected="{mapConfig>isDefault}" enabled="false"/>
+                                                    <Button icon="sap-icon://delete" type="Transparent"
+                                                        press="onDeleteCustomBaseMap" tooltip="Remove"/>
+                                                </cells>
+                                            </ColumnListItem>
+                                        </items>
+                                    </Table>
+                                </content>
+                            </Panel>
+
+                            <!-- Clustering -->
+                            <Panel headerText="Marker Clustering" expandable="true" expanded="false"
+                                class="sapUiSmallMarginTop">
+                                <content>
+                                    <form:SimpleForm editable="true" layout="ResponsiveGridLayout"
+                                        labelSpanL="4" labelSpanM="4" columnsL="2" columnsM="1">
+                                        <Label text="Clustering Enabled"/>
+                                        <Switch id="mapCfgClusterEnabled"
+                                            state="{mapConfig>/clusteringEnabled}"
+                                            change="onMapConfigChange"
+                                            customTextOn="Yes" customTextOff="No"/>
+                                        <Label text="Cluster Radius (px)"/>
+                                        <Input id="mapCfgClusterRadius"
+                                            value="{mapConfig>/clusterRadius}"
+                                            type="Number" placeholder="60"/>
+                                        <Label text="Disable Clustering Above Zoom"/>
+                                        <Input id="mapCfgMaxZoomCluster"
+                                            value="{mapConfig>/maxZoomBeforeCluster}"
+                                            type="Number" placeholder="15"/>
+                                    </form:SimpleForm>
+                                </content>
+                            </Panel>
+
+                            <!-- Draw Tool Colours -->
+                            <Panel headerText="Draw Tool Colours" expandable="true" expanded="false"
+                                class="sapUiSmallMarginTop">
+                                <content>
+                                    <form:SimpleForm editable="true" layout="ResponsiveGridLayout"
+                                        labelSpanL="4" labelSpanM="4" columnsL="2" columnsM="1">
+                                        <Label text="Polygon Colour (hex)"/>
+                                        <Input id="mapCfgPolyColor"
+                                            value="{mapConfig>/drawPolygonColor}" placeholder="#0070F2"/>
+                                        <Label text="Rectangle Colour (hex)"/>
+                                        <Input id="mapCfgRectColor"
+                                            value="{mapConfig>/drawRectColor}" placeholder="#E9730C"/>
+                                        <Label text="Circle Colour (hex)"/>
+                                        <Input id="mapCfgCircleColor"
+                                            value="{mapConfig>/drawCircleColor}" placeholder="#107E3E"/>
+                                        <Label text="Fill Opacity (0–1)"/>
+                                        <Input id="mapCfgFillOpacity"
+                                            value="{mapConfig>/drawFillOpacity}"
+                                            type="Number" placeholder="0.12"/>
+                                    </form:SimpleForm>
+                                </content>
+                            </Panel>
+
+                            <!-- Notes -->
+                            <Panel headerText="Notes" expandable="true" expanded="false"
+                                class="sapUiSmallMarginTop">
+                                <content>
+                                    <TextArea id="mapCfgNotes" value="{mapConfig>/notes}"
+                                        rows="3" growing="true" width="100%"
+                                        placeholder="Internal notes about this map configuration..."/>
+                                </content>
+                            </Panel>
+
+                        </VBox>
+                    </IconTabFilter>
+
+                    <!-- ── Tab 4: Deployment Configuration ────────── -->
+                    <IconTabFilter id="tabDeploymentConfig" icon="sap-icon://shipping-status"
+                        text="Deployment Config" iconColor="Critical">
+                        <VBox class="sapUiMediumMarginBeginEnd sapUiMediumMarginTopBottom">
+
+                            <MessageStrip
+                                text="Deployment configuration controls which feature groups are active for this tenant. Disabling a group hides its screens and returns 403 on related entities. Changes take effect after save."
+                                type="Warning" showIcon="true" class="sapUiSmallMarginBottom"/>
+
+                            <!-- Deployment Mode Selector (Phase B9) -->
+                            <Panel headerText="Deployment Mode" expandable="false" class="sapUiSmallMarginBottom">
+                                <content>
+                                    <HBox alignItems="Center" class="sapUiSmallMargin">
+                                        <Label text="Mode:" design="Bold" class="sapUiSmallMarginEnd" width="80px"/>
+                                        <Select id="deploymentModeSelect"
+                                            selectedKey="{deploy>/deploymentMode}"
+                                            change="onDeploymentModeChange"
+                                            width="280px">
+                                            <core:Item key="FULL"     text="Full — All feature groups enabled"/>
+                                            <core:Item key="STANDARD" text="Standard — Core + Inspection + Compliance"/>
+                                            <core:Item key="CORE"     text="Core — Core Platform only"/>
+                                            <core:Item key="LITE"     text="Lite — Core minus some features"/>
+                                            <core:Item key="CUSTOM"   text="Custom — Manual group toggles"/>
+                                        </Select>
+                                        <Text id="deploymentModeHint" text=""
+                                            class="sapUiSmallMarginBegin"/>
+                                    </HBox>
+                                </content>
+                            </Panel>
+
+                            <!-- Feature Group Cards container — rendered by controller -->
+                            <Toolbar>
+                                <Title text="Feature Groups" level="H3"/>
+                                <ToolbarSpacer/>
+                                <Button text="Save Deployment Config" icon="sap-icon://save"
+                                    type="Emphasized" press="onSaveDeploymentConfig"/>
+                            </Toolbar>
+
+                            <VBox id="featureGroupCardsContainer" class="sapUiSmallMarginTop"/>
+
+                        </VBox>
+                    </IconTabFilter>
+
+                </items>
+            </IconTabBar>
+        </content>
+
+        <footer>
+            <OverflowToolbar>
+                <ToolbarSpacer/>
+                <Button text="Back to Home" icon="sap-icon://home"
+                    press="onNavBack" type="Transparent"/>
+            </OverflowToolbar>
+        </footer>
+
+    </Page>
+
+    <!-- ── Grant Jurisdiction Access Dialog ──────────────────── -->
+    <Dialog id="grantAccessDialog" title="Grant Jurisdiction Access"
+        contentWidth="640px" draggable="true" resizable="true">
+        <content>
+            <form:SimpleForm editable="true" layout="ResponsiveGridLayout"
+                labelSpanM="5" emptySpanM="0" columnsM="1"
+                xmlns:form="sap.ui.layout.form"
+                class="sapUiSmallMargin">
+                <Label text="User Ref (email / ID)" required="true"/>
+                <Input id="jaUserRef" placeholder="e.g. john.smith@nhvr.gov.au" maxLength="100"/>
+                <Label text="Jurisdiction" required="true"/>
+                <Select id="jaJurisdiction" width="100%">
+                    <items>
+                        <core:Item key="ALL" text="All Jurisdictions"/>
+                        <core:Item key="NSW" text="New South Wales (NSW)"/>
+                        <core:Item key="VIC" text="Victoria (VIC)"/>
+                        <core:Item key="QLD" text="Queensland (QLD)"/>
+                        <core:Item key="WA"  text="Western Australia (WA)"/>
+                        <core:Item key="SA"  text="South Australia (SA)"/>
+                        <core:Item key="TAS" text="Tasmania (TAS)"/>
+                        <core:Item key="ACT" text="ACT"/>
+                        <core:Item key="NT"  text="Northern Territory (NT)"/>
+                    </items>
+                </Select>
+                <Label text="Access Level" required="true"/>
+                <Select id="jaAccessLevel" width="100%">
+                    <items>
+                        <core:Item key="READ"  text="Read Only"/>
+                        <core:Item key="WRITE" text="Read + Write"/>
+                        <core:Item key="ADMIN" text="Admin (full)"/>
+                    </items>
+                </Select>
+                <Label text="Expires At (optional)"/>
+                <DatePicker id="jaExpiresAt" placeholder="Leave blank = no expiry"
+                    displayFormat="dd/MM/yyyy" valueFormat="yyyy-MM-dd"/>
+                <Label text="Notes (optional)"/>
+                <Input id="jaGrantNotes" placeholder="Reason for grant..."/>
+            </form:SimpleForm>
+        </content>
+        <buttons>
+            <Button text="Grant Access" type="Emphasized" press="onConfirmGrantAccess"/>
+            <Button text="Cancel" type="Transparent" press="onCancelGrantAccess"/>
+        </buttons>
+    </Dialog>
+
+    <!-- ── Deployment Impact Preview Dialog (Phase B10) ──────── -->
+    <Dialog id="deploymentImpactDialog" title="Deployment Impact Preview"
+        contentWidth="560px" draggable="true" resizable="true">
+        <content>
+            <VBox class="sapUiSmallMargin">
+                <MessageStrip
+                    text="Review the impact of the deployment configuration changes before saving."
+                    type="Warning" showIcon="true" class="sapUiSmallMarginBottom"/>
+
+                <Panel headerText="Summary" expandable="false">
+                    <content>
+                        <VBox class="sapUiSmallMargin">
+                            <HBox class="sapUiTinyMarginBottom">
+                                <Label text="Screens that will be hidden:" design="Bold" width="220px"/>
+                                <ObjectStatus id="impactHiddenScreens" text="0" state="None"/>
+                            </HBox>
+                            <HBox class="sapUiTinyMarginBottom">
+                                <Label text="Entities returning 403:" design="Bold" width="220px"/>
+                                <ObjectStatus id="impactBlockedEntities" text="0" state="None"/>
+                            </HBox>
+                            <HBox class="sapUiTinyMarginBottom">
+                                <Label text="Groups being disabled:" design="Bold" width="220px"/>
+                                <Text id="impactDisabledGroups" text="None"/>
+                            </HBox>
+                            <HBox id="impactCascadeRow" visible="false">
+                                <Label text="Cascade disables:" design="Bold" width="220px"/>
+                                <ObjectStatus id="impactCascadeDisables" text="" state="Warning"/>
+                            </HBox>
+                        </VBox>
+                    </content>
+                </Panel>
+
+                <!-- Disabled groups detail list -->
+                <Panel id="impactDetailPanel" headerText="Disabled Groups Detail"
+                    expandable="true" expanded="false"
+                    class="sapUiSmallMarginTop" visible="false">
+                    <content>
+                        <List id="impactDisabledGroupList"
+                            noDataText="No groups disabled"/>
+                    </content>
+                </Panel>
+            </VBox>
+        </content>
+        <buttons>
+            <Button text="Confirm and Save" type="Emphasized" press="onConfirmDeploymentSave"/>
+            <Button text="Cancel" type="Transparent" press="onCancelDeploymentSave"/>
+        </buttons>
+    </Dialog>
+
+</mvc:View>

@@ -1,0 +1,47 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:l="sap.ui.layout">
+    <!--
+        FieldWithHelp.fragment.xml — Labelled input + helper text below
+        This fragment is a pattern reference — most usage should inline
+        this pattern in form views directly. It is provided here as a
+        reusable atomic block.
+        Required model: fieldWithHelp JSONModel
+          fieldWithHelp/label       — field label text
+          fieldWithHelp/value       — two-way bound input value
+          fieldWithHelp/placeholder — input placeholder
+          fieldWithHelp/helperText  — hint text shown below input
+          fieldWithHelp/tooltip     — tooltip text on label info icon
+          fieldWithHelp/required    — boolean
+          fieldWithHelp/valueState  — "None" | "Error" | "Warning" | "Success"
+          fieldWithHelp/valueStateText — error/warning message
+        Controller: standard two-way binding; no special handler needed.
+    -->
+    <VBox class="sapUiTinyMarginBottom">
+        <HBox alignItems="Center">
+            <Label
+                text="{fieldWithHelp>/label}"
+                required="{fieldWithHelp>/required}"
+                design="Bold"
+                class="sapUiTinyMarginEnd"/>
+            <Button
+                icon="sap-icon://hint"
+                type="Transparent"
+                tooltip="{fieldWithHelp>/tooltip}"
+                visible="{= !!${fieldWithHelp>/tooltip} }"
+                class="sapUiNoMargin"
+                press=".onFieldHelpPress"/>
+        </HBox>
+        <Input
+            value="{fieldWithHelp>/value}"
+            placeholder="{fieldWithHelp>/placeholder}"
+            valueState="{= ${fieldWithHelp>/valueState} || 'None' }"
+            valueStateText="{fieldWithHelp>/valueStateText}"
+            width="100%"/>
+        <Text
+            text="{fieldWithHelp>/helperText}"
+            class="nhvrFieldHelper"
+            visible="{= !!${fieldWithHelp>/helperText} }"/>
+    </VBox>
+</core:FragmentDefinition>

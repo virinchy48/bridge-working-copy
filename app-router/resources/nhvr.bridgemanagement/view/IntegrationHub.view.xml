@@ -1,0 +1,834 @@
+<!-- ============================================================
+     NHVR Integration Hub
+     Tabs: System Integrations | Field Mapping | Cross-System Launch | GIS & Mapping
+     ============================================================ -->
+<mvc:View
+    controllerName="nhvr.bridgemanagement.controller.IntegrationHub"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:l="sap.ui.layout"
+    xmlns:form="sap.ui.layout.form"
+    displayBlock="true">
+
+    <Page id="integrationHubPage"
+        title="Integration Hub"
+        showNavButton="true"
+        navButtonPress="onNavBack"
+        backgroundDesign="List">
+
+        <headerContent>
+            <Button text="Refresh Status" icon="sap-icon://refresh"
+                press="onRefreshStatus" type="Transparent"/>
+        </headerContent>
+
+        <content>
+        <IconTabBar id="integrationTabBar" expanded="true" class="sapUiNoContentPadding">
+        <items>
+
+        <!-- ═══════════════════════════════════════════════════════
+             TAB 1 — System Integrations
+             Status tiles, sync actions, equipment mapping table, log
+        ═══════════════════════════════════════════════════════════ -->
+        <IconTabFilter id="tabIntegrations" icon="sap-icon://it-system" text="System Integrations">
+        <VBox class="sapUiResponsivePadding">
+
+            <!-- System Status Cards -->
+            <Title text="Connected Systems" level="H3"
+                class="sapUiMediumMarginTop sapUiSmallMarginBegin"/>
+
+            <HBox wrap="Wrap" class="sapUiSmallMarginBegin sapUiSmallMarginBottom">
+
+                <!-- S/4HANA -->
+                <GenericTile id="s4TileCard"
+                    header="SAP S/4HANA"
+                    subheader="Equipment Master + PM"
+                    class="sapUiTinyMargin nhvrIntegTile"
+                    press="onOpenS4Config">
+                    <TileContent id="s4TileContent">
+                        <VBox>
+                            <ObjectStatus id="s4StatusBadge" text="Checking…" state="None"
+                                icon="sap-icon://system-second-call"/>
+                            <Text id="s4LastSync" text="" class="sapUiTinyMarginTop nhvrSubText"/>
+                            <Text id="s4TotalSynced" text="" class="nhvrSubText"/>
+                        </VBox>
+                    </TileContent>
+                </GenericTile>
+
+                <!-- BANC -->
+                <GenericTile id="bancTileCard"
+                    header="Austroads BANC"
+                    subheader="National Bridge Condition DB"
+                    class="sapUiTinyMargin nhvrIntegTile"
+                    press="onOpenBancConfig">
+                    <TileContent id="bancTileContent">
+                        <VBox>
+                            <ObjectStatus id="bancStatusBadge" text="Checking…" state="None"
+                                icon="sap-icon://database"/>
+                            <Text id="bancLastSync" text="" class="sapUiTinyMarginTop nhvrSubText"/>
+                            <Text id="bancTotalSynced" text="" class="nhvrSubText"/>
+                        </VBox>
+                    </TileContent>
+                </GenericTile>
+
+                <!-- ESRI -->
+                <GenericTile id="esriTileCard"
+                    header="ESRI ArcGIS"
+                    subheader="Spatial Feature Service"
+                    class="sapUiTinyMargin nhvrIntegTile"
+                    press="onOpenEsriConfig">
+                    <TileContent id="esriTileContent">
+                        <VBox>
+                            <ObjectStatus id="esriStatusBadge" text="Checking…" state="None"
+                                icon="sap-icon://map"/>
+                            <Text id="esriLastSync" text="" class="sapUiTinyMarginTop nhvrSubText"/>
+                            <Text id="esriTotalSynced" text="" class="nhvrSubText"/>
+                        </VBox>
+                    </TileContent>
+                </GenericTile>
+
+                <!-- Add new system tile -->
+                <GenericTile id="addSystemTile"
+                    header="Add System"
+                    subheader="Configure new integration"
+                    class="sapUiTinyMargin nhvrIntegTileAdd"
+                    press="onOpenAddSystemDialog">
+                    <TileContent>
+                        <VBox alignItems="Center" justifyContent="Center">
+                            <core:Icon src="sap-icon://add-activity" size="2rem"
+                                class="sapUiMediumMarginTop" color="Positive"/>
+                        </VBox>
+                    </TileContent>
+                </GenericTile>
+
+            </HBox>
+
+            <!-- Quick Actions -->
+            <Title text="Quick Actions" level="H3"
+                class="sapUiMediumMarginTop sapUiSmallMarginBegin"/>
+
+            <HBox wrap="Wrap" class="sapUiSmallMargin">
+                <Button text="Sync All → S/4HANA"
+                    icon="sap-icon://upload-to-cloud"
+                    press="onSyncAllToS4"
+                    type="Emphasized"
+                    class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
+                    enabled="{= ${integrationModel>/s4Active} === true }"/>
+                <Button text="Export to BANC"
+                    icon="sap-icon://download"
+                    press="onExportToBANC"
+                    type="Default"
+                    class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
+                    enabled="{= ${integrationModel>/bancActive} === true }"/>
+                <Button text="Sync All → ArcGIS"
+                    icon="sap-icon://map-2"
+                    press="onSyncAllToESRI"
+                    type="Default"
+                    class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
+                    enabled="{= ${integrationModel>/esriActive} === true }"/>
+                <ToolbarSeparator/>
+                <Button text="Test All Connections"
+                    icon="sap-icon://ping"
+                    press="onTestAllConnections"
+                    type="Transparent"
+                    class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                <Button text="Configure…"
+                    icon="sap-icon://settings"
+                    press="onOpenConfigDialog"
+                    type="Transparent"
+                    class="sapUiTinyMarginBottom"/>
+            </HBox>
+
+            <!-- Sync Result strip -->
+            <MessageStrip id="syncResultStrip"
+                text=""
+                type="Information"
+                showCloseButton="true"
+                visible="false"
+                class="sapUiSmallMarginBegin sapUiSmallMarginEnd sapUiSmallMarginBottom"/>
+
+            <!-- S/4HANA Equipment Mappings table -->
+            <Panel id="s4MappingPanel"
+                headerText="S/4HANA Equipment Mappings"
+                expandable="true"
+                expanded="true"
+                class="sapUiSmallMarginBegin sapUiSmallMarginEnd sapUiMediumMarginTop">
+                <toolbar>
+                    <OverflowToolbar>
+                        <SearchField id="s4MappingSearch"
+                            width="250px"
+                            placeholder="Search by Bridge ID or Equipment No."
+                            search="onSearchS4Mapping"/>
+                        <ToolbarSpacer/>
+                        <Button text="Export Mapping" icon="sap-icon://excel-attachment"
+                            press="onExportS4Mapping" type="Transparent"/>
+                    </OverflowToolbar>
+                </toolbar>
+                <Table id="s4MappingTable"
+                    items="{
+                        path: '/S4EquipmentMappings',
+                        parameters: { $expand: 'bridge' }
+                    }"
+                    growing="true"
+                    growingThreshold="50"
+                    noDataText="No S/4HANA equipment mappings found">
+                    <columns>
+                        <Column><Text text="Bridge ID"/></Column>
+                        <Column><Text text="Bridge Name"/></Column>
+                        <Column><Text text="Equipment No."/></Column>
+                        <Column><Text text="Sync Direction"/></Column>
+                        <Column><Text text="Last Sync"/></Column>
+                        <Column><Text text="Status"/></Column>
+                        <Column hAlign="End"><Text text="Actions"/></Column>
+                    </columns>
+                    <items>
+                        <ColumnListItem vAlign="Middle">
+                            <cells>
+                                <Text text="{bridge/bridgeId}"/>
+                                <Text text="{bridge/name}"/>
+                                <ObjectIdentifier
+                                    title="{equipmentNumber}"
+                                    text="{assetNumber}"/>
+                                <ObjectStatus
+                                    text="{syncDirection}"
+                                    state="{= ${syncDirection} === 'BOTH' ? 'Success'
+                                           : ${syncDirection} === 'TO_S4' ? 'Information'
+                                           : 'Warning' }"/>
+                                <Text text="{
+                                    path: 'lastSyncAt',
+                                    type: 'sap.ui.model.type.DateTime',
+                                    formatOptions: { style: 'short' }
+                                }"/>
+                                <ObjectStatus
+                                    text="{lastSyncStatus}"
+                                    state="{= ${lastSyncStatus} === 'SUCCESS' ? 'Success'
+                                           : ${lastSyncStatus} === 'ERROR'   ? 'Error'
+                                           : 'None' }"/>
+                                <HBox>
+                                    <Button icon="sap-icon://upload-to-cloud"
+                                        tooltip="Sync this bridge to S/4HANA"
+                                        type="Transparent"
+                                        press="onSyncSingleToS4"/>
+                                    <Button icon="sap-icon://download-from-cloud"
+                                        tooltip="Pull updates from S/4HANA"
+                                        type="Transparent"
+                                        press="onPullFromS4"/>
+                                </HBox>
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
+            </Panel>
+
+            <!-- Integration Activity Log -->
+            <Panel id="integrationLogPanel"
+                headerText="Integration Activity Log"
+                expandable="true"
+                expanded="false"
+                class="sapUiSmallMarginBegin sapUiSmallMarginEnd sapUiMediumMarginTop sapUiMediumMarginBottom">
+                <toolbar>
+                    <OverflowToolbar>
+                        <Select id="logSystemFilter" change="onLogSystemFilter" width="130px">
+                            <core:Item key="ALL"    text="All Systems"/>
+                            <core:Item key="S4HANA" text="S/4HANA"/>
+                            <core:Item key="BANC"   text="BANC"/>
+                            <core:Item key="ESRI"   text="ESRI"/>
+                        </Select>
+                        <Select id="logStatusFilter" change="onLogStatusFilter" width="120px">
+                            <core:Item key="ALL"     text="All Status"/>
+                            <core:Item key="SUCCESS" text="Success"/>
+                            <core:Item key="ERROR"   text="Errors"/>
+                            <core:Item key="PARTIAL" text="Partial"/>
+                        </Select>
+                        <ToolbarSpacer/>
+                        <Button text="Clear Log" icon="sap-icon://delete"
+                            press="onClearLog" type="Transparent"/>
+                    </OverflowToolbar>
+                </toolbar>
+                <Table id="integrationLogTable"
+                    items="{
+                        path: '/IntegrationLogs',
+                        parameters: { $orderby: 'startedAt desc' }
+                    }"
+                    growing="true" growingThreshold="30"
+                    noDataText="No integration activity yet">
+                    <columns>
+                        <Column width="100px"><Text text="System"/></Column>
+                        <Column width="130px"><Text text="Operation"/></Column>
+                        <Column width="90px"><Text text="Status"/></Column>
+                        <Column width="70px" hAlign="End"><Text text="Records"/></Column>
+                        <Column width="80px" hAlign="End"><Text text="Duration"/></Column>
+                        <Column><Text text="Message / Error"/></Column>
+                        <Column width="140px"><Text text="Timestamp"/></Column>
+                    </columns>
+                    <items>
+                        <ColumnListItem vAlign="Middle">
+                            <cells>
+                                <ObjectStatus
+                                    text="{systemCode}"
+                                    state="{= ${systemCode} === 'S4HANA' ? 'Information'
+                                           : ${systemCode} === 'BANC'   ? 'Warning'
+                                           : 'Success' }"/>
+                                <Text text="{operationType}"/>
+                                <ObjectStatus
+                                    text="{status}"
+                                    state="{= ${status} === 'SUCCESS' ? 'Success'
+                                           : ${status} === 'ERROR'   ? 'Error'
+                                           : ${status} === 'PARTIAL' ? 'Warning'
+                                           : 'None' }"/>
+                                <Text text="{recordsSynced}" wrapping="false"/>
+                                <Text text="{= ${durationMs} ? (${durationMs} + 'ms') : '' }"/>
+                                <Text text="{errorMessage}" wrapping="false"
+                                    maxLines="1" tooltip="{errorMessage}"/>
+                                <Text text="{
+                                    path: 'startedAt',
+                                    type: 'sap.ui.model.type.DateTime',
+                                    formatOptions: { style: 'short' }
+                                }"/>
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
+            </Panel>
+
+            <!-- ── SAP EAM Data Mapping ── -->
+            <Panel expandable="true" expanded="true"
+                headerText="SAP EAM / S4HANA Object Mapping"
+                class="sapUiSmallMarginBeginEnd sapUiSmallMarginTop sapUiMediumMarginBottom">
+                <content>
+                    <VBox class="sapUiSmallMarginBeginEnd sapUiSmallMarginTopBottom">
+                        <Text text="This mapping defines how NHVR BMS objects correspond to standard SAP Plant Maintenance / EAM objects, enabling future S/4HANA integration."
+                            wrapping="true" class="sapUiSmallMarginBottom"/>
+                        <Table
+                            items="{integrationHub>/eamMapping}"
+                            alternateRowColors="true"
+                            fixedLayout="false">
+                            <headerToolbar>
+                                <Toolbar>
+                                    <Title text="NHVR BMS ↔ SAP S/4HANA EAM Object Map" level="H5"/>
+                                    <ToolbarSpacer/>
+                                    <Button text="Export Mapping" icon="sap-icon://excel-attachment" press="onExportEamMapping" type="Transparent"/>
+                                </Toolbar>
+                            </headerToolbar>
+                            <columns>
+                                <Column width="180px"><Text text="BMS Object"/></Column>
+                                <Column width="200px"><Text text="SAP S/4HANA Object"/></Column>
+                                <Column width="100px"><Text text="SAP T-Code"/></Column>
+                                <Column width="120px"><Text text="Integration Status"/></Column>
+                                <Column><Text text="Key Field Mapping"/></Column>
+                            </columns>
+                            <items>
+                                <ColumnListItem type="Inactive">
+                                    <cells>
+                                        <Text text="{integrationHub>bmsObject}"/>
+                                        <Text text="{integrationHub>sapObject}"/>
+                                        <ObjectStatus text="{integrationHub>tCode}" state="None"/>
+                                        <ObjectStatus
+                                            text="{integrationHub>status}"
+                                            state="{= ${integrationHub>status} === 'Active' ? 'Success' : ${integrationHub>status} === 'Planned' ? 'Warning' : 'None'}"/>
+                                        <Text text="{integrationHub>fieldMapping}" wrapping="true"/>
+                                    </cells>
+                                </ColumnListItem>
+                            </items>
+                        </Table>
+
+                        <!-- BANC Integration Section -->
+                        <Title text="AustRoads BANC Integration" level="H5" class="sapUiMediumMarginTop"/>
+                        <Text text="Bridge Asset National Collection (BANC) is the authoritative national register of bridge assets maintained by AustRoads. NHVR BMS can deep-link to BANC records via the Bridge External References."
+                            wrapping="true" class="sapUiTinyMarginBottom"/>
+                        <HBox alignItems="Center" class="sapUiSmallMarginTop">
+                            <VBox class="sapUiLargeMarginEnd">
+                                <Label text="Bridge → BANC Asset ID" design="Bold"/>
+                                <Text text="BridgeExternalRef.externalId where systemType = 'BANC'" class="sapUiSmallText"/>
+                            </VBox>
+                            <VBox class="sapUiLargeMarginEnd">
+                                <Label text="Deep-link URL pattern" design="Bold"/>
+                                <Text text="BridgeExternalRef.externalURL (stored per bridge, opens in browser tab)" class="sapUiSmallText"/>
+                            </VBox>
+                            <VBox>
+                                <Label text="Configuration" design="Bold"/>
+                                <Text text="Use BridgeDetail > External Systems tab to add BANC links per bridge" class="sapUiSmallText"/>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+                </content>
+            </Panel>
+
+        </VBox>
+        </IconTabFilter>
+
+        <!-- ═══════════════════════════════════════════════════════
+             TAB 2 — Field Mapping
+             Configure how BMS fields map to external system fields
+        ═══════════════════════════════════════════════════════════ -->
+        <IconTabFilter id="tabFieldMapping" icon="sap-icon://map" text="Field Mapping">
+        <VBox class="sapUiMediumMargin">
+
+            <MessageStrip
+                text="Define how BMS bridge data fields map to fields in each external system. Mappings are used during sync operations and cross-system launches."
+                type="Information" showIcon="true" class="sapUiSmallMarginBottom"/>
+
+            <!-- System selector + actions -->
+            <Toolbar design="Transparent" class="sapUiSmallMarginBottom">
+                <Label text="System:" class="sapUiSmallMarginEnd"/>
+                <SegmentedButton id="fieldMappingSystemBtn" selectionChange="onFieldMappingSystemChange">
+                    <items>
+                        <SegmentedButtonItem key="S4HANA" text="S/4HANA" icon="sap-icon://system-second-call"/>
+                        <SegmentedButtonItem key="BANC"   text="BANC"    icon="sap-icon://database"/>
+                        <SegmentedButtonItem key="ESRI"   text="ArcGIS"  icon="sap-icon://map"/>
+                        <SegmentedButtonItem key="CUSTOM" text="Custom"  icon="sap-icon://settings"/>
+                    </items>
+                </SegmentedButton>
+                <ToolbarSpacer/>
+                <Button text="Add Mapping"   icon="sap-icon://add"    type="Ghost"      press="onAddFieldMapping"   class="sapUiTinyMarginEnd"/>
+                <Button text="Save Mappings" icon="sap-icon://save"   type="Emphasized" press="onSaveFieldMappings" class="sapUiTinyMarginEnd"/>
+                <Button text="Load Defaults" icon="sap-icon://reset"  type="Transparent" press="onLoadDefaultMappings"/>
+            </Toolbar>
+
+            <!-- Field mapping table -->
+            <Table id="fieldMappingTable"
+                items="{integrationModel>/fieldMappings}"
+                growing="true" growingThreshold="30"
+                noDataText="No field mappings configured. Click 'Add Mapping' or 'Load Defaults'."
+                class="sapUiSmallMarginBottom">
+                <columns>
+                    <Column width="180px"><Text text="BMS Field"/></Column>
+                    <Column width="100px" hAlign="Center"><Text text="Direction"/></Column>
+                    <Column width="190px"><Text text="External Field"/></Column>
+                    <Column><Text text="Transform / Notes"/></Column>
+                    <Column width="80px" hAlign="Center"><Text text="Active"/></Column>
+                    <Column width="90px" hAlign="End"><Text text=""/></Column>
+                </columns>
+                <items>
+                    <ColumnListItem vAlign="Middle">
+                        <cells>
+                            <ObjectIdentifier
+                                title="{integrationModel>bmsField}"
+                                text="{integrationModel>bmsFieldLabel}"/>
+                            <ObjectStatus
+                                text="{integrationModel>direction}"
+                                state="{= ${integrationModel>direction} === 'BOTH'   ? 'Success'
+                                       : ${integrationModel>direction} === 'TO_EXT'  ? 'Information'
+                                       : 'Warning' }"/>
+                            <ObjectIdentifier
+                                title="{integrationModel>externalField}"
+                                text="{integrationModel>externalFieldLabel}"/>
+                            <Text text="{integrationModel>transformation}"
+                                wrapping="false" maxLines="1"
+                                tooltip="{integrationModel>transformation}"/>
+                            <ObjectStatus
+                                icon="{= ${integrationModel>isActive} ? 'sap-icon://accept' : 'sap-icon://decline'}"
+                                state="{= ${integrationModel>isActive} ? 'Success' : 'Error'}"/>
+                            <HBox>
+                                <Button icon="sap-icon://edit"   type="Transparent" press="onEditFieldMapping"   tooltip="Edit"/>
+                                <Button icon="sap-icon://delete" type="Transparent" press="onDeleteFieldMapping" tooltip="Delete"/>
+                            </HBox>
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+
+            <!-- BMS Bridge fields reference -->
+            <Panel headerText="Available BMS Bridge Fields (reference)" expandable="true" expanded="false"
+                class="sapUiSmallMarginTop">
+                <content>
+                    <MessageStrip
+                        text="Use these exact field names on the BMS side of your mappings."
+                        type="None" showIcon="true" class="sapUiTinyMarginBottom"/>
+                    <HBox wrap="Wrap" class="sapUiSmallMarginBeginEnd sapUiSmallMarginBottom">
+                        <ObjectStatus text="bridgeId"          state="Information" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                        <ObjectStatus text="name"              state="Information" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                        <ObjectStatus text="region"            state="Information" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                        <ObjectStatus text="state"             state="Information" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                        <ObjectStatus text="structureType"     state="Information" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                        <ObjectStatus text="material"          state="Information" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                        <ObjectStatus text="latitude"          state="Information" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                        <ObjectStatus text="longitude"         state="Information" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                        <ObjectStatus text="condition"         state="Information" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                        <ObjectStatus text="conditionScore"    state="Information" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                        <ObjectStatus text="conditionRating"   state="Information" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                        <ObjectStatus text="inspectionDate"    state="Information" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                        <ObjectStatus text="spanLengthM"       state="Information" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                        <ObjectStatus text="deckWidthM"        state="Information" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                        <ObjectStatus text="clearanceHeightM"  state="Information" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                        <ObjectStatus text="postingStatus"     state="Information" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                        <ObjectStatus text="yearBuilt"         state="Information" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                        <ObjectStatus text="assetOwner"        state="Information" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                        <ObjectStatus text="lga"               state="Information" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                        <ObjectStatus text="designLoad"        state="Information" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                        <ObjectStatus text="nhvrRef"           state="Information" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                        <ObjectStatus text="gazetteRef"        state="Information" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                    </HBox>
+                </content>
+            </Panel>
+
+        </VBox>
+        </IconTabFilter>
+
+        <!-- ═══════════════════════════════════════════════════════
+             TAB 3 — Cross-System Launch
+             Map BMS bridge ID → external system ID → deep-link URL
+        ═══════════════════════════════════════════════════════════ -->
+        <IconTabFilter id="tabCrossLaunch" icon="sap-icon://action-settings" text="Cross-System Launch">
+        <VBox class="sapUiMediumMargin">
+
+            <MessageStrip
+                text="Cross-System Launch lets users open a bridge record directly in an external system (e.g. S/4HANA Equipment, GIS portal) from the BMS Bridge Detail page. The BMS bridge ID is resolved to the external system's equivalent ID via the External References registry."
+                type="Information" showIcon="true" class="sapUiSmallMarginBottom"/>
+
+            <!-- How it works panel -->
+            <Panel headerText="How it works" expandable="true" expanded="false" class="sapUiSmallMarginBottom">
+                <content>
+                    <VBox class="sapUiSmallMarginBeginEnd sapUiSmallMarginTopBottom">
+                        <HBox alignItems="Start" class="sapUiTinyMarginBottom">
+                            <core:Icon src="sap-icon://step" color="Critical" class="sapUiSmallMarginEnd sapUiSmallMarginTop"/>
+                            <Text text="1. When a user clicks 'Open in [System]' on a Bridge Detail page, BMS looks up the bridge's External References for a matching systemType." wrapping="true"/>
+                        </HBox>
+                        <HBox alignItems="Start" class="sapUiTinyMarginBottom">
+                            <core:Icon src="sap-icon://step" color="Critical" class="sapUiSmallMarginEnd sapUiSmallMarginTop"/>
+                            <Text text="2. The matched externalId is substituted into the Launch URL Template in place of {{externalId}}." wrapping="true"/>
+                        </HBox>
+                        <HBox alignItems="Start" class="sapUiTinyMarginBottom">
+                            <core:Icon src="sap-icon://step" color="Critical" class="sapUiSmallMarginEnd sapUiSmallMarginTop"/>
+                            <Text text="3. The resolved URL opens in a new browser tab, navigating directly to the bridge record in the external system." wrapping="true"/>
+                        </HBox>
+                        <HBox alignItems="Start">
+                            <core:Icon src="sap-icon://step" color="Critical" class="sapUiSmallMarginEnd sapUiSmallMarginTop"/>
+                            <Text text="Example URL Template: https://s4.example.com/sap/bc/ui5_ui5/flp#Equipment-displayFactSheet?Equipment={{externalId}}&amp;plant=AU01" wrapping="true"/>
+                        </HBox>
+                    </VBox>
+                </content>
+            </Panel>
+
+            <!-- Cross-launch system configurations table -->
+            <Toolbar design="Transparent" class="sapUiSmallMarginBottom">
+                <Title text="Launch Configurations" level="H4"/>
+                <ToolbarSpacer/>
+                <Button text="Add System" icon="sap-icon://add" type="Emphasized"
+                    press="onAddCrossLaunchSystem" class="sapUiTinyMarginEnd"/>
+                <Button text="Save All"   icon="sap-icon://save" type="Default"
+                    press="onSaveCrossLaunchConfigs"/>
+            </Toolbar>
+
+            <Table id="crossLaunchTable"
+                items="{integrationModel>/crossLaunchConfigs}"
+                growing="false"
+                noDataText="No cross-launch systems configured. Click 'Add System' to begin.">
+                <columns>
+                    <Column width="100px"><Text text="System Code"/></Column>
+                    <Column width="160px"><Text text="Display Name"/></Column>
+                    <Column width="120px"><Text text="Icon"/></Column>
+                    <Column width="130px"><Text text="ID Source (ExternalRef)"/></Column>
+                    <Column><Text text="URL Template  (use {{externalId}})"/></Column>
+                    <Column width="80px" hAlign="Center"><Text text="Enabled"/></Column>
+                    <Column width="100px" hAlign="End"><Text text="Actions"/></Column>
+                </columns>
+                <items>
+                    <ColumnListItem vAlign="Middle">
+                        <cells>
+                            <ObjectStatus text="{integrationModel>systemCode}" state="Information"/>
+                            <Text text="{integrationModel>displayName}"/>
+                            <core:Icon src="{integrationModel>iconSrc}" size="1.2rem"/>
+                            <Text text="{integrationModel>externalRefType}"/>
+                            <Text text="{integrationModel>urlTemplate}" wrapping="false" maxLines="1"
+                                tooltip="{integrationModel>urlTemplate}"/>
+                            <Switch state="{integrationModel>isEnabled}"
+                                change="onCrossLaunchToggle"/>
+                            <HBox>
+                                <Button icon="sap-icon://edit"    type="Transparent" press="onEditCrossLaunchSystem"  tooltip="Edit"/>
+                                <Button icon="sap-icon://play"    type="Transparent" press="onTestCrossLaunch"        tooltip="Test launch"/>
+                                <Button icon="sap-icon://delete"  type="Transparent" press="onDeleteCrossLaunchSystem" tooltip="Delete"/>
+                            </HBox>
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+
+            <!-- Test panel -->
+            <Panel headerText="Test a Cross-System Launch" expandable="true" expanded="true"
+                class="sapUiMediumMarginTop">
+                <content>
+                    <MessageStrip
+                        text="Enter a BMS Bridge ID and choose a target system to preview the resolved launch URL."
+                        type="None" showIcon="true" class="sapUiTinyMarginBottom"/>
+                    <HBox alignItems="End" wrap="Wrap" class="sapUiSmallMarginBeginEnd sapUiSmallMarginBottom">
+                        <VBox class="sapUiSmallMarginEnd">
+                            <Label text="Bridge ID"/>
+                            <Input id="crossLaunchTestBridgeId" width="150px" placeholder="BMS-0001"/>
+                        </VBox>
+                        <VBox class="sapUiSmallMarginEnd">
+                            <Label text="Target System"/>
+                            <Select id="crossLaunchTestSystem" width="180px">
+                                <core:Item key="S4HANA" text="SAP S/4HANA"/>
+                                <core:Item key="BANC"   text="Austroads BANC"/>
+                                <core:Item key="ESRI"   text="ESRI ArcGIS"/>
+                            </Select>
+                        </VBox>
+                        <Button text="Resolve &amp; Preview" icon="sap-icon://simulate"
+                            type="Emphasized" press="onPreviewCrossLaunch"
+                            class="sapUiSmallMarginBottom"/>
+                    </HBox>
+                    <VBox id="crossLaunchPreviewBox" visible="false"
+                        class="sapUiSmallMarginBeginEnd sapUiSmallMarginBottom">
+                        <Label text="Resolved External ID:"/>
+                        <Text id="crossLaunchResolvedId" text="" class="sapUiTinyMarginBottom"/>
+                        <Label text="Launch URL:"/>
+                        <Link id="crossLaunchResolvedUrl" text="" href="" target="_blank" wrapping="true"/>
+                    </VBox>
+                </content>
+            </Panel>
+
+        </VBox>
+        </IconTabFilter>
+
+        <!-- ═══════════════════════════════════════════════════════
+             TAB 4 — GIS &amp; Mapping
+             ESRI ArcGIS config, viewport, clustering, reference layers
+        ═══════════════════════════════════════════════════════════ -->
+        <IconTabFilter id="tabGIS" icon="sap-icon://map-2" text="GIS &amp; Mapping">
+        <VBox class="sapUiMediumMargin">
+
+            <MessageStrip
+                text="GIS configuration controls map viewport, base layers, reference overlays and ESRI ArcGIS integration. Changes are applied on next Map view open."
+                type="Information" showIcon="true" class="sapUiSmallMarginBottom"/>
+
+            <!-- ESRI ArcGIS config -->
+            <Panel headerText="ESRI ArcGIS Integration (REST — No SDK / No License Required)"
+                expandable="true" expanded="true" class="sapUiSmallMarginBottom">
+                <content>
+                    <MessageStrip
+                        text="BMS uses ESRI REST APIs directly — no ArcGIS JS SDK or ESRI license needed. Public tile services (World Imagery, Topo, Hillshade) are free with attribution."
+                        type="None" showIcon="true" class="sapUiTinyMarginBottom"/>
+                    <form:SimpleForm id="esriConfigForm" editable="true" layout="ResponsiveGridLayout"
+                        labelSpanL="4" labelSpanM="5" columnsL="1" columnsM="1">
+                        <form:content>
+                            <Label text="ESRI Portal URL"/>
+                            <Input id="ihEsriPortal" value="{mapConfig>/esriPortalUrl}"
+                                placeholder="https://www.arcgis.com"/>
+                            <Label text="Feature Service URL"/>
+                            <Input id="ihEsriFeatureSvc" value="{mapConfig>/esriFeatureServiceUrl}"
+                                placeholder="https://services.arcgis.com/.../FeatureServer/0"/>
+                            <Label text="API Key (optional — private layers only)"/>
+                            <Input id="ihEsriApiKey" type="Password" value="{mapConfig>/esriApiKey}"
+                                placeholder="Leave empty for public services"/>
+                            <Label text="Default Query Where Clause"/>
+                            <Input id="ihEsriQuery" value="{mapConfig>/esriQueryWhere}"
+                                placeholder="1=1"/>
+                        </form:content>
+                    </form:SimpleForm>
+                    <HBox class="sapUiSmallMarginBeginEnd sapUiSmallMarginBottom">
+                        <Button text="Save ESRI Config" icon="sap-icon://save" type="Emphasized"
+                            press="onSaveEsriConfig" class="sapUiTinyMarginEnd"/>
+                        <Button text="Test Connection"  icon="sap-icon://ping"  type="Default"
+                            press="onTestEsriConnection"/>
+                    </HBox>
+                </content>
+            </Panel>
+
+            <!-- Default Viewport -->
+            <Panel headerText="Default Viewport &amp; Projection"
+                expandable="true" expanded="true" class="sapUiSmallMarginBottom">
+                <content>
+                    <form:SimpleForm editable="true" layout="ResponsiveGridLayout"
+                        labelSpanL="4" labelSpanM="5" columnsL="2" columnsM="1">
+                        <form:content>
+                            <Label text="Default Centre — Latitude"/>
+                            <Input id="ihMapCfgLat" value="{mapConfig>/defaultCenter_lat}"
+                                type="Number" placeholder="-27.0"/>
+                            <Label text="Default Centre — Longitude"/>
+                            <Input id="ihMapCfgLng" value="{mapConfig>/defaultCenter_lng}"
+                                type="Number" placeholder="133.0"/>
+                            <Label text="Default Zoom Level (1–18)"/>
+                            <Input id="ihMapCfgZoom" value="{mapConfig>/defaultZoom}"
+                                type="Number" placeholder="5"/>
+                            <Label text="Base Map"/>
+                            <Select id="ihMapCfgBaseMap" selectedKey="{mapConfig>/defaultBaseMap}">
+                                <core:Item key="osm"       text="OpenStreetMap (Street)"/>
+                                <core:Item key="satellite" text="ESRI World Imagery (Satellite)"/>
+                                <core:Item key="topo"      text="ESRI World Topo"/>
+                                <core:Item key="dark"      text="CartoDB Dark Matter"/>
+                            </Select>
+                            <Label text="Coordinate Reference System"/>
+                            <Input id="ihMapCfgCRS" value="{mapConfig>/projection}"
+                                placeholder="EPSG:4326"/>
+                        </form:content>
+                    </form:SimpleForm>
+                    <HBox class="sapUiSmallMarginBeginEnd sapUiSmallMarginBottom">
+                        <Button text="Save Viewport"    icon="sap-icon://save"  type="Emphasized"
+                            press="onSaveGISViewport" class="sapUiTinyMarginEnd"/>
+                        <Button text="Reset to Default" icon="sap-icon://reset" type="Transparent"
+                            press="onResetGISViewport"/>
+                    </HBox>
+                </content>
+            </Panel>
+
+            <!-- Clustering -->
+            <Panel headerText="Marker Clustering" expandable="true" expanded="false"
+                class="sapUiSmallMarginBottom">
+                <content>
+                    <form:SimpleForm editable="true" layout="ResponsiveGridLayout"
+                        labelSpanL="4" labelSpanM="5" columnsL="2" columnsM="1">
+                        <form:content>
+                            <Label text="Clustering Enabled"/>
+                            <Switch id="ihClusterEnabled" state="{mapConfig>/clusteringEnabled}"
+                                customTextOn="Yes" customTextOff="No"/>
+                            <Label text="Cluster Radius (px)"/>
+                            <Input id="ihClusterRadius" value="{mapConfig>/clusterRadius}"
+                                type="Number" placeholder="60"/>
+                            <Label text="Disable Above Zoom"/>
+                            <Input id="ihClusterMaxZoom" value="{mapConfig>/maxZoomBeforeCluster}"
+                                type="Number" placeholder="15"/>
+                        </form:content>
+                    </form:SimpleForm>
+                    <HBox class="sapUiSmallMarginBeginEnd sapUiSmallMarginBottom">
+                        <Button text="Save Clustering" icon="sap-icon://save" type="Emphasized"
+                            press="onSaveGISClustering"/>
+                    </HBox>
+                </content>
+            </Panel>
+
+            <!-- Reference / Overlay Layers -->
+            <Panel headerText="Reference / Overlay Layers" expandable="true" expanded="false">
+                <content>
+                    <MessageStrip
+                        text="Reference layers appear in the Map's layer panel. Set isDefault=true to auto-load on startup."
+                        type="Information" showIcon="true" class="sapUiTinyMarginBottom"/>
+                    <Toolbar design="Transparent">
+                        <ToolbarSpacer/>
+                        <Button text="Add Layer" icon="sap-icon://add" type="Ghost"
+                            press="onAddGISReferenceLayer"/>
+                    </Toolbar>
+                    <Table id="ihRefLayersTable"
+                        items="{mapConfig>/parsedRefLayers}"
+                        noDataText="No reference layers configured" growing="false"
+                        class="sapUiTinyMarginTop">
+                        <columns>
+                            <Column width="120px"><Text text="ID"/></Column>
+                            <Column width="160px"><Text text="Name"/></Column>
+                            <Column width="80px" hAlign="Center"><Text text="Type"/></Column>
+                            <Column><Text text="URL"/></Column>
+                            <Column width="80px" hAlign="Center"><Text text="Auto-load"/></Column>
+                            <Column width="60px" hAlign="End"><Text text=""/></Column>
+                        </columns>
+                        <items>
+                            <ColumnListItem>
+                                <cells>
+                                    <Text text="{mapConfig>id}"/>
+                                    <Text text="{mapConfig>name}"/>
+                                    <ObjectStatus text="{mapConfig>type}" state="Information"/>
+                                    <Link text="{mapConfig>url}" href="{mapConfig>url}"
+                                        target="_blank" wrapping="false"/>
+                                    <CheckBox selected="{mapConfig>isDefault}" enabled="false"/>
+                                    <Button icon="sap-icon://edit" type="Transparent"
+                                        press="onEditGISReferenceLayer" tooltip="Edit"/>
+                                </cells>
+                            </ColumnListItem>
+                        </items>
+                    </Table>
+                </content>
+            </Panel>
+
+        </VBox>
+        </IconTabFilter>
+
+        </items>
+        </IconTabBar>
+        </content>
+    </Page>
+
+    <!-- ── Field Mapping Dialog ──────────────────────────────────── -->
+    <Dialog id="fieldMappingDialog"
+        title="{integrationModel>/fieldMappingDialog/title}"
+        contentWidth="580px"
+        draggable="true" resizable="true">
+        <content>
+            <form:SimpleForm editable="true" layout="ResponsiveGridLayout"
+                labelSpanL="4" labelSpanM="4" columnsL="1" columnsM="1"
+                class="sapUiSmallMarginTop sapUiSmallMarginBeginEnd">
+                <form:content>
+                    <Label text="BMS Field Name" required="true"/>
+                    <Input id="fmBmsField" value="{integrationModel>/fieldMappingDialog/bmsField}"
+                        placeholder="e.g. bridgeId, name, conditionScore"/>
+                    <Label text="BMS Field Label (display)"/>
+                    <Input id="fmBmsFieldLabel" value="{integrationModel>/fieldMappingDialog/bmsFieldLabel}"
+                        placeholder="e.g. Bridge ID"/>
+                    <Label text="Direction"/>
+                    <Select id="fmDirection" selectedKey="{integrationModel>/fieldMappingDialog/direction}">
+                        <core:Item key="BOTH"    text="Both Directions (Bidirectional)"/>
+                        <core:Item key="TO_EXT"  text="BMS → External System only"/>
+                        <core:Item key="FROM_EXT" text="External System → BMS only"/>
+                    </Select>
+                    <Label text="External System Field" required="true"/>
+                    <Input id="fmExtField" value="{integrationModel>/fieldMappingDialog/externalField}"
+                        placeholder="e.g. EquipmentNumber, BRIDGE_ID, objectId"/>
+                    <Label text="External Field Label (display)"/>
+                    <Input id="fmExtFieldLabel" value="{integrationModel>/fieldMappingDialog/externalFieldLabel}"
+                        placeholder="e.g. Equipment No."/>
+                    <Label text="Transformation / Formula"/>
+                    <TextArea id="fmTransformation" value="{integrationModel>/fieldMappingDialog/transformation}"
+                        rows="2" width="100%"
+                        placeholder="e.g. value.toUpperCase(), LEFT(value,10), 'BRIDGE_' + value"/>
+                    <Label text="Active"/>
+                    <Switch id="fmIsActive" state="{integrationModel>/fieldMappingDialog/isActive}"/>
+                </form:content>
+            </form:SimpleForm>
+        </content>
+        <beginButton>
+            <Button text="Save Mapping" type="Emphasized" press="onConfirmFieldMapping"/>
+        </beginButton>
+        <endButton>
+            <Button text="Cancel" press="onCancelFieldMapping"/>
+        </endButton>
+    </Dialog>
+
+    <!-- ── Cross-Launch System Dialog ───────────────────────────── -->
+    <Dialog id="crossLaunchDialog"
+        title="{integrationModel>/crossLaunchDialog/title}"
+        contentWidth="620px"
+        draggable="true" resizable="true">
+        <content>
+            <MessageStrip
+                text="URL Template placeholders: {{externalId}} = resolved external system ID, {{bridgeId}} = BMS bridge ID, {{bridgeName}} = bridge name"
+                type="Information" showIcon="true"
+                class="sapUiSmallMarginTop sapUiSmallMarginBeginEnd"/>
+            <form:SimpleForm editable="true" layout="ResponsiveGridLayout"
+                labelSpanL="4" labelSpanM="4" columnsL="1" columnsM="1"
+                class="sapUiSmallMarginBeginEnd">
+                <form:content>
+                    <Label text="System Code" required="true"/>
+                    <Input id="clSystemCode" value="{integrationModel>/crossLaunchDialog/systemCode}"
+                        placeholder="e.g. S4HANA, BANC, GIS_PORTAL, ASSET_DB"/>
+                    <Label text="Display Name" required="true"/>
+                    <Input id="clDisplayName" value="{integrationModel>/crossLaunchDialog/displayName}"
+                        placeholder="e.g. SAP S/4HANA Equipment"/>
+                    <Label text="Icon"/>
+                    <Input id="clIconSrc" value="{integrationModel>/crossLaunchDialog/iconSrc}"
+                        placeholder="sap-icon://system-second-call"/>
+                    <Label text="External Ref Type (from BridgeExternalRefs)" required="true"/>
+                    <Input id="clExternalRefType" value="{integrationModel>/crossLaunchDialog/externalRefType}"
+                        placeholder="e.g. S4HANA, BANC, VICROADS, GIS"/>
+                    <Label text="Launch URL Template" required="true"/>
+                    <TextArea id="clUrlTemplate" value="{integrationModel>/crossLaunchDialog/urlTemplate}"
+                        rows="3" width="100%"
+                        placeholder="https://s4.example.com/flp#Equipment-display?Equipment={{externalId}}"/>
+                    <Label text="Open In"/>
+                    <Select id="clOpenIn" selectedKey="{integrationModel>/crossLaunchDialog/openIn}">
+                        <core:Item key="_blank" text="New Tab"/>
+                        <core:Item key="_self"  text="Same Tab"/>
+                    </Select>
+                    <Label text="Enabled"/>
+                    <Switch id="clIsEnabled" state="{integrationModel>/crossLaunchDialog/isEnabled}"/>
+                    <Label text="Notes"/>
+                    <TextArea id="clNotes" value="{integrationModel>/crossLaunchDialog/notes}" rows="2" width="100%"/>
+                </form:content>
+            </form:SimpleForm>
+        </content>
+        <beginButton>
+            <Button text="Save" type="Emphasized" press="onConfirmCrossLaunchSystem"/>
+        </beginButton>
+        <endButton>
+            <Button text="Cancel" press="onCancelCrossLaunchSystem"/>
+        </endButton>
+    </Dialog>
+
+</mvc:View>

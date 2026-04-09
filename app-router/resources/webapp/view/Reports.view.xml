@@ -1,0 +1,185 @@
+<!-- ============================================================
+     NHVR Reports & Analytics — Hub + Report Output dual-view
+     Hub: 15 report cards with category filter and search
+     Output: Criteria panel + results table + export
+     ============================================================ -->
+<mvc:View
+    controllerName="nhvr.bridgemanagement.controller.Reports"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.f"
+    xmlns:l="sap.ui.layout"
+    displayBlock="true">
+
+    <f:DynamicPage id="reportsPage" toggleHeaderOnTitleClick="false" fitContent="true">
+        <f:title>
+            <f:DynamicPageTitle>
+                <f:heading>
+                    <Title text="Reports &amp; Analytics" level="H1"/>
+                </f:heading>
+                <f:snappedHeading>
+                    <Title text="Reports &amp; Analytics" level="H2"/>
+                </f:snappedHeading>
+                <f:actions>
+                    <Button icon="sap-icon://hint" type="Transparent" press="onInfoPressReports"
+                        tooltip="Reports guide and help"/>
+                    <Button text="Refresh" icon="sap-icon://refresh" press="onRefresh" type="Transparent"/>
+                    <Button text="Home" icon="sap-icon://home" press="onNavHome" type="Transparent"/>
+                </f:actions>
+                <f:breadcrumbs>
+                    <Breadcrumbs>
+                        <Link text="Home" press="onNavHome"/>
+                        <Link text="Reports"/>
+                    </Breadcrumbs>
+                </f:breadcrumbs>
+            </f:DynamicPageTitle>
+        </f:title>
+
+        <f:content>
+            <VBox id="reportsPageContent" class="sapUiSmallMargin">
+
+                <!-- ═══════════════════════════════════════════════════
+                     HUB VIEW — Report catalogue cards
+                     ═══════════════════════════════════════════════════ -->
+                <VBox id="hubSection" visible="{reports>/hubView}">
+
+                    <!-- Category filter + search bar -->
+                    <HBox alignItems="Center" class="sapUiSmallMarginBottom" wrap="Wrap">
+                        <IconTabBar id="reportsTabBar" select="onCategoryTab"
+                            selectedKey="ALL" stretchContentHeight="false"
+                            headerMode="Inline" class="sapUiSmallMarginEnd">
+                            <items>
+                                <IconTabFilter key="ALL" text="All Reports"/>
+                                <IconTabFilter key="ASSET" text="Asset Health" icon="sap-icon://building"/>
+                                <IconTabFilter key="COMPLIANCE" text="Compliance" icon="sap-icon://shield"/>
+                                <IconTabFilter key="INSPECTIONS" text="Inspections" icon="sap-icon://inspection"/>
+                                <IconTabFilter key="RESTRICTIONS" text="Restrictions" icon="sap-icon://warning2"/>
+                                <IconTabFilter key="NETWORK" text="Network" icon="sap-icon://connected"/>
+                                <IconTabFilter key="TRENDS" text="Trends" icon="sap-icon://line-chart"/>
+                            </items>
+                        </IconTabBar>
+                        <SearchField id="reportSearch" placeholder="Search reports..."
+                            liveChange="onReportSearch" width="300px"/>
+                    </HBox>
+
+                    <!-- Recently viewed -->
+                    <VBox id="recentRow" visible="false" class="sapUiSmallMarginBottom">
+                        <Label text="Recently Viewed:" class="sapUiTinyMarginBottom"/>
+                        <HBox id="recentTiles" wrap="Wrap"/>
+                    </VBox>
+
+                    <!-- Report cards container — populated by _buildReportCards() -->
+                    <FlexBox id="reportCardsContainer" wrap="Wrap" justifyContent="Start"
+                        alignItems="Stretch" class="sapUiSmallMargin">
+                        <!-- Cards injected dynamically by controller -->
+                    </FlexBox>
+
+                    <!-- No results strip -->
+                    <MessageStrip id="noCardsStrip" text="No reports match your filter criteria."
+                        type="Information" showIcon="true" visible="false"
+                        class="sapUiSmallMargin"/>
+                </VBox>
+
+                <!-- ═══════════════════════════════════════════════════
+                     REPORT OUTPUT VIEW — Criteria + Results
+                     ═══════════════════════════════════════════════════ -->
+                <VBox id="outputSection" visible="{= !${reports>/hubView}}">
+
+                    <!-- Back button + report title -->
+                    <HBox alignItems="Center" class="sapUiSmallMarginBottom">
+                        <Button text="← Reports Hub" press="onBackToHub" type="Transparent"
+                            class="sapUiSmallMarginEnd"/>
+                        <Title id="resultsCountTitle" text="Results" level="H3"/>
+                    </HBox>
+
+                    <!-- Report info drawer dialog -->
+                    <Dialog id="infoDrawerDialog" title="Report Information" contentWidth="500px"
+                        draggable="true" resizable="true">
+                        <VBox class="sapUiSmallMargin">
+                            <Label text="Purpose" design="Bold"/>
+                            <Text text="{reports>/currentReport/info/purpose}" class="sapUiTinyMarginBottom"/>
+                            <Label text="Intended Users" design="Bold"/>
+                            <Text text="{reports>/currentReport/info/users}" class="sapUiTinyMarginBottom"/>
+                            <Label text="Data Sources" design="Bold"/>
+                            <Text text="{reports>/currentReport/info/sources}" class="sapUiTinyMarginBottom"/>
+                            <Label text="Logic" design="Bold"/>
+                            <Text text="{reports>/currentReport/info/logic}" class="sapUiTinyMarginBottom"/>
+                            <Label text="Refresh" design="Bold"/>
+                            <Text text="{reports>/currentReport/info/refresh}"/>
+                        </VBox>
+                        <beginButton>
+                            <Button text="Close" press="onInfoDrawerClose"/>
+                        </beginButton>
+                    </Dialog>
+
+                    <!-- Selection criteria panel -->
+                    <Panel headerText="Selection Criteria" expandable="true" expanded="true"
+                        class="sapUiSmallMarginBottom">
+                        <HBox wrap="Wrap" alignItems="End" class="sapUiSmallMargin">
+                            <VBox class="sapUiSmallMarginEnd">
+                                <Label text="Date Range"/>
+                                <DateRangeSelection id="criteriaDateRange" width="260px"/>
+                            </VBox>
+                            <VBox class="sapUiSmallMarginEnd">
+                                <Label text="State"/>
+                                <Select id="criteriaState" width="140px">
+                                    <core:Item key="" text="All States"/>
+                                    <core:Item key="NSW" text="NSW"/>
+                                    <core:Item key="VIC" text="VIC"/>
+                                    <core:Item key="QLD" text="QLD"/>
+                                    <core:Item key="WA" text="WA"/>
+                                    <core:Item key="SA" text="SA"/>
+                                    <core:Item key="TAS" text="TAS"/>
+                                    <core:Item key="ACT" text="ACT"/>
+                                    <core:Item key="NT" text="NT"/>
+                                </Select>
+                            </VBox>
+                            <VBox class="sapUiSmallMarginEnd">
+                                <Label text="Condition Min"/>
+                                <Input id="criteriaCondMin" type="Number" width="80px" placeholder="1"/>
+                            </VBox>
+                            <VBox class="sapUiSmallMarginEnd">
+                                <Label text="Condition Max"/>
+                                <Input id="criteriaCondMax" type="Number" width="80px" placeholder="10"/>
+                            </VBox>
+                            <VBox class="sapUiSmallMarginEnd">
+                                <Label text="Search"/>
+                                <Input id="criteriaSearch" width="200px" placeholder="Bridge name or ID..."/>
+                            </VBox>
+                            <Button text="▶ Run Report" type="Emphasized" press="onRunCurrentReport"
+                                class="sapUiSmallMarginEnd"/>
+                            <Button text="Reset" press="onResetCriteria" type="Transparent"/>
+                            <Button text="ⓘ Info" press="onInfoDrawerOpen" type="Ghost"
+                                class="sapUiSmallMarginBegin"/>
+                        </HBox>
+                    </Panel>
+
+                    <!-- Status strips -->
+                    <MessageStrip id="reportRunningStrip" text="Running report..."
+                        type="Information" showIcon="true" visible="false"
+                        class="sapUiSmallMarginBottom"/>
+                    <MessageStrip id="resultsSummaryStrip" text=""
+                        type="Success" showIcon="true" visible="false"
+                        class="sapUiSmallMarginBottom"/>
+
+                    <!-- Export button -->
+                    <Toolbar class="sapUiSmallMarginBottom">
+                        <ToolbarSpacer/>
+                        <Button text="Export to Excel" icon="sap-icon://excel-attachment"
+                            press="onExportCurrentReport" type="Transparent"/>
+                    </Toolbar>
+
+                    <!-- Results table — columns built dynamically by _setReportColumns() -->
+                    <Table id="reportResultsTable" growing="true" growingThreshold="50"
+                        growingScrollToLoad="true" sticky="ColumnHeaders"
+                        noDataText="Click ▶ Run Report to load data."
+                        class="sapUiSmallMarginBottom">
+                        <!-- Columns and items injected by controller -->
+                    </Table>
+                </VBox>
+
+            </VBox>
+        </f:content>
+    </f:DynamicPage>
+</mvc:View>

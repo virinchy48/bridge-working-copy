@@ -1,0 +1,4 @@
+ID,ruleCode,description,category,thresholdDays,recipientRoles,isEnabled
+b0000001-0001-0001-0001-000000000001,PERMIT_EXPIRING,Notify when permits expire within threshold days,PERMIT,30,BridgeManager,true
+b0000001-0001-0001-0001-000000000002,INSPECTION_OVERDUE,Notify when bridge inspection is overdue,INSPECTION,365,BridgeManager,true
+b0000001-0001-0001-0001-000000000003,RESTRICTION_EXPIRING,Notify when restrictions expire within threshold days,RESTRICTION,7,BridgeManager,true

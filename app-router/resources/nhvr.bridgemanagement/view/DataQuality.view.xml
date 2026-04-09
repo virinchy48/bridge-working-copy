@@ -1,0 +1,93 @@
+<mvc:View
+    controllerName="nhvr.bridgemanagement.controller.DataQuality"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:l="sap.ui.layout"
+    xmlns:f="sap.f"
+    xmlns:core="sap.ui.core">
+
+    <Page id="dqPage" title="Data Quality Dashboard" showNavButton="true" navButtonPress=".onNavBack">
+        <headerContent>
+            <Button id="btnRecalcAll" text="Recalculate All" icon="sap-icon://refresh" type="Emphasized" press=".onRecalculateAll" />
+        </headerContent>
+        <content>
+            <!-- KPI Row -->
+            <l:HorizontalLayout id="dqKpiRow" class="sapUiSmallMargin" allowWrapping="true">
+                <GenericTile id="tileDqOverall" header="Network Score" subheader="Average across all bridges" class="sapUiTinyMarginEnd">
+                    <TileContent><NumericContent id="ncDqOverall" value="{dq>/overallScore}" scale="/ 100" valueColor="{dq>/scoreColor}" /></TileContent>
+                </GenericTile>
+                <GenericTile id="tileDqCompleteness" header="Completeness" class="sapUiTinyMarginEnd">
+                    <TileContent><NumericContent id="ncDqCompleteness" value="{dq>/completeness}" scale="%" /></TileContent>
+                </GenericTile>
+                <GenericTile id="tileDqAccuracy" header="Accuracy" class="sapUiTinyMarginEnd">
+                    <TileContent><NumericContent id="ncDqAccuracy" value="{dq>/accuracy}" scale="%" /></TileContent>
+                </GenericTile>
+                <GenericTile id="tileDqTimeliness" header="Timeliness" class="sapUiTinyMarginEnd">
+                    <TileContent><NumericContent id="ncDqTimeliness" value="{dq>/timeliness}" scale="%" /></TileContent>
+                </GenericTile>
+                <GenericTile id="tileDqTotal" header="Bridges Scored" class="sapUiTinyMarginEnd">
+                    <TileContent><NumericContent id="ncDqTotal" value="{dq>/totalScored}" /></TileContent>
+                </GenericTile>
+            </l:HorizontalLayout>
+
+            <!-- Score Distribution -->
+            <Panel id="panelDqDistribution" headerText="Score Distribution" class="sapUiSmallMargin">
+                <HBox id="hboxDqDist" justifyContent="Start" class="sapUiSmallMargin">
+                    <VBox id="vboxDqCritical" class="sapUiTinyMarginEnd" width="25%">
+                        <ObjectStatus id="osDqCritical" text="Critical (0-25)" state="Error" />
+                        <ProgressIndicator id="piDqCritical" percentValue="{dq>/dist/criticalPct}" displayValue="{dq>/dist/critical} bridges" state="Error" />
+                    </VBox>
+                    <VBox id="vboxDqPoor" class="sapUiTinyMarginEnd" width="25%">
+                        <ObjectStatus id="osDqPoor" text="Poor (25-50)" state="Warning" />
+                        <ProgressIndicator id="piDqPoor" percentValue="{dq>/dist/poorPct}" displayValue="{dq>/dist/poor} bridges" state="Warning" />
+                    </VBox>
+                    <VBox id="vboxDqFair" class="sapUiTinyMarginEnd" width="25%">
+                        <ObjectStatus id="osDqFair" text="Fair (50-75)" state="None" />
+                        <ProgressIndicator id="piDqFair" percentValue="{dq>/dist/fairPct}" displayValue="{dq>/dist/fair} bridges" state="None" />
+                    </VBox>
+                    <VBox id="vboxDqGood" width="25%">
+                        <ObjectStatus id="osDqGood" text="Good (75-100)" state="Success" />
+                        <ProgressIndicator id="piDqGood" percentValue="{dq>/dist/goodPct}" displayValue="{dq>/dist/good} bridges" state="Success" />
+                    </VBox>
+                </HBox>
+            </Panel>
+
+            <!-- Worst Bridges Table -->
+            <Panel id="panelDqWorst" headerText="Lowest Quality Bridges (Top 20)" class="sapUiSmallMargin">
+                <Table id="tblDqWorst" items="{dq>/worstBridges}" sticky="ColumnHeaders" growing="true" growingThreshold="20">
+                    <columns>
+                        <Column id="colDqBridgeId"><Text text="Bridge ID" /></Column>
+                        <Column id="colDqName"><Text text="Name" /></Column>
+                        <Column id="colDqState"><Text text="State" /></Column>
+                        <Column id="colDqScore" hAlign="End"><Text text="Score" /></Column>
+                        <Column id="colDqCompl" hAlign="End"><Text text="Completeness" /></Column>
+                        <Column id="colDqAccur" hAlign="End"><Text text="Accuracy" /></Column>
+                        <Column id="colDqTimel" hAlign="End"><Text text="Timeliness" /></Column>
+                        <Column id="colDqMissing"><Text text="Missing Fields" /></Column>
+                    </columns>
+                    <items>
+                        <ColumnListItem type="Navigation" press=".onBridgePress">
+                            <cells>
+                                <Link text="{dq>bridgeId}" press=".onBridgePress" />
+                                <Text text="{dq>name}" />
+                                <Text text="{dq>state}" />
+                                <ObjectNumber number="{dq>overallScore}" state="{dq>scoreState}" />
+                                <Text text="{dq>completeness}%" />
+                                <Text text="{dq>accuracy}%" />
+                                <Text text="{dq>timeliness}%" />
+                                <Text text="{dq>missingFields}" />
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
+            </Panel>
+
+            <!-- Missing Fields Heatmap -->
+            <Panel id="panelDqHeatmap" headerText="Most Common Missing Fields" class="sapUiSmallMargin">
+                <List id="listDqMissing" items="{dq>/missingFieldCounts}">
+                    <StandardListItem title="{dq>field}" info="{dq>count} bridges" infoState="{dq>severity}" />
+                </List>
+            </Panel>
+        </content>
+    </Page>
+</mvc:View>

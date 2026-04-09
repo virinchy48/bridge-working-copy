@@ -1,0 +1,155 @@
+{
+    "_version": "1.49.0",
+    "sap.app": {
+        "id": "nhvr.admin",
+        "type": "application",
+        "i18n": "i18n/i18n.properties",
+        "applicationVersion": { "version": "1.0.0" },
+        "title": "NHVR Administration",
+        "description": "Manage Attribute Definitions and system configuration",
+        "dataSources": {
+            "mainService": {
+                "uri": "/bridge-management/",
+                "type": "OData",
+                "settings": {
+                    "odataVersion": "4.0"
+                }
+            }
+        }
+    },
+    "sap.ui": {
+        "technology": "UI5",
+        "deviceTypes": { "desktop": true, "tablet": true, "phone": false }
+    },
+    "sap.fiori": { "archeType": "analytical" },
+    "sap.ui5": {
+        "flexEnabled": true,
+        "dependencies": {
+            "minUI5Version": "1.120.0",
+            "libs": {
+                "sap.m": {}, "sap.ui.core": {}, "sap.fe.templates": {}
+            }
+        },
+        "models": {
+            "": {
+                "dataSource": "mainService",
+                "preload": true,
+                "settings": {
+                    "synchronizationMode": "None",
+                    "operationMode": "Server",
+                    "autoExpandSelect": true,
+                    "earlyRequests": true
+                }
+            }
+        },
+        "routing": {
+            "routes": [
+                {
+                    "pattern": "",
+                    "name": "AttributeDefinitionsList",
+                    "target": "AttributeDefinitionsList"
+                },
+                {
+                    "pattern": "AttributeDefinitions({key}):?query:",
+                    "name": "AttributeDefinitionsObjectPage",
+                    "target": "AttributeDefinitionsObjectPage"
+                },
+                {
+                    "pattern": "AttributeDefinitions({key})/validValues({validValuesKey}):?query:",
+                    "name": "AttributeValidValuesObjectPage",
+                    "target": "AttributeValidValuesObjectPage"
+                },
+                {
+                    "pattern": "Lookups",
+                    "name": "LookupsList",
+                    "target": "LookupsList"
+                },
+                {
+                    "pattern": "Lookups({key}):?query:",
+                    "name": "LookupsObjectPage",
+                    "target": "LookupsObjectPage"
+                },
+                {
+                    "pattern": "AuditLogs",
+                    "name": "AuditLogsList",
+                    "target": "AuditLogsList"
+                }
+            ],
+            "targets": {
+                "AttributeDefinitionsList": {
+                    "type": "Component",
+                    "id": "AttributeDefinitionsList",
+                    "name": "sap.fe.templates.ListReport",
+                    "options": {
+                        "settings": {
+                            "entitySet": "AttributeDefinitions",
+                            "variantManagement": "None",
+                            "initialLoad": "Enabled"
+                        }
+                    }
+                },
+                "AttributeDefinitionsObjectPage": {
+                    "type": "Component",
+                    "id": "AttributeDefinitionsObjectPage",
+                    "name": "sap.fe.templates.ObjectPage",
+                    "options": {
+                        "settings": {
+                            "entitySet": "AttributeDefinitions",
+                            "navigation": {
+                                "validValues": {
+                                    "detail": {
+                                        "route": "AttributeValidValuesObjectPage"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "AttributeValidValuesObjectPage": {
+                    "type": "Component",
+                    "id": "AttributeValidValuesObjectPage",
+                    "name": "sap.fe.templates.ObjectPage",
+                    "options": {
+                        "settings": {
+                            "entitySet": "AttributeValidValues"
+                        }
+                    }
+                },
+                "LookupsList": {
+                    "type": "Component",
+                    "id": "LookupsList",
+                    "name": "sap.fe.templates.ListReport",
+                    "options": {
+                        "settings": {
+                            "entitySet": "Lookups",
+                            "variantManagement": "None",
+                            "initialLoad": "Enabled"
+                        }
+                    }
+                },
+                "LookupsObjectPage": {
+                    "type": "Component",
+                    "id": "LookupsObjectPage",
+                    "name": "sap.fe.templates.ObjectPage",
+                    "options": {
+                        "settings": {
+                            "entitySet": "Lookups"
+                        }
+                    }
+                },
+                "AuditLogsList": {
+                    "type": "Component",
+                    "id": "AuditLogsList",
+                    "name": "sap.fe.templates.ListReport",
+                    "options": {
+                        "settings": {
+                            "entitySet": "AuditLogs",
+                            "variantManagement": "None",
+                            "initialLoad": "Enabled"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
