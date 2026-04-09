@@ -1,7 +1,0 @@
-{
-    "name": "nhvr-bridge-lite-router",
-    "version": "1.0.0",
-    "dependencies": {
-        "@sap/approuter": "^16"
-    }
-}
