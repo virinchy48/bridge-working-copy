@@ -10,8 +10,9 @@ sap.ui.define([
     "nhvr/bridgemanagement/model/CapabilityManager",
     "nhvr/bridgemanagement/util/AlvToolbarMixin",
     "nhvr/bridgemanagement/util/UserAnalytics",
-    "nhvr/bridgemanagement/model/RoleManager"
-], function (Controller, JSONModel, MessageToast, MessageBox, ExcelExport, CapabilityManager, AlvToolbarMixin, UserAnalytics, RoleManager) {
+    "nhvr/bridgemanagement/model/RoleManager",
+    "nhvr/bridgemanagement/util/LookupService"
+], function (Controller, JSONModel, MessageToast, MessageBox, ExcelExport, CapabilityManager, AlvToolbarMixin, UserAnalytics, RoleManager, LookupService) {
     "use strict";
 
     const BASE = "/bridge-management";
@@ -28,6 +29,14 @@ sap.ui.define([
 
             this._loadDefectViews();
             this._rebuildDefectViewsMenu();
+
+            LookupService.load().then(function () {
+                LookupService.populateSelect(this.byId("statusFilter"),   "DEFECT_STATUS",   "All Statuses");
+                LookupService.populateSelect(this.byId("severityFilter"), "DEFECT_SEVERITY", "All Severities");
+                LookupService.populateSelect(this.byId("categoryFilter"), "DEFECT_CATEGORY", "All Categories");
+                LookupService.populateSelect(this.byId("priorityFilter"), "DEFECT_PRIORITY", "All Priorities");
+                LookupService.populateFormSelect(this.byId("fWoPriority"), "WORK_ORDER_PRIORITY");
+            }.bind(this));
         },
 
         _onRouteMatched: function () {

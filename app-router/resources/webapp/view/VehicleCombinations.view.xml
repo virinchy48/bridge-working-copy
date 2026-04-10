@@ -144,17 +144,7 @@
                         </VBox>
                         <VBox class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
                             <Label text="State (optional)" design="Bold"/>
-                            <Select id="vehState" width="120px">
-                                <core:Item key="" text="All States"/>
-                                <core:Item key="NSW" text="NSW"/>
-                                <core:Item key="VIC" text="VIC"/>
-                                <core:Item key="QLD" text="QLD"/>
-                                <core:Item key="WA"  text="WA"/>
-                                <core:Item key="SA"  text="SA"/>
-                                <core:Item key="TAS" text="TAS"/>
-                                <core:Item key="ACT" text="ACT"/>
-                                <core:Item key="NT"  text="NT"/>
-                            </Select>
+                            <Select id="vehState" width="120px"/>
                         </VBox>
                         <VBox class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
                             <Label text="Region (optional)" design="Bold"/>

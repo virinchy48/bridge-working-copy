@@ -2,8 +2,9 @@ sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/ui/model/json/JSONModel",
     "sap/m/MessageToast",
-    "nhvr/bridgemanagement/model/CapabilityManager"
-], function (Controller, JSONModel, MessageToast, CapabilityManager) {
+    "nhvr/bridgemanagement/model/CapabilityManager",
+    "nhvr/bridgemanagement/util/LookupService"
+], function (Controller, JSONModel, MessageToast, CapabilityManager, LookupService) {
     "use strict";
 
     var BASE = "/bridge-management";
@@ -15,6 +16,11 @@ sap.ui.define([
             var oRouter = this.getOwnerComponent().getRouter();
             oRouter.getRoute("WorkOrders").attachPatternMatched(this._onRouteMatched, this);
             this._allWorkOrders = [];
+
+            LookupService.load().then(function () {
+                LookupService.populateSelect(this.byId("woStatusFilter"),   "WORK_ORDER_STATUS",   "All Statuses");
+                LookupService.populateSelect(this.byId("woPriorityFilter"), "WORK_ORDER_PRIORITY", "All Priorities");
+            }.bind(this));
         },
 
         _onRouteMatched: function () {

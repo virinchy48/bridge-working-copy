@@ -10,8 +10,9 @@ sap.ui.define([
     "sap/m/MessageToast",
     "sap/m/MessageBox",
     "nhvr/bridgemanagement/util/HelpAssistantMixin",
-    "nhvr/bridgemanagement/model/CapabilityManager"
-], function (Controller, JSONModel, MessageToast, MessageBox, HelpAssistantMixin, CapabilityManager) {
+    "nhvr/bridgemanagement/model/CapabilityManager",
+    "nhvr/bridgemanagement/util/LookupService"
+], function (Controller, JSONModel, MessageToast, MessageBox, HelpAssistantMixin, CapabilityManager, LookupService) {
     "use strict";
 
     const BASE = "/bridge-management";
@@ -46,6 +47,11 @@ sap.ui.define([
             }), "licenseModel");
 
             this._initHelpAssistant("adminConfig");
+
+            LookupService.load().then(function () {
+                LookupService.populateFormSelect(this.byId("selJurisdiction"),     "STATE", "— Select —");
+                LookupService.populateFormSelect(this.byId("newTenantJurisdiction"), "STATE", "— Select —");
+            }.bind(this));
         },
 
         _onRouteMatched: function () {

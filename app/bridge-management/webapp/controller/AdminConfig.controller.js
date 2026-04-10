@@ -6,8 +6,9 @@ sap.ui.define([
     "nhvr/bridgemanagement/util/StandardsAdapter",
     "nhvr/bridgemanagement/model/CapabilityManager",
     "nhvr/bridgemanagement/util/AuthFetch",
-    "nhvr/bridgemanagement/util/UserAnalytics"
-], function (Controller, JSONModel, MessageToast, MessageBox, StandardsAdapter, CapabilityManager, AuthFetch, UserAnalytics) {
+    "nhvr/bridgemanagement/util/UserAnalytics",
+    "nhvr/bridgemanagement/util/LookupService"
+], function (Controller, JSONModel, MessageToast, MessageBox, StandardsAdapter, CapabilityManager, AuthFetch, UserAnalytics, LookupService) {
     "use strict";
 
     const BASE  = "/bridge-management";
@@ -85,6 +86,10 @@ sap.ui.define([
             this._initStandardsProfile();
             this._loadMapConfig();
             this._loadMapProviderConfig();
+
+            LookupService.load().then(function () {
+                LookupService.populateSelect(this.byId("jaJurisdiction"), "STATE", "All Jurisdictions");
+            }.bind(this));
 
             var router = this.getOwnerComponent().getRouter();
             router.getRoute("AdminConfig").attachPatternMatched(this._onRouteMatched, this);

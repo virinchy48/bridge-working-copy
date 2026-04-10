@@ -12,8 +12,9 @@ sap.ui.define([
     "nhvr/bridgemanagement/util/GeoLocation",
     "nhvr/bridgemanagement/util/AuthFetch",
     "nhvr/bridgemanagement/util/UserAnalytics",
-    "nhvr/bridgemanagement/model/CapabilityManager"
-], function (Controller, JSONModel, MessageToast, MessageBox, StandardListItem, RoleManager, AppConfig, GeoLocation, AuthFetch, UserAnalytics, CapabilityManager) {
+    "nhvr/bridgemanagement/model/CapabilityManager",
+    "nhvr/bridgemanagement/util/LookupService"
+], function (Controller, JSONModel, MessageToast, MessageBox, StandardListItem, RoleManager, AppConfig, GeoLocation, AuthFetch, UserAnalytics, CapabilityManager, LookupService) {
     "use strict";
 
     function escapeHtml(str) {
@@ -54,6 +55,35 @@ sap.ui.define([
 
             const router = this.getOwnerComponent().getRouter();
             router.getRoute("BridgeDetail").attachPatternMatched(this._onRouteMatched, this);
+
+            LookupService.load().then(function () {
+                // Filter dropdowns
+                LookupService.populateSelect(this.byId("restrictionFilter"),   "RESTRICTION_STATUS", "All Statuses");
+                LookupService.populateSelect(this.byId("defectStatusFilter"),  "DEFECT_STATUS",      "All Statuses");
+                // Inline edit form Selects
+                LookupService.populateFormSelect(this.byId("scourRiskManualSelect"), "SCOUR_RISK");
+                LookupService.populateFormSelect(this.byId("ceCapStatus"),     "CAPACITY_STATUS");
+                LookupService.populateFormSelect(this.byId("ioType"),          "INSPECTION_TYPE");
+                LookupService.populateFormSelect(this.byId("ioAccessMethod"),  "ACCESS_METHOD");
+                LookupService.populateFormSelect(this.byId("ioRatingMethod"),  "RATING_METHOD");
+                LookupService.populateFormSelect(this.byId("ciAdequacy"),      "STRUCTURAL_ADEQUACY");
+                LookupService.populateFormSelect(this.byId("ciUrgency"),       "MAINTENANCE_URGENCY");
+                LookupService.populateFormSelect(this.byId("rdCategory"),      "DEFECT_CATEGORY");
+                LookupService.populateFormSelect(this.byId("rdSeverity"),      "DEFECT_SEVERITY");
+                LookupService.populateFormSelect(this.byId("rdExtent"),        "DEFECT_EXTENT");
+                LookupService.populateFormSelect(this.byId("rdStructuralRisk"),"STRUCTURAL_RISK");
+                LookupService.populateFormSelect(this.byId("rdPriority"),      "DEFECT_PRIORITY");
+                LookupService.populateFormSelect(this.byId("rdElementGroup"),  "ELEMENT_GROUP");
+                LookupService.populateFormSelect(this.byId("erSystemType"),    "EXTERNAL_SYSTEM_TYPE");
+                LookupService.populateFormSelect(this.byId("bdRestType"),      "RESTRICTION_TYPE");
+                LookupService.populateFormSelect(this.byId("bdRestStatus"),    "RESTRICTION_STATUS");
+                LookupService.populateFormSelect(this.byId("editRestType"),    "RESTRICTION_TYPE");
+                LookupService.populateFormSelect(this.byId("editRestStatus"),  "RESTRICTION_STATUS");
+                LookupService.populateFormSelect(this.byId("rcCondition"),     "CONDITION");
+                LookupService.populateFormSelect(this.byId("rcAdequacy"),      "STRUCTURAL_ADEQUACY");
+                LookupService.populateFormSelect(this.byId("invType"),         "INTERVENTION_TYPE");
+                LookupService.populateFormSelect(this.byId("invStatus"),       "PROGRAMME_STATUS");
+            }.bind(this));
         },
 
         _onRouteMatched: function (e) {

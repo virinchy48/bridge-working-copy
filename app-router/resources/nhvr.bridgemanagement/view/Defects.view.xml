@@ -65,34 +65,12 @@
                 <!-- Filters -->
                 <HBox wrap="Wrap" alignItems="Center" class="sapUiSmallMarginBottom">
                     <Select id="statusFilter" change="onFilter" width="150px" class="sapUiSmallMarginEnd">
-                        <core:Item key="" text="All Statuses"/>
-                        <core:Item key="OPEN"         text="Open"/>
-                        <core:Item key="UNDER_REPAIR" text="Under Repair"/>
-                        <core:Item key="MONITORING"   text="Monitoring"/>
-                        <core:Item key="REPAIRED"     text="Repaired"/>
-                        <core:Item key="CLOSED"       text="Closed"/>
                     </Select>
                     <Select id="severityFilter" change="onFilter" width="150px" class="sapUiSmallMarginEnd">
-                        <core:Item key="" text="All Severities"/>
-                        <core:Item key="CRITICAL" text="Critical"/>
-                        <core:Item key="HIGH"     text="High"/>
-                        <core:Item key="MEDIUM"   text="Medium"/>
-                        <core:Item key="LOW"      text="Low"/>
                     </Select>
                     <Select id="categoryFilter" change="onFilter" width="160px" class="sapUiSmallMarginEnd">
-                        <core:Item key="" text="All Categories"/>
-                        <core:Item key="STRUCTURAL"     text="Structural"/>
-                        <core:Item key="SAFETY"         text="Safety"/>
-                        <core:Item key="DURABILITY"     text="Durability"/>
-                        <core:Item key="SERVICEABILITY" text="Serviceability"/>
                     </Select>
                     <Select id="priorityFilter" change="onFilter" width="150px" class="sapUiSmallMarginEnd">
-                        <core:Item key="" text="All Priorities"/>
-                        <core:Item key="IMMEDIATE" text="Immediate"/>
-                        <core:Item key="HIGH"      text="High"/>
-                        <core:Item key="MEDIUM"    text="Medium"/>
-                        <core:Item key="LOW"       text="Low"/>
-                        <core:Item key="ROUTINE"   text="Routine"/>
                     </Select>
                     <ToolbarSeparator/>
                     <MenuButton id="defectViewsMenuBtn" text="Saved Views" icon="sap-icon://filter" class="sapUiSmallMarginEnd">
@@ -192,9 +170,6 @@
             <form:SimpleForm editable="true" layout="ResponsiveGridLayout" columnsL="1" columnsM="1">
                 <Label text="Priority *"/>
                 <Select id="fWoPriority">
-                    <core:Item key="HIGH" text="High"/>
-                    <core:Item key="MEDIUM" text="Medium"/>
-                    <core:Item key="LOW" text="Low"/>
                 </Select>
                 <Label text="Planned Date"/>
                 <DatePicker id="fWoPlannedDate" valueFormat="yyyy-MM-dd" displayFormat="dd MMM yyyy"/>

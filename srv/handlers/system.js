@@ -203,7 +203,16 @@ module.exports = function registerSystemHandlers(srv) {
             return ALL_CAPS.map(c => ({ capabilityCode: c, displayName: c, category: 'CORE',
                 isCoreFeature: true, isEnabled: true, canView: true, canEdit: true, canAdmin: true }));
         }
-        if (!catalog || !catalog.length) return [];
+        // FeatureCatalog is empty — fail open (grant all access) so the app works
+        // without needing CSV seed data. Admins can populate the catalog via BMS Admin.
+        if (!catalog || !catalog.length) {
+            const ALL_CAPS = ['BRIDGE_REGISTRY','RESTRICTIONS','MAP_VIEW','REPORTS','EXECUTIVE_DASHBOARD',
+                'INSPECTIONS','DEFECTS','CAPACITY_RATINGS','MASS_UPLOAD','MASS_EDIT','ADMIN_CONFIG',
+                'INTEGRATION_HUB','PERMITS','ROUTE_ASSESSMENT','FREIGHT_ROUTES','VEHICLE_COMBINATIONS',
+                'BRIDGE_IQ','WORK_ORDERS','DATA_QUALITY'];
+            return ALL_CAPS.map(c => ({ capabilityCode: c, displayName: c, category: 'CORE',
+                isCoreFeature: true, isEnabled: true, canView: true, canEdit: true, canAdmin: true }));
+        }
         const tenantRows = await db.run(
             SELECT.from('nhvr.TenantFeature').columns('capabilityCode','isEnabled','validFrom','validTo')
                 .where({ 'tenant.tenantCode': tenantCode, 'tenant.isActive': true })

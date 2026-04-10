@@ -668,12 +668,7 @@
                                     <Button id="btnAddTempRestriction" text="Add Temporary"
                                         icon="sap-icon://date-time" type="Default" press="onAddTempRestriction"
                                         class="sapUiTinyMarginEnd"/>
-                                    <Select id="restrictionFilter" change="onRestrictionFilterChange" width="160px">
-                                        <core:Item key="ALL"       text="All Statuses"/>
-                                        <core:Item key="ACTIVE"    text="Active Only"/>
-                                        <core:Item key="SCHEDULED" text="Scheduled"/>
-                                        <core:Item key="EXPIRED"   text="Expired"/>
-                                    </Select>
+                                    <Select id="restrictionFilter" change="onRestrictionFilterChange" width="160px"/>
                                 </HBox>
                             </HBox>
 
@@ -1028,13 +1023,7 @@
                                         press="onInfoPressDefects" tooltip="About defect severity levels"/>
                                 </HBox>
                                 <HBox>
-                                    <Select id="defectStatusFilter" change="onDefectStatusFilter" width="150px" class="sapUiSmallMarginEnd">
-                                        <core:Item key="" text="All Statuses"/>
-                                        <core:Item key="OPEN"         text="Open"/>
-                                        <core:Item key="UNDER_REPAIR" text="Under Repair"/>
-                                        <core:Item key="MONITORING"   text="Monitoring"/>
-                                        <core:Item key="CLOSED"       text="Closed"/>
-                                    </Select>
+                                    <Select id="defectStatusFilter" change="onDefectStatusFilter" width="150px" class="sapUiSmallMarginEnd"/>
                                     <Button text="Raise Defect" icon="sap-icon://add" press="onRaiseDefect"
                                         type="Negative" class="nhvrBtn"/>
                                 </HBox>
@@ -1410,13 +1399,7 @@
                                                 <Text text="Manual override:" class="sapUiTinyMarginEnd"/>
                                                 <Select id="scourRiskManualSelect" width="160px"
                                                     change="onScourRiskManualOverride"
-                                                    tooltip="Manually set the scour risk level overriding the calculated value">
-                                                    <core:Item key=""         text="— Use Calculated —"/>
-                                                    <core:Item key="LOW"      text="LOW"/>
-                                                    <core:Item key="MEDIUM"   text="MEDIUM"/>
-                                                    <core:Item key="HIGH"     text="HIGH"/>
-                                                    <core:Item key="CRITICAL" text="CRITICAL"/>
-                                                </Select>
+                                                    tooltip="Manually set the scour risk level overriding the calculated value"/>
                                                 <Button text="Apply Override" icon="sap-icon://accept"
                                                     press="onApplyScourRiskOverride" type="Emphasized"
                                                     class="sapUiTinyMarginBegin"
@@ -1749,13 +1732,7 @@
                 <HBox wrap="Wrap">
                     <VBox width="220px" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
                         <Label text="Status *" class="sapUiTinyMarginBottom" labelFor="ceCapStatus"/>
-                        <Select id="ceCapStatus" width="100%">
-                            <core:Item key="FULL" text="FULL — No capacity restrictions"/>
-                            <core:Item key="RESTRICTED" text="RESTRICTED — Restrictions applied"/>
-                            <core:Item key="REDUCED" text="REDUCED — Temporarily reduced"/>
-                            <core:Item key="UNDER_REVIEW" text="UNDER REVIEW — Rating in progress"/>
-                            <core:Item key="NOT_RATED" text="NOT RATED — No load rating"/>
-                        </Select>
+                        <Select id="ceCapStatus" width="100%"/>
                     </VBox>
                     <VBox width="220px" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
                         <Label text="Last Reviewed By" class="sapUiTinyMarginBottom" labelFor="ceReviewedBy"/>
@@ -1819,14 +1796,7 @@
                 <Input id="ioOrderNumber" placeholder="e.g. INS-2024-015" width="100%" class="sapUiSmallMarginBottom"/>
 
                 <Label text="Inspection Type" class="sapUiTinyMarginBottom" labelFor="ioType"/>
-                <Select id="ioType" width="100%" class="sapUiSmallMarginBottom">
-                    <core:Item key="ROUTINE"    text="Routine"/>
-                    <core:Item key="SPECIAL"    text="Special"/>
-                    <core:Item key="PRINCIPAL"  text="Principal"/>
-                    <core:Item key="UNDERWATER" text="Underwater"/>
-                    <core:Item key="POST_EVENT" text="Post-Event"/>
-                    <core:Item key="LOAD"       text="Load Test"/>
-                </Select>
+                <Select id="ioType" width="100%" class="sapUiSmallMarginBottom"/>
 
                 <Label text="Planned Date" required="true" class="sapUiTinyMarginBottom" labelFor="ioPlannedDate"/>
                 <DatePicker id="ioPlannedDate" width="100%" displayFormat="dd/MM/yyyy" valueFormat="yyyy-MM-dd"
@@ -1839,23 +1809,10 @@
                 <Input id="ioInspectorOrg" placeholder="Company / Authority" width="100%" class="sapUiSmallMarginBottom"/>
 
                 <Label text="Access Method" class="sapUiTinyMarginBottom" labelFor="ioAccessMethod"/>
-                <Select id="ioAccessMethod" width="100%" class="sapUiSmallMarginBottom">
-                    <core:Item key="" text="— Select —"/>
-                    <core:Item key="WALK"         text="Walk"/>
-                    <core:Item key="UNDER_BRIDGE" text="Under Bridge"/>
-                    <core:Item key="ROPE"         text="Rope Access"/>
-                    <core:Item key="BOAT"         text="Boat"/>
-                    <core:Item key="LANE_CLOSURE" text="Lane Closure"/>
-                    <core:Item key="SCAFFOLD"     text="Scaffold"/>
-                </Select>
+                <Select id="ioAccessMethod" width="100%" class="sapUiSmallMarginBottom"/>
 
                 <Label text="Rating Method" class="sapUiTinyMarginBottom" labelFor="ioRatingMethod"/>
-                <Select id="ioRatingMethod" width="100%" class="sapUiSmallMarginBottom">
-                    <core:Item key="VISUAL"     text="Visual"/>
-                    <core:Item key="NDE"        text="Non-Destructive (NDE)"/>
-                    <core:Item key="LOAD_TEST"  text="Load Test"/>
-                    <core:Item key="ANALYTICAL" text="Analytical"/>
-                </Select>
+                <Select id="ioRatingMethod" width="100%" class="sapUiSmallMarginBottom"/>
 
                 <Label text="Notes" class="sapUiTinyMarginBottom" labelFor="ioNotes"/>
                 <TextArea id="ioNotes" rows="2" width="100%" class="sapUiSmallMarginBottom"/>
@@ -1878,20 +1835,10 @@
                 <Text id="ciRatingLabel" text="Rating: 7 / 10" class="sapUiSmallMarginBottom"/>
 
                 <Label text="Structural Adequacy" class="sapUiTinyMarginBottom" labelFor="ciAdequacy"/>
-                <Select id="ciAdequacy" width="100%" class="sapUiSmallMarginBottom">
-                    <core:Item key="ADEQUATE"   text="Adequate"/>
-                    <core:Item key="MARGINAL"   text="Marginal"/>
-                    <core:Item key="INADEQUATE" text="Inadequate"/>
-                </Select>
+                <Select id="ciAdequacy" width="100%" class="sapUiSmallMarginBottom"/>
 
                 <Label text="Maintenance Urgency" class="sapUiTinyMarginBottom" labelFor="ciUrgency"/>
-                <Select id="ciUrgency" width="100%" class="sapUiSmallMarginBottom">
-                    <core:Item key="IMMEDIATE"   text="Immediate"/>
-                    <core:Item key="SHORT_TERM"  text="Short Term (0–6 months)"/>
-                    <core:Item key="MEDIUM_TERM" text="Medium Term (6–24 months)"/>
-                    <core:Item key="LONG_TERM"   text="Long Term (2+ years)"/>
-                    <core:Item key="MONITOR"     text="Monitor Only"/>
-                </Select>
+                <Select id="ciUrgency" width="100%" class="sapUiSmallMarginBottom"/>
 
                 <Label text="Report Reference" class="sapUiTinyMarginBottom" labelFor="ciReportRef"/>
                 <Input id="ciReportRef" placeholder="Report No. or URL" width="100%" class="sapUiSmallMarginBottom"/>
@@ -1919,60 +1866,22 @@
         <content>
             <VBox class="sapUiSmallMarginBeginEnd sapUiSmallMarginTop">
                 <Label text="Defect Category" required="true" class="sapUiTinyMarginBottom" labelFor="rdCategory"/>
-                <Select id="rdCategory" width="100%" class="sapUiSmallMarginBottom">
-                    <core:Item key="STRUCTURAL"     text="Structural"/>
-                    <core:Item key="SERVICEABILITY" text="Serviceability"/>
-                    <core:Item key="DURABILITY"     text="Durability"/>
-                    <core:Item key="SAFETY"         text="Safety"/>
-                </Select>
+                <Select id="rdCategory" width="100%" class="sapUiSmallMarginBottom"/>
 
                 <Label text="Severity" required="true" class="sapUiTinyMarginBottom" labelFor="rdSeverity"/>
-                <Select id="rdSeverity" width="100%" class="sapUiSmallMarginBottom">
-                    <core:Item key="LOW"      text="Low"/>
-                    <core:Item key="MEDIUM"   text="Medium"/>
-                    <core:Item key="HIGH"     text="High"/>
-                    <core:Item key="CRITICAL" text="Critical"/>
-                </Select>
+                <Select id="rdSeverity" width="100%" class="sapUiSmallMarginBottom"/>
 
                 <Label text="Extent" class="sapUiTinyMarginBottom" labelFor="rdExtent"/>
-                <Select id="rdExtent" width="100%" class="sapUiSmallMarginBottom">
-                    <core:Item key="" text="— Select —"/>
-                    <core:Item key="LOCALISED"  text="Localised"/>
-                    <core:Item key="MODERATE"   text="Moderate"/>
-                    <core:Item key="EXTENSIVE"  text="Extensive"/>
-                    <core:Item key="PERVASIVE"  text="Pervasive"/>
-                </Select>
+                <Select id="rdExtent" width="100%" class="sapUiSmallMarginBottom"/>
 
                 <Label text="Structural Risk" class="sapUiTinyMarginBottom" labelFor="rdStructuralRisk"/>
-                <Select id="rdStructuralRisk" width="100%" class="sapUiSmallMarginBottom">
-                    <core:Item key="" text="— Select —"/>
-                    <core:Item key="NEGLIGIBLE" text="Negligible"/>
-                    <core:Item key="LOW"        text="Low"/>
-                    <core:Item key="MEDIUM"     text="Medium"/>
-                    <core:Item key="HIGH"       text="High"/>
-                    <core:Item key="EXTREME"    text="Extreme"/>
-                </Select>
+                <Select id="rdStructuralRisk" width="100%" class="sapUiSmallMarginBottom"/>
 
                 <Label text="Priority" class="sapUiTinyMarginBottom" labelFor="rdPriority"/>
-                <Select id="rdPriority" width="100%" class="sapUiSmallMarginBottom">
-                    <core:Item key="IMMEDIATE" text="Immediate"/>
-                    <core:Item key="HIGH"      text="High"/>
-                    <core:Item key="MEDIUM"    text="Medium"/>
-                    <core:Item key="LOW"       text="Low"/>
-                    <core:Item key="ROUTINE"   text="Routine"/>
-                </Select>
+                <Select id="rdPriority" width="100%" class="sapUiSmallMarginBottom"/>
 
                 <Label text="Element Group" class="sapUiTinyMarginBottom" labelFor="rdElementGroup"/>
-                <Select id="rdElementGroup" width="100%" class="sapUiSmallMarginBottom">
-                    <core:Item key="" text="— Select —"/>
-                    <core:Item key="DECK"           text="Deck"/>
-                    <core:Item key="SUPERSTRUCTURE" text="Superstructure"/>
-                    <core:Item key="SUBSTRUCTURE"   text="Substructure"/>
-                    <core:Item key="SITE"           text="Site"/>
-                    <core:Item key="WATERWAY"       text="Waterway"/>
-                    <core:Item key="FURNITURE"      text="Furniture"/>
-                    <core:Item key="BARRIERS"       text="Barriers"/>
-                </Select>
+                <Select id="rdElementGroup" width="100%" class="sapUiSmallMarginBottom"/>
 
                 <Label text="Element Name" class="sapUiTinyMarginBottom" labelFor="rdElementName"/>
                 <Input id="rdElementName" placeholder="e.g. Deck Slab - Span 2" width="100%" class="sapUiSmallMarginBottom"/>
@@ -2013,16 +1922,7 @@
         <content>
             <VBox class="sapUiSmallMarginBeginEnd sapUiSmallMarginTop">
                 <Label text="System Type" required="true" class="sapUiTinyMarginBottom" labelFor="erSystemType"/>
-                <Select id="erSystemType" width="100%" class="sapUiSmallMarginBottom">
-                    <core:Item key="BANC"      text="BANC (Austroads)"/>
-                    <core:Item key="AUSTROADS" text="Austroads"/>
-                    <core:Item key="RMS"       text="RMS / TfNSW"/>
-                    <core:Item key="VICROADS"  text="VicRoads"/>
-                    <core:Item key="MRWA"      text="MRWA (WA)"/>
-                    <core:Item key="DPTI"      text="DPTI (SA)"/>
-                    <core:Item key="TMR"       text="TMR (QLD)"/>
-                    <core:Item key="OTHER"     text="Other"/>
-                </Select>
+                <Select id="erSystemType" width="100%" class="sapUiSmallMarginBottom"/>
 
                 <Label text="External ID" required="true" class="sapUiTinyMarginBottom" labelFor="erExternalId"/>
                 <Input id="erExternalId" placeholder="e.g. BANC-NSW-HWY31-001" width="100%" class="sapUiSmallMarginBottom"/>
@@ -2067,17 +1967,7 @@
                 <!-- Restriction Type -->
                 <Label text="Restriction Type" required="true" class="sapUiTinyMarginBottom"
                     tooltip="The category of restriction applied to this bridge (e.g. Height, Mass, Speed)."/>
-                <Select id="bdRestType" width="100%" class="sapUiSmallMarginBottom">
-                    <core:Item key="HEIGHT"           text="Height Limit (m)"/>
-                    <core:Item key="MASS"             text="Mass Limit (t)"/>
-                    <core:Item key="GROSS_MASS"       text="Gross Mass Limit (t)"/>
-                    <core:Item key="AXLE_MASS"        text="Axle Mass Limit (t)"/>
-                    <core:Item key="COMBINATION_MASS" text="Combination Mass (t)"/>
-                    <core:Item key="WIDTH"            text="Width Limit (m)"/>
-                    <core:Item key="LENGTH"           text="Length Limit (m)"/>
-                    <core:Item key="SPEED"            text="Speed Limit (km/h)"/>
-                    <core:Item key="LOAD"             text="Load Limit"/>
-                </Select>
+                <Select id="bdRestType" width="100%" class="sapUiSmallMarginBottom"/>
 
                 <!-- Value + Unit side-by-side -->
                 <HBox alignItems="Center" class="sapUiSmallMarginBottom">
@@ -2103,10 +1993,7 @@
                 <VBox id="bdRestStatusBox" class="sapUiSmallMarginBottom">
                     <Label text="Status" class="sapUiTinyMarginBottom"
                         tooltip="ACTIVE = currently enforced. SCHEDULED = future restriction not yet in force."/>
-                    <Select id="bdRestStatus" width="100%">
-                        <core:Item key="ACTIVE"    text="Active — Currently Enforced"/>
-                        <core:Item key="SCHEDULED" text="Scheduled — Future Date"/>
-                    </Select>
+                    <Select id="bdRestStatus" width="100%"/>
                 </VBox>
 
                 <!-- Valid dates -->
@@ -2291,16 +2178,7 @@
                     class="sapUiSmallMarginBottom"/>
 
                 <Label text="Restriction Type" required="true" class="sapUiTinyMarginBottom" labelFor="editRestType"/>
-                <Select id="editRestType" width="100%" class="sapUiSmallMarginBottom">
-                    <core:Item key="HEIGHT"     text="Height Limit"/>
-                    <core:Item key="GROSS_MASS" text="Gross Mass Limit"/>
-                    <core:Item key="AXLE_LOAD"  text="Axle Load Limit"/>
-                    <core:Item key="SPEED"      text="Speed Limit"/>
-                    <core:Item key="WIDTH"      text="Width Limit"/>
-                    <core:Item key="LENGTH"     text="Length Limit"/>
-                    <core:Item key="LOAD"       text="Load Limit"/>
-                    <core:Item key="MASS"       text="Mass"/>
-                </Select>
+                <Select id="editRestType" width="100%" class="sapUiSmallMarginBottom"/>
 
                 <Label text="Value" required="true" class="sapUiTinyMarginBottom" labelFor="editRestValue"/>
                 <Input id="editRestValue" type="Number" placeholder="e.g. 4.5" width="100%" class="sapUiSmallMarginBottom"/>
@@ -2314,12 +2192,7 @@
                 </Select>
 
                 <Label text="Status" class="sapUiTinyMarginBottom" labelFor="editRestStatus"/>
-                <Select id="editRestStatus" width="100%" class="sapUiSmallMarginBottom">
-                    <core:Item key="ACTIVE"    text="Active"/>
-                    <core:Item key="SCHEDULED" text="Scheduled"/>
-                    <core:Item key="EXPIRED"   text="Expired"/>
-                    <core:Item key="INACTIVE"  text="Inactive"/>
-                </Select>
+                <Select id="editRestStatus" width="100%" class="sapUiSmallMarginBottom"/>
 
                 <Label text="Valid From Date" class="sapUiTinyMarginBottom" labelFor="editRestFrom"/>
                 <DatePicker id="editRestFrom" width="100%" displayFormat="dd/MM/yyyy" valueFormat="yyyy-MM-dd"
@@ -2366,16 +2239,7 @@
                 <Text id="rcRatingLabel" text="7 / 10 — Good" class="sapUiSmallMarginBottom"/>
 
                 <Label text="Condition Summary" class="sapUiTinyMarginBottom" labelFor="rcCondition"/>
-                <Select id="rcCondition" width="100%" class="sapUiSmallMarginBottom">
-                    <core:Item key="EXCELLENT"  text="Excellent"/>
-                    <core:Item key="VERY_GOOD"  text="Very Good"/>
-                    <core:Item key="GOOD"       text="Good"/>
-                    <core:Item key="FAIR"       text="Fair"/>
-                    <core:Item key="POOR"       text="Poor"/>
-                    <core:Item key="VERY_POOR"  text="Very Poor"/>
-                    <core:Item key="CRITICAL"   text="Critical"/>
-                    <core:Item key="FAILED"     text="Failed"/>
-                </Select>
+                <Select id="rcCondition" width="100%" class="sapUiSmallMarginBottom"/>
 
                 <Label text="Assessment Date" required="true" class="sapUiTinyMarginBottom" labelFor="rcDate"/>
                 <DatePicker id="rcDate" width="100%" displayFormat="dd/MM/yyyy" valueFormat="yyyy-MM-dd"
@@ -2392,12 +2256,7 @@
                     class="sapUiSmallMarginBottom"/>
 
                 <Label text="Structural Adequacy" class="sapUiTinyMarginBottom" labelFor="rcAdequacy"/>
-                <Select id="rcAdequacy" width="100%" class="sapUiSmallMarginBottom">
-                    <core:Item key=""           text="— Not assessed —"/>
-                    <core:Item key="ADEQUATE"   text="Adequate"/>
-                    <core:Item key="MARGINAL"   text="Marginal"/>
-                    <core:Item key="INADEQUATE" text="Inadequate"/>
-                </Select>
+                <Select id="rcAdequacy" width="100%" class="sapUiSmallMarginBottom"/>
 
                 <Label text="Notes / Findings" class="sapUiTinyMarginBottom" labelFor="rcNotes"/>
                 <TextArea id="rcNotes" rows="4" width="100%"
@@ -2468,13 +2327,7 @@
                 <Label text="Recommended Year" required="true" class="sapUiTinyMarginTop" labelFor="invYear"/>
                 <Input id="invYear" type="Number" placeholder="e.g. 2026" width="100%"/>
                 <Label text="Intervention Type" required="true" class="sapUiTinyMarginTop" labelFor="invType"/>
-                <Select id="invType" width="100%">
-                    <core:Item key="MAINTENANCE"    text="Maintenance"/>
-                    <core:Item key="REHABILITATION" text="Rehabilitation"/>
-                    <core:Item key="REPLACEMENT"    text="Replacement"/>
-                    <core:Item key="MONITORING"     text="Monitoring"/>
-                    <core:Item key="INSPECTION"     text="Inspection"/>
-                </Select>
+                <Select id="invType" width="100%"/>
                 <Label text="Estimated CAPEX ($AUD)" class="sapUiTinyMarginTop" labelFor="invCapex"/>
                 <Input id="invCapex" type="Number" placeholder="e.g. 500000" width="100%"/>
                 <Label text="Estimated OPEX ($/yr)" class="sapUiTinyMarginTop" labelFor="invOpex"/>
@@ -2482,14 +2335,7 @@
                 <Label text="Benefit-Cost Ratio" class="sapUiTinyMarginTop" labelFor="invBcr"/>
                 <Input id="invBcr" type="Number" placeholder="e.g. 2.4" width="100%"/>
                 <Label text="Programme Status" class="sapUiTinyMarginTop" labelFor="invStatus"/>
-                <Select id="invStatus" width="100%">
-                    <core:Item key="PROPOSED"    text="Proposed"/>
-                    <core:Item key="APPROVED"    text="Approved"/>
-                    <core:Item key="IN_PROGRESS" text="In Progress"/>
-                    <core:Item key="COMPLETED"   text="Completed"/>
-                    <core:Item key="DEFERRED"    text="Deferred"/>
-                    <core:Item key="CANCELLED"   text="Cancelled"/>
-                </Select>
+                <Select id="invStatus" width="100%"/>
                 <Label text="Funding Source" class="sapUiTinyMarginTop" labelFor="invFundingSource"/>
                 <Input id="invFundingSource" placeholder="e.g. State Capital Works 2026/27" width="100%"/>
                 <Label text="Work Order Ref" class="sapUiTinyMarginTop" labelFor="invWorkOrderRef"/>

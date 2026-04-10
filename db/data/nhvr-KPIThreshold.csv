@@ -1,5 +1,0 @@
-ID,kpiKey,warningValue,criticalValue,unit,description,isActive
-b0000001-0001-0001-0001-000000000001,INSPECTION_OVERDUE_DAYS,365.000,730.000,days,Days since last inspection before overdue warning/critical,true
-b0000001-0001-0001-0001-000000000002,RESTRICTION_EXPIRY_DAYS,30.000,7.000,days,Days before restriction expiry for warning/critical alert,true
-b0000001-0001-0001-0001-000000000003,CONDITION_AT_RISK_SCORE,50.000,40.000,,Condition score below which bridge is at-risk warning/critical,true
-b0000001-0001-0001-0001-000000000004,COMPLIANCE_TARGET_PCT,90.000,80.000,%,Inspection compliance percentage targets,true

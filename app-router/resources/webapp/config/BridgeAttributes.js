@@ -60,7 +60,7 @@ sap.ui.define([], function () {
             key: "state", label: "State/Territory", shortLabel: "State",
             section: "A", sectionLabel: "Identity & Registration",
             type: T.ENUM, required: true, filterType: F.MULTI,
-            enumValues: ["NSW", "VIC", "QLD", "WA", "SA", "TAS", "ACT", "NT"],
+            enumValues: [],          /* loaded at runtime from Lookups(STATE) */
             defaultVisible: true, csvColumn: true, uploadable: true, editable: true,
             helpText: "Australian state or territory where the bridge is located.",
             placeholder: "e.g. NSW"
@@ -159,7 +159,7 @@ sap.ui.define([], function () {
             key: "structureType", label: "Structure Type", shortLabel: "Type",
             section: "B", sectionLabel: "Physical & Geometric",
             type: T.ENUM, required: false, filterType: F.MULTI,
-            enumValues: ["BEAM", "BOX_GIRDER", "ARCH", "TRUSS", "CABLE_STAYED", "SUSPENSION", "CULVERT", "PONTOON", "OTHER"],
+            enumValues: [],          /* loaded at runtime from Lookups(STRUCTURE_TYPE) */
             defaultVisible: true, csvColumn: true, uploadable: true, editable: true,
             helpText: "Primary structural type per AustRoads BIMM classification.",
             placeholder: ""
@@ -195,7 +195,7 @@ sap.ui.define([], function () {
             key: "postingStatus", label: "Posting Status", shortLabel: "Status",
             section: "C", sectionLabel: "Load Capacity, Safety & NHVR",
             type: T.ENUM, required: true, filterType: F.MULTI,
-            enumValues: ["UNRESTRICTED", "RESTRICTED", "WEIGHT_RESTRICTED", "HEIGHT_RESTRICTED", "POSTED", "CLOSED"],
+            enumValues: [],          /* loaded at runtime from Lookups(POSTING_STATUS) */
             defaultVisible: true, csvColumn: true, uploadable: true, editable: true,
             helpText: "Current traffic/load posting status. CLOSED = bridge closed to all traffic.",
             placeholder: ""
@@ -220,7 +220,7 @@ sap.ui.define([], function () {
             key: "nhvrRouteApprovalClass", label: "NHVR PBS Approval Class", shortLabel: "PBS Class",
             section: "C", sectionLabel: "Load Capacity, Safety & NHVR",
             type: T.ENUM, required: false, filterType: F.MULTI,
-            enumValues: ["CLASS1", "CLASS2", "CLASS3", "CLASS4", "HML", "B_DOUBLE", "B_TRIPLE", "NONE"],
+            enumValues: [],          /* PBS approval classes — static schema enum */
             defaultVisible: false, csvColumn: true, uploadable: true, editable: true,
             helpText: "Highest NHVR Performance Based Standards (PBS) approval class for this bridge.",
             placeholder: ""
@@ -281,7 +281,7 @@ sap.ui.define([], function () {
             key: "condition", label: "Condition Band", shortLabel: "Condition",
             section: "D", sectionLabel: "Inspection, Condition & Health",
             type: T.ENUM, required: false, filterType: F.MULTI,
-            enumValues: ["EXCELLENT", "VERY_GOOD", "GOOD", "FAIR", "POOR", "VERY_POOR", "FAILED"],
+            enumValues: [],          /* loaded at runtime from Lookups(CONDITION) */
             defaultVisible: false, csvColumn: true, uploadable: true, editable: true,
             helpText: "Condition band derived from condition rating. Indicates overall structural health.",
             placeholder: ""
@@ -341,7 +341,7 @@ sap.ui.define([], function () {
             key: "scourRisk", label: "Scour Risk", shortLabel: "Scour",
             section: "E", sectionLabel: "Risk, Criticality & Resilience",
             type: T.ENUM, required: false, filterType: F.MULTI,
-            enumValues: ["LOW", "MEDIUM", "HIGH", "CRITICAL"],
+            enumValues: [],          /* loaded at runtime from Lookups(SCOUR_RISK) */
             defaultVisible: true, csvColumn: true, uploadable: true, editable: true,
             helpText: "Assessed scour risk level per AustRoads BIMM scour vulnerability assessment.",
             placeholder: ""

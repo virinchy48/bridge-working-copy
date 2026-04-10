@@ -80,20 +80,8 @@
                                 <Title text="Inspection Orders" level="H4"/>
                                 <HBox alignItems="Center">
                                     <Select id="statusFilter" change="onStatusFilter" width="170px" class="sapUiSmallMarginEnd">
-                                        <core:Item key="" text="All Statuses"/>
-                                        <core:Item key="PLANNED"        text="Planned"/>
-                                        <core:Item key="IN_PROGRESS"    text="In Progress"/>
-                                        <core:Item key="PENDING_REVIEW" text="Pending Review"/>
-                                        <core:Item key="COMPLETED"      text="Completed"/>
-                                        <core:Item key="CANCELLED"      text="Cancelled"/>
                                     </Select>
                                     <Select id="typeFilter" change="onTypeFilter" width="150px" class="sapUiSmallMarginEnd">
-                                        <core:Item key="" text="All Types"/>
-                                        <core:Item key="ROUTINE"    text="Routine"/>
-                                        <core:Item key="SPECIAL"    text="Special"/>
-                                        <core:Item key="PRINCIPAL"  text="Principal"/>
-                                        <core:Item key="UNDERWATER" text="Underwater"/>
-                                        <core:Item key="POST_EVENT" text="Post-Event"/>
                                     </Select>
                                     <ToolbarSeparator/>
                                     <MenuButton id="inspViewsMenuBtn" text="Saved Views" icon="sap-icon://filter" class="sapUiSmallMarginEnd">

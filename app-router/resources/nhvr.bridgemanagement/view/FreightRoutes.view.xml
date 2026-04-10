@@ -50,17 +50,7 @@
                         <core:Item key="GENERAL" text="General Freight"/>
                     </Select>
                     <Select id="routeStateFilter" width="8rem" change="onStateFilter"
-                        class="sapUiSmallMarginBegin">
-                        <core:Item key="" text="All States"/>
-                        <core:Item key="NSW" text="NSW"/>
-                        <core:Item key="VIC" text="VIC"/>
-                        <core:Item key="QLD" text="QLD"/>
-                        <core:Item key="WA" text="WA"/>
-                        <core:Item key="SA" text="SA"/>
-                        <core:Item key="TAS" text="TAS"/>
-                        <core:Item key="NT" text="NT"/>
-                        <core:Item key="ACT" text="ACT"/>
-                    </Select>
+                        class="sapUiSmallMarginBegin"/>
                     <Text id="routeCount" text="Loading..." class="sapUiSmallMarginBegin sapUiSmallMarginTop"/>
                 </HBox>
 
@@ -148,16 +138,7 @@
                 <Label text="Name"/>
                 <Input id="fRouteName" placeholder="e.g. Newell Highway HML Corridor" maxLength="200"/>
                 <Label text="State"/>
-                <Select id="fRouteState">
-                    <core:Item key="NSW" text="NSW"/>
-                    <core:Item key="VIC" text="VIC"/>
-                    <core:Item key="QLD" text="QLD"/>
-                    <core:Item key="WA" text="WA"/>
-                    <core:Item key="SA" text="SA"/>
-                    <core:Item key="TAS" text="TAS"/>
-                    <core:Item key="NT" text="NT"/>
-                    <core:Item key="ACT" text="ACT"/>
-                </Select>
+                <Select id="fRouteState"/>
                 <Label text="Route Class"/>
                 <Select id="fRouteClass">
                     <core:Item key="PBS" text="PBS (Performance-Based Standards)"/>

@@ -33,18 +33,9 @@
                         width="24rem" search="onSearch" liveChange="onSearch"/>
                     <Select id="woStatusFilter" width="12rem" change="onStatusFilter"
                         class="sapUiSmallMarginBegin">
-                        <core:Item key="" text="All Statuses"/>
-                        <core:Item key="CREATED" text="Created"/>
-                        <core:Item key="IN_PROGRESS" text="In Progress"/>
-                        <core:Item key="COMPLETED" text="Completed"/>
-                        <core:Item key="CANCELLED" text="Cancelled"/>
                     </Select>
                     <Select id="woPriorityFilter" width="10rem" change="onPriorityFilter"
                         class="sapUiSmallMarginBegin">
-                        <core:Item key="" text="All Priorities"/>
-                        <core:Item key="HIGH" text="High"/>
-                        <core:Item key="MEDIUM" text="Medium"/>
-                        <core:Item key="LOW" text="Low"/>
                     </Select>
                     <Text id="woCount" text="Loading..." class="sapUiSmallMarginBegin sapUiSmallMarginTop"/>
                 </HBox>

@@ -1,4 +1,0 @@
-ID,bridge_ID,ratingStandard,ratingVehicle,ratingFactor,assessedBy,engineerRegNo,assessmentDate,expiryDate,assessmentMethod,reportReference,reportURL,isCurrentCert,notes
-a1b2c3d4-0001-4000-8000-000000000001,30000000-0000-0000-0000-000000000001,SM1600,SM1600 Road Traffic Model,0.950,Dr Sarah Mitchell,NER 54321,2024-06-15,2029-06-15,TIER2,BRG-2024-001-LR-v1.pdf,,true,Post-rehabilitation assessment per AS 5100.7:2017
-a1b2c3d4-0002-4000-8000-000000000002,30000000-0000-0000-0000-000000000002,300LA,300LA General Loading,1.050,James O'Brien CPEng,NER 78432,2023-11-20,2028-11-20,TIER1,BRG-2023-044-LR.pdf,,true,Initial assessment — new construction
-a1b2c3d4-0003-4000-8000-000000000003,30000000-0000-0000-0000-000000000001,T44,T44 Truck Loading,0.780,Dr Sarah Mitchell,NER 54321,2019-03-10,2024-03-10,TIER1,BRG-2019-007-LR.pdf,,false,Superseded by 2024 SM1600 assessment

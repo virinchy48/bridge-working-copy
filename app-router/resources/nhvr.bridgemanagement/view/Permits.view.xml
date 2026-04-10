@@ -84,27 +84,9 @@
                     <SearchField id="permitSearchField" width="18rem" placeholder="Search permits..." liveChange=".onPermitSearch" class="sapUiSmallMarginEnd"/>
                     <Label text="Status:" class="sapUiSmallMarginEnd"/>
                     <Select id="permitStatusFilter" width="10rem" change=".onPermitFilter" class="sapUiSmallMarginEnd">
-                        <items>
-                            <core:Item key="" text="All Statuses"/>
-                            <core:Item key="DRAFT" text="Draft"/>
-                            <core:Item key="PENDING" text="Pending"/>
-                            <core:Item key="APPROVED" text="Approved"/>
-                            <core:Item key="APPROVED_WITH_CONDITIONS" text="Approved w/ Conditions"/>
-                            <core:Item key="DENIED" text="Denied"/>
-                            <core:Item key="EXPIRED" text="Expired"/>
-                            <core:Item key="CANCELLED" text="Cancelled"/>
-                        </items>
                     </Select>
                     <Label text="Type:" class="sapUiSmallMarginEnd"/>
                     <Select id="permitTypeFilter" width="10rem" change=".onPermitFilter" class="sapUiSmallMarginEnd">
-                        <items>
-                            <core:Item key="" text="All Types"/>
-                            <core:Item key="SINGLE_TRIP" text="Single Trip"/>
-                            <core:Item key="MULTI_TRIP" text="Multi-Trip"/>
-                            <core:Item key="ANNUAL" text="Annual"/>
-                            <core:Item key="NETWORK" text="Network"/>
-                            <core:Item key="EMERGENCY" text="Emergency"/>
-                        </items>
                     </Select>
                     <Button text="Clear" icon="sap-icon://clear-filter" press=".onClearPermitFilters" class="sapUiSmallMarginEnd"/>
                     <ToolbarSeparator/>
@@ -228,13 +210,6 @@
 
                                     <Label text="Permit Type *" required="true"/>
                                     <Select id="permitTypeSelect" width="100%">
-                                        <items>
-                                            <core:Item key="SINGLE_TRIP" text="Single Trip"/>
-                                            <core:Item key="MULTI_TRIP" text="Multi-Trip"/>
-                                            <core:Item key="ANNUAL" text="Annual"/>
-                                            <core:Item key="NETWORK" text="Network"/>
-                                            <core:Item key="EMERGENCY" text="Emergency"/>
-                                        </items>
                                     </Select>
 
                                     <Label text="Applicant Name *" required="true"/>

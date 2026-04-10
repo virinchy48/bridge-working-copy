@@ -128,18 +128,7 @@
 
                                         <Label text="Jurisdiction"/>
                                         <Select id="selJurisdiction"
-                                            selectedKey="{licenseModel>/selectedTenant/jurisdiction}">
-                                            <core:Item key="" text="— Select —"/>
-                                            <core:Item key="NATIONAL" text="National"/>
-                                            <core:Item key="NSW"      text="New South Wales"/>
-                                            <core:Item key="VIC"      text="Victoria"/>
-                                            <core:Item key="QLD"      text="Queensland"/>
-                                            <core:Item key="WA"       text="Western Australia"/>
-                                            <core:Item key="SA"       text="South Australia"/>
-                                            <core:Item key="TAS"      text="Tasmania"/>
-                                            <core:Item key="ACT"      text="Australian Capital Territory"/>
-                                            <core:Item key="NT"       text="Northern Territory"/>
-                                        </Select>
+                                            selectedKey="{licenseModel>/selectedTenant/jurisdiction}"/>
 
                                         <Label text="Licence Status"/>
                                         <Select id="selLicenseStatus"
@@ -304,18 +293,7 @@
                             <Input id="newTenantShort" maxLength="50"/>
 
                             <Label text="Jurisdiction"/>
-                            <Select id="newTenantJurisdiction">
-                                <core:Item key="" text="— Select —"/>
-                                <core:Item key="NATIONAL" text="National"/>
-                                <core:Item key="NSW"      text="New South Wales"/>
-                                <core:Item key="VIC"      text="Victoria"/>
-                                <core:Item key="QLD"      text="Queensland"/>
-                                <core:Item key="WA"       text="Western Australia"/>
-                                <core:Item key="SA"       text="South Australia"/>
-                                <core:Item key="TAS"      text="Tasmania"/>
-                                <core:Item key="ACT"      text="Australian Capital Territory"/>
-                                <core:Item key="NT"       text="Northern Territory"/>
-                            </Select>
+                            <Select id="newTenantJurisdiction"/>
 
                             <Label text="Licence Type"/>
                             <Select id="newTenantLicenseStatus">

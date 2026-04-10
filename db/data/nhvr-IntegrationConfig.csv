@@ -1,4 +1,0 @@
-ID,systemCode,systemName,description,baseUrl,authType,username,isActive,s4Client,s4MaintenancePlant,s4EquipCategory,s4EquipClass,esriLayerId,bancStateCode,bancAgencyCode,additionalConfig
-10000001-0000-4000-8000-000000000001,S4HANA,SAP S/4HANA,S/4HANA Equipment Master and Plant Maintenance integration,,BASIC,,false,100,AU01,M,BRIDGE_INFRA,,,,{}
-10000002-0000-4000-8000-000000000002,BANC,Austroads BANC,National Bridge Asset Network Condition CSV export,,NONE,,false,,,,,,NSW,NHVR,{}
-10000003-0000-4000-8000-000000000003,ESRI,ArcGIS Bridge Layer,ArcGIS Feature Service bridge point layer,,API_KEY,,false,,,,,0,,,{}

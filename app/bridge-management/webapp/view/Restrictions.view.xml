@@ -45,30 +45,11 @@
                     <VBox class="sapUiSmallMarginEnd">
                         <Label text="Status" design="Bold"/>
                         <Select id="filterStatus" change="onFilterChange" width="160px">
-                            <core:Item key="ALL"      text="All Statuses"/>
-                            <core:Item key="ACTIVE"   text="Active"/>
-                            <core:Item key="SCHEDULED" text="Scheduled"/>
-                            <core:Item key="EXPIRED"  text="Expired"/>
                         </Select>
                     </VBox>
                     <VBox class="sapUiSmallMarginEnd">
                         <Label text="Type" design="Bold"/>
                         <Select id="filterType" change="onFilterChange" width="180px">
-                            <core:Item key="ALL"            text="All Types"/>
-                            <core:Item key="MASS"           text="Mass"/>
-                            <core:Item key="GROSS_MASS"     text="Gross Mass"/>
-                            <core:Item key="AXLE_LOAD"      text="Axle Load"/>
-                            <core:Item key="AXLE_MASS"      text="Axle Mass"/>
-                            <core:Item key="HEIGHT"         text="Height"/>
-                            <core:Item key="WIDTH"          text="Width"/>
-                            <core:Item key="LENGTH"         text="Length"/>
-                            <core:Item key="SPEED"          text="Speed"/>
-                            <core:Item key="WIND_SPEED"     text="Wind Speed"/>
-                            <core:Item key="WEIGHT"         text="Weight"/>
-                            <core:Item key="CLEARANCE"      text="Clearance"/>
-                            <core:Item key="COMBINATION_MASS" text="Combination Mass"/>
-                            <core:Item key="VEHICLE_TYPE"   text="Vehicle Type"/>
-                            <core:Item key="FLOOD_CLOSURE"  text="Flood Closure"/>
                         </Select>
                     </VBox>
                     <VBox class="sapUiSmallMarginEnd">
@@ -277,15 +258,6 @@
 
                 <Label text="Restriction Type" required="true" class="sapUiTinyMarginBottom"/>
                 <Select id="glEditRestType" width="100%" class="sapUiSmallMarginBottom">
-                    <core:Item key="GROSS_MASS"    text="Gross Mass Limit"/>
-                    <core:Item key="AXLE_LOAD"     text="Axle Load Limit"/>
-                    <core:Item key="HEIGHT"        text="Height Limit"/>
-                    <core:Item key="WIDTH"         text="Width Limit"/>
-                    <core:Item key="LENGTH"        text="Length Limit"/>
-                    <core:Item key="SPEED"         text="Speed Limit"/>
-                    <core:Item key="WIND_SPEED"    text="Wind Speed Limit"/>
-                    <core:Item key="FLOOD_CLOSURE" text="Flood Closure"/>
-                    <core:Item key="VEHICLE_TYPE"  text="Vehicle Type Restriction"/>
                 </Select>
 
                 <Label text="Value" required="true" class="sapUiTinyMarginBottom"/>
@@ -310,10 +282,6 @@
 
                 <Label text="Status" class="sapUiTinyMarginBottom"/>
                 <Select id="glEditRestStatus" width="100%" class="sapUiSmallMarginBottom">
-                    <core:Item key="ACTIVE"    text="Active"/>
-                    <core:Item key="SCHEDULED" text="Scheduled"/>
-                    <core:Item key="EXPIRED"   text="Expired"/>
-                    <core:Item key="INACTIVE"  text="Inactive"/>
                 </Select>
 
                 <Label text="Valid From Date" class="sapUiTinyMarginBottom"/>

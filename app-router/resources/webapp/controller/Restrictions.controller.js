@@ -13,8 +13,9 @@ sap.ui.define([
     "nhvr/bridgemanagement/util/AlvToolbarMixin",
     "nhvr/bridgemanagement/model/RoleManager",
     "nhvr/bridgemanagement/util/AuthFetch",
-    "nhvr/bridgemanagement/util/UserAnalytics"
-], function (Controller, JSONModel, MessageToast, MessageBox, Item, ExcelExport, RestrictionAttrs, CsvExport, AlvToolbarMixin, RoleManager, AuthFetch, UserAnalytics) {
+    "nhvr/bridgemanagement/util/UserAnalytics",
+    "nhvr/bridgemanagement/util/LookupService"
+], function (Controller, JSONModel, MessageToast, MessageBox, Item, ExcelExport, RestrictionAttrs, CsvExport, AlvToolbarMixin, RoleManager, AuthFetch, UserAnalytics, LookupService) {
     "use strict";
 
     const BASE = "/bridge-management";
@@ -54,6 +55,13 @@ sap.ui.define([
                 oUiModel.setProperty("/canAddRestriction", canEdit);
                 oUiModel.setProperty("/canEditRestriction", canEdit);
             }.bind(this), 300);
+
+            LookupService.load().then(function () {
+                LookupService.populateSelect(this.byId("filterStatus"), "RESTRICTION_STATUS", "All Statuses");
+                LookupService.populateSelect(this.byId("filterType"),   "RESTRICTION_TYPE",   "All Types");
+                LookupService.populateFormSelect(this.byId("glEditRestType"),   "RESTRICTION_TYPE");
+                LookupService.populateFormSelect(this.byId("glEditRestStatus"), "RESTRICTION_STATUS");
+            }.bind(this));
         },
 
         onAfterRendering: function () {

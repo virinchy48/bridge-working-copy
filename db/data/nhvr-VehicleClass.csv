@@ -1,9 +1,0 @@
-ID,name,code,description,maxMassKg,maxHeightM,maxWidthM,maxLengthM,isActive
-20000000-0000-0000-0000-000000000001,B-Double,BDOUBLE,B-Double articulated vehicle with two trailers,68500,4.3,2.5,25.0,true
-20000000-0000-0000-0000-000000000002,Road Train,ROADTRAIN,Road train with three or more trailers,136000,4.3,2.5,53.5,true
-20000000-0000-0000-0000-000000000003,Semi-Trailer,SEMI,Single semi-trailer articulated vehicle,42500,4.3,2.5,19.0,true
-20000000-0000-0000-0000-000000000004,PBS Vehicle,PBS,Performance Based Standards vehicle,,4.3,2.5,,true
-20000000-0000-0000-0000-000000000005,Heavy Rigid,HEAVYRIGID,Heavy rigid truck (no trailer),22500,4.3,2.5,12.5,true
-20000000-0000-0000-0000-000000000006,Oversize Vehicle,OVERSIZE,Oversize/overmass vehicle requiring permit,,,,,true
-20000000-0000-0000-0000-000000000007,Livestock Carrier,LIVESTOCK,Livestock transport vehicle,42500,4.6,2.5,19.0,true
-20000000-0000-0000-0000-000000000008,B-Triple,BTRIPLE,B-Triple vehicle with three trailers,90000,4.3,2.5,36.5,true

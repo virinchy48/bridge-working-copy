@@ -20,10 +20,11 @@ sap.ui.define([
     "sap/m/Tokenizer",
     "sap/m/ObjectStatus",
     "sap/m/StandardListItem",
-    "sap/ui/core/Icon"
+    "sap/ui/core/Icon",
+    "nhvr/bridgemanagement/util/LookupService"
 ], function (Controller, JSONModel, MessageToast, MessageBox,
              Panel, HBox, VBox, Text, Title, Label, Switch,
-             Token, Tokenizer, ObjectStatus, StandardListItem, Icon) {
+             Token, Tokenizer, ObjectStatus, StandardListItem, Icon, LookupService) {
     "use strict";
 
     var BASE = "/bridge-management";
@@ -162,6 +163,10 @@ sap.ui.define([
             this._loadMapConfig();
             this._loadStandardsProfiles();
             this._loadFeatureGroups();
+
+            LookupService.load().then(function () {
+                LookupService.populateSelect(this.byId("jaJurisdiction"), "STATE", "All Jurisdictions");
+            }.bind(this));
         },
 
         // ── Jurisdiction Access ───────────────────────────────────

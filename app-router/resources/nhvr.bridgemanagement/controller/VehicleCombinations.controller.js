@@ -6,8 +6,9 @@ sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "sap/m/MessageToast",
     "sap/m/MessageBox",
-    "nhvr/bridgemanagement/model/CapabilityManager"
-], function (Controller, JSONModel, MessageToast, MessageBox, CapabilityManager) {
+    "nhvr/bridgemanagement/model/CapabilityManager",
+    "nhvr/bridgemanagement/util/LookupService"
+], function (Controller, JSONModel, MessageToast, MessageBox, CapabilityManager, LookupService) {
     "use strict";
 
     const BASE = "/bridge-management";
@@ -32,6 +33,10 @@ sap.ui.define([
                 searchResults : []
             });
             this.getView().setModel(this._model, "vehicle");
+
+            LookupService.load().then(function () {
+                LookupService.populateSelect(this.byId("vehState"), "STATE", "All States");
+            }.bind(this));
 
             const router = this.getOwnerComponent().getRouter();
             router.getRoute("VehicleCombinations").attachPatternMatched(this._onRouteMatched, this);

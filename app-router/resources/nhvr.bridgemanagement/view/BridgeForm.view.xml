@@ -71,31 +71,11 @@
                             <VBox width="200px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
                                 <Label text="Asset Class" design="Bold" labelFor="fAssetClass"/>
                                 <Select id="fAssetClass">
-                                    <core:Item key="BRIDGE"             text="Bridge"/>
-                                    <core:Item key="CULVERT"            text="Culvert"/>
-                                    <core:Item key="TUNNEL"             text="Tunnel"/>
-                                    <core:Item key="FORD"               text="Ford"/>
-                                    <core:Item key="CAUSEWAY"           text="Causeway"/>
-                                    <core:Item key="RETAINING_WALL"     text="Retaining Wall"/>
-                                    <core:Item key="OVERHEAD_STRUCTURE" text="Overhead Structure"/>
-                                    <core:Item key="PEDESTRIAN_BRIDGE"  text="Pedestrian Bridge"/>
-                                    <core:Item key="RAILWAY_OVERPASS"   text="Railway Overpass"/>
-                                    <core:Item key="SIGN_GANTRY"        text="Sign Gantry"/>
-                                    <core:Item key="OTHER"              text="Other"/>
                                 </Select>
                             </VBox>
                             <VBox width="160px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
                                 <Label text="State *" design="Bold" labelFor="fState"/>
                                 <Select id="fState" change="onStateChanged">
-                                    <core:Item key="" text="— Select —"/>
-                                    <core:Item key="NSW" text="NSW"/>
-                                    <core:Item key="VIC" text="VIC"/>
-                                    <core:Item key="QLD" text="QLD"/>
-                                    <core:Item key="WA"  text="WA"/>
-                                    <core:Item key="SA"  text="SA"/>
-                                    <core:Item key="TAS" text="TAS"/>
-                                    <core:Item key="ACT" text="ACT"/>
-                                    <core:Item key="NT"  text="NT"/>
                                 </Select>
                             </VBox>
                             <VBox width="200px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">

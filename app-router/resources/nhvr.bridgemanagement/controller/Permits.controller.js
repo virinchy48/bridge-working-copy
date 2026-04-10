@@ -8,8 +8,9 @@ sap.ui.define([
     "nhvr/bridgemanagement/util/AlvToolbarMixin",
     "nhvr/bridgemanagement/util/AuthFetch",
     "nhvr/bridgemanagement/util/UserAnalytics",
-    "nhvr/bridgemanagement/model/RoleManager"
-], function (Controller, JSONModel, MessageToast, MessageBox, ExcelExport, CapabilityManager, AlvToolbarMixin, AuthFetch, UserAnalytics, RoleManager) {
+    "nhvr/bridgemanagement/model/RoleManager",
+    "nhvr/bridgemanagement/util/LookupService"
+], function (Controller, JSONModel, MessageToast, MessageBox, ExcelExport, CapabilityManager, AlvToolbarMixin, AuthFetch, UserAnalytics, RoleManager, LookupService) {
     "use strict";
 
     var BASE = "/bridge-management/";
@@ -58,6 +59,12 @@ sap.ui.define([
             // admiring-lamarr: Load saved filter views and rebuild menu
             this._loadPermitViews();
             this._rebuildPermitViewsMenu();
+
+            LookupService.load().then(function () {
+                LookupService.populateSelect(this.byId("permitStatusFilter"), "PERMIT_STATUS", "All Statuses");
+                LookupService.populateSelect(this.byId("permitTypeFilter"),   "PERMIT_TYPE",   "All Types");
+                LookupService.populateFormSelect(this.byId("permitTypeSelect"), "PERMIT_TYPE");
+            }.bind(this));
         },
 
         _onRouteMatched: function () {

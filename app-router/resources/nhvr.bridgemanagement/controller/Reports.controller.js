@@ -10,8 +10,9 @@ sap.ui.define([
     "sap/m/MessageBox",
     "nhvr/bridgemanagement/util/ExcelExport",
     "nhvr/bridgemanagement/util/UserAnalytics",
-    "nhvr/bridgemanagement/util/ReferenceData"
-], function (Controller, JSONModel, MessageToast, MessageBox, ExcelExport, UserAnalytics, ReferenceData) {
+    "nhvr/bridgemanagement/util/ReferenceData",
+    "nhvr/bridgemanagement/util/LookupService"
+], function (Controller, JSONModel, MessageToast, MessageBox, ExcelExport, UserAnalytics, ReferenceData, LookupService) {
     "use strict";
 
     const BASE     = "/bridge-management";
@@ -375,6 +376,10 @@ sap.ui.define([
             this.getOwnerComponent().getRouter()
                 .getRoute("Reports")
                 .attachPatternMatched(this._onRouteMatched, this);
+
+            LookupService.load().then(function () {
+                LookupService.populateSelect(this.byId("criteriaState"), "STATE", "All States");
+            }.bind(this));
         },
 
         onExit: function () {

@@ -9,8 +9,9 @@ sap.ui.define([
     'sap/m/MessageToast',
     'sap/m/MessageBox',
     'sap/m/BusyDialog',
-    'nhvr/bridgemanagement/model/CapabilityManager'
-], function (Controller, JSONModel, MessageToast, MessageBox, BusyDialog, CapabilityManager) {
+    'nhvr/bridgemanagement/model/CapabilityManager',
+    'nhvr/bridgemanagement/util/LookupService'
+], function (Controller, JSONModel, MessageToast, MessageBox, BusyDialog, CapabilityManager, LookupService) {
     'use strict';
 
     const SRV = '/bridge-management/';
@@ -734,6 +735,16 @@ sap.ui.define([
             }).then(oDialog => {
                 that._cfgDialog = oDialog;
                 that.getView().addDependent(oDialog);
+                // Populate state Select from OData Lookups (items removed from XML)
+                LookupService.load().then(function () {
+                    LookupService.populateFormSelect(oDialog.getContent && oDialog.getContent()[0]
+                        ? sap.ui.getCore().byId(oDialog.getId() + '--bancStateCode')
+                        : null, "STATE");
+                    // Fallback: find by fragment-scoped ID
+                    var oStateSelect = sap.ui.getCore().byId('bancStateCode') ||
+                                       (oDialog.findElements && oDialog.findElements(true).find(function(e) { return e.getId && e.getId().indexOf('bancStateCode') >= 0; }));
+                    if (oStateSelect) LookupService.populateFormSelect(oStateSelect, "STATE");
+                });
                 oDialog.open();
             });
         },

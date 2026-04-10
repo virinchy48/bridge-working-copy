@@ -240,40 +240,6 @@ sap.ui.define([
             this.getOwnerComponent().getRouter().navTo(routeName);
         },
 
-        // ── Role switching ────────────────────────────────────────
-        onRoleChange: function (e) {
-            const newRole = e.getParameter("selectedItem").getKey();
-            RoleManager.switchRole(newRole).then(() => {
-                this._applyRoleToHome();
-                MessageToast.show("Role switched to: " + RoleManager.getLabel());
-            });
-        },
-
-        onOpenRoleDialog: function () {
-            var dlg = this.byId("roleSwitchDialog");
-            if (dlg) {
-                var roleSelector = this.byId("roleSelector");
-                if (roleSelector) roleSelector.setSelectedKey(RoleManager.getRole());
-                // In production environments, disable role switching — show assigned role read-only
-                var env = this._detectEnvironment();
-                var isDevMode = (env === "LOCAL" || env === "DEV");
-                if (roleSelector) roleSelector.setEnabled(isDevMode);
-                var applyBtn = dlg.getBeginButton();
-                if (applyBtn) applyBtn.setVisible(isDevMode);
-                dlg.open();
-            }
-        },
-
-        onRoleSwitchConfirm: function () {
-            var dlg = this.byId("roleSwitchDialog");
-            if (dlg) dlg.close();
-        },
-
-        onRoleSwitchCancel: function () {
-            var dlg = this.byId("roleSwitchDialog");
-            if (dlg) dlg.close();
-        },
-
         onAvatarPress: function (oEvent) {
             this._showInfoPopover(
                 oEvent.getSource(),
@@ -285,12 +251,6 @@ sap.ui.define([
         },
 
         _applyRoleToHome: function () {
-            const role = RoleManager.getRole();
-
-            // Sync the dropdown immediately
-            const roleSelector = this.byId("roleSelector");
-            if (roleSelector) roleSelector.setSelectedKey(role);
-
             // Operations tiles (featureKey matches tile ID prefix)
             const opsTiles = [
                 { id: "tileDashboard",       key: "dashboard" },

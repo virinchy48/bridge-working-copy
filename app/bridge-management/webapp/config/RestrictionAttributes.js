@@ -63,7 +63,7 @@ sap.ui.define([], function () {
             key: "bridge_state", label: "State", shortLabel: "State",
             section: "identity", sectionLabel: "Identity",
             type: T.ENUM, required: false, filterType: F.MULTI,
-            enumValues: ["NSW", "VIC", "QLD", "WA", "SA", "TAS", "ACT", "NT"],
+            enumValues: [],          /* loaded at runtime from Lookups(STATE) */
             defaultVisible: false, csvColumn: true, uploadable: false, editable: false,
             helpText: "State/territory (read-only, derived from bridge record).",
             placeholder: ""
@@ -74,7 +74,7 @@ sap.ui.define([], function () {
             key: "restrictionType", label: "Restriction Type", shortLabel: "Type",
             section: "spec", sectionLabel: "Specification",
             type: T.ENUM, required: true, filterType: F.MULTI,
-            enumValues: ["GROSS_MASS", "AXLE_LOAD", "HEIGHT", "WIDTH", "LENGTH", "WIND_SPEED", "FLOOD_CLOSURE", "VEHICLE_TYPE", "SPEED"],
+            enumValues: [],          /* loaded at runtime from Lookups(RESTRICTION_TYPE) */
             defaultVisible: true, csvColumn: true, uploadable: true, editable: true,
             helpText: "Category of restriction. GROSS_MASS = total vehicle mass limit; AXLE_LOAD = per-axle; HEIGHT/WIDTH/LENGTH = dimensional.",
             placeholder: ""
@@ -91,7 +91,7 @@ sap.ui.define([], function () {
             key: "unit", label: "Unit", shortLabel: "Unit",
             section: "spec", sectionLabel: "Specification",
             type: T.ENUM, required: true, filterType: F.MULTI,
-            enumValues: ["t", "kN", "m", "km/h"],
+            enumValues: ["t", "kN", "m", "km/h"],  /* measurement units — immutable physical constants, not domain data */
             defaultVisible: true, csvColumn: true, uploadable: true, editable: true,
             helpText: "Measurement unit for the restriction value. Auto-set based on restriction type.",
             placeholder: ""
@@ -108,7 +108,7 @@ sap.ui.define([], function () {
             key: "status", label: "Status", shortLabel: "Status",
             section: "spec", sectionLabel: "Specification",
             type: T.ENUM, required: true, filterType: F.MULTI,
-            enumValues: ["ACTIVE", "INACTIVE", "EXPIRED", "SEASONAL"],
+            enumValues: [],          /* loaded at runtime from Lookups(RESTRICTION_STATUS) */
             defaultVisible: true, csvColumn: true, uploadable: true, editable: true,
             helpText: "Current status. ACTIVE = in force; EXPIRED = validToDate has passed; SEASONAL = date-bounded annual restriction.",
             placeholder: ""

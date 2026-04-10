@@ -1,5 +1,0 @@
-ID,tenantCode,displayName,shortName,jurisdiction,contactEmail,contactName,licenseStartDate,licenseEndDate,licenseStatus,maxUsers,notes,isActive
-t-nhvr-national,NHVR_NATIONAL,NHVR National Operations,NHVR,NATIONAL,admin@nhvr.gov.au,NHVR Platform Admin,2024-01-01,,ACTIVE,500,Full-access master tenant for NHVR national operations,true
-t-nsw-rms,NSW_RMS,NSW Roads and Maritime Services,NSW RMS,NSW,bridges@rms.nsw.gov.au,NSW Bridge Manager,2024-06-01,,ACTIVE,100,NSW state roads agency — full inspection and restriction modules,true
-t-vicroads,VICROADS,VicRoads,VicRoads,VIC,bridges@vicroads.vic.gov.au,VicRoads Bridge Team,2024-06-01,,ACTIVE,80,Victorian road authority — standard licence,true
-t-tmr-qld,TMR_QLD,Department of Transport and Main Roads Queensland,TMR QLD,QLD,bridges@tmr.qld.gov.au,TMR Bridge Engineer,2025-01-01,2025-12-31,TRIAL,20,Queensland trial tenant — limited capabilities,true

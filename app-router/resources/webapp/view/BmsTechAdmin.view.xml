@@ -352,19 +352,7 @@
                 <Label text="User Ref (email / ID)" required="true"/>
                 <Input id="jaUserRef" placeholder="e.g. john.smith@nhvr.gov.au" maxLength="100"/>
                 <Label text="Jurisdiction" required="true"/>
-                <Select id="jaJurisdiction" width="100%">
-                    <items>
-                        <core:Item key="ALL" text="All Jurisdictions"/>
-                        <core:Item key="NSW" text="New South Wales (NSW)"/>
-                        <core:Item key="VIC" text="Victoria (VIC)"/>
-                        <core:Item key="QLD" text="Queensland (QLD)"/>
-                        <core:Item key="WA"  text="Western Australia (WA)"/>
-                        <core:Item key="SA"  text="South Australia (SA)"/>
-                        <core:Item key="TAS" text="Tasmania (TAS)"/>
-                        <core:Item key="ACT" text="ACT"/>
-                        <core:Item key="NT"  text="Northern Territory (NT)"/>
-                    </items>
-                </Select>
+                <Select id="jaJurisdiction" width="100%"/>
                 <Label text="Access Level" required="true"/>
                 <Select id="jaAccessLevel" width="100%">
                     <items>

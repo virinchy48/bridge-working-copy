@@ -50,44 +50,21 @@
                     <VBox class="sapUiSmallMarginEnd">
                         <Label text="State" design="Bold" labelFor="filterState"/>
                         <Select id="filterState" change="onFilterChange" width="120px">
-                            <core:Item key="ALL" text="All States"/>
-                            <core:Item key="NSW" text="NSW"/>
-                            <core:Item key="VIC" text="VIC"/>
-                            <core:Item key="QLD" text="QLD"/>
-                            <core:Item key="WA" text="WA"/>
-                            <core:Item key="SA" text="SA"/>
-                            <core:Item key="TAS" text="TAS"/>
-                            <core:Item key="ACT" text="ACT"/>
-                            <core:Item key="NT" text="NT"/>
                         </Select>
                     </VBox>
                     <VBox class="sapUiSmallMarginEnd">
                         <Label text="Condition" design="Bold" labelFor="filterCondition"/>
                         <Select id="filterCondition" change="onFilterChange" width="130px">
-                            <core:Item key="ALL" text="All"/>
-                            <core:Item key="GOOD" text="Good"/>
-                            <core:Item key="FAIR" text="Fair"/>
-                            <core:Item key="POOR" text="Poor"/>
-                            <core:Item key="CRITICAL" text="Critical"/>
                         </Select>
                     </VBox>
                     <VBox class="sapUiSmallMarginEnd">
                         <Label text="Status" design="Bold" labelFor="filterPosting"/>
                         <Select id="filterPosting" change="onFilterChange" width="150px">
-                            <core:Item key="ALL" text="All Statuses"/>
-                            <core:Item key="UNRESTRICTED" text="Unrestricted"/>
-                            <core:Item key="POSTED" text="Posted"/>
-                            <core:Item key="CLOSED" text="Closed"/>
                         </Select>
                     </VBox>
                     <VBox class="sapUiSmallMarginEnd">
                         <Label text="Scour Risk" design="Bold" labelFor="filterScour"/>
                         <Select id="filterScour" change="onFilterChange" width="130px">
-                            <core:Item key="ALL" text="All"/>
-                            <core:Item key="LOW" text="Low"/>
-                            <core:Item key="MEDIUM" text="Medium"/>
-                            <core:Item key="HIGH" text="High"/>
-                            <core:Item key="CRITICAL" text="Critical"/>
                         </Select>
                     </VBox>
                     <VBox class="sapUiSmallMarginEnd">
@@ -109,12 +86,6 @@
                     <VBox class="sapUiSmallMarginEnd">
                         <Label text="Risk Band" design="Bold" labelFor="filterRiskBand"/>
                         <Select id="filterRiskBand" change="onFilterChange" width="130px">
-                            <core:Item key="ALL"      text="All"/>
-                            <core:Item key="LOW"      text="Low"/>
-                            <core:Item key="MEDIUM"   text="Medium"/>
-                            <core:Item key="HIGH"     text="High"/>
-                            <core:Item key="VERY_HIGH" text="Very High"/>
-                            <core:Item key="CRITICAL" text="Critical"/>
                         </Select>
                     </VBox>
                     <VBox alignItems="End" class="sapUiSmallMarginTop">

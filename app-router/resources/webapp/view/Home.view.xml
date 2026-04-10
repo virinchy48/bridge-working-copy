@@ -61,13 +61,6 @@
                         <!-- v4.7.7: sap.f.ShellBar.additionalContent expects sap.f.IShellBar
                              items; OverflowToolbarButton implements the interface, raw Button
                              does not and triggers UI5 deprecation warnings. -->
-                        <OverflowToolbarButton id="btnRoleSwitch"
-                            icon="sap-icon://user-settings"
-                            text="{i18n>tooltip.switchRole}"
-                            tooltip="{i18n>tooltip.switchRole}"
-                            press="onOpenRoleDialog"
-                            type="Transparent"
-                            class="nhvrShellBarBtn"/>
                         <OverflowToolbarButton icon="sap-icon://sys-help"
                             text="{i18n>tooltip.openHelp}"
                             tooltip="{i18n>tooltip.openHelp}"
@@ -77,38 +70,12 @@
                     </f:additionalContent>
                 </f:ShellBar>
 
-                <!-- ── Role Switch Dialog ──────────────────────────── -->
-                <Dialog id="roleSwitchDialog"
-                    title="{i18n>dialog.switchRole}"
-                    contentWidth="320px">
-                    <content>
-                        <VBox class="sapUiSmallMargin">
-                            <Label text="{i18n>label.selectRole}" design="Bold" class="sapUiTinyMarginBottom"/>
-                            <Select id="roleSelector" width="100%" change="onRoleChange"
-                                tooltip="{i18n>tooltip.switchRole}">
-                                <core:Item key="ADMIN"          text="🔑 {i18n>role.admin}"/>
-                                <core:Item key="BRIDGE_MANAGER" text="🏗 {i18n>role.bridgeManager}"/>
-                                <core:Item key="INSPECTOR"      text="🔍 {i18n>role.inspector}"/>
-                                <core:Item key="OPERATOR"       text="🚛 {i18n>role.operator}"/>
-                                <core:Item key="READ_ONLY"      text="👁 {i18n>role.readOnly}"/>
-                            </Select>
-                            <HBox alignItems="Center" class="sapUiSmallMarginTop">
-                                <core:Icon src="sap-icon://employee" class="sapUiTinyMarginEnd"/>
-                                <Text id="roleChip" text="" class="nhvrRoleBadge"/>
-                            </HBox>
-                            <HBox alignItems="Center" class="sapUiTinyMarginTop">
-                                <Text id="appVersionBadge" text="" class="nhvrVersionBadge sapUiTinyMarginEnd"/>
-                                <Text id="appEnvBadge" text="" class="nhvrEnvBadge"/>
-                            </HBox>
-                        </VBox>
-                    </content>
-                    <beginButton>
-                        <Button text="{i18n>btn.apply}" type="Emphasized" press="onRoleSwitchConfirm"/>
-                    </beginButton>
-                    <endButton>
-                        <Button text="{i18n>btn.cancel}" press="onRoleSwitchCancel"/>
-                    </endButton>
-                </Dialog>
+                <!-- Role chip and version/env badges — hidden placeholders written by _loadVersionInfo / _loadUserInfo -->
+                <VBox visible="false">
+                    <Text id="roleChip" text=""/>
+                    <Text id="appVersionBadge" text=""/>
+                    <Text id="appEnvBadge" text=""/>
+                </VBox>
 
 
 

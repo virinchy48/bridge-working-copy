@@ -9,8 +9,9 @@ sap.ui.define([
     "nhvr/bridgemanagement/util/ExcelExport",
     "nhvr/bridgemanagement/model/CapabilityManager",
     "nhvr/bridgemanagement/util/AlvToolbarMixin",
-    "nhvr/bridgemanagement/util/UserAnalytics"
-], function (Controller, JSONModel, MessageToast, MessageBox, ExcelExport, CapabilityManager, AlvToolbarMixin, UserAnalytics) {
+    "nhvr/bridgemanagement/util/UserAnalytics",
+    "nhvr/bridgemanagement/util/LookupService"
+], function (Controller, JSONModel, MessageToast, MessageBox, ExcelExport, CapabilityManager, AlvToolbarMixin, UserAnalytics, LookupService) {
     "use strict";
 
     const BASE = "/bridge-management";
@@ -35,6 +36,11 @@ sap.ui.define([
 
             this._loadInspectionViews();
             this._rebuildInspectionViewsMenu();
+
+            LookupService.load().then(function () {
+                LookupService.populateSelect(this.byId("statusFilter"), "INSPECTION_STATUS", "All Statuses");
+                LookupService.populateSelect(this.byId("typeFilter"),   "INSPECTION_TYPE",   "All Types");
+            }.bind(this));
         },
 
         _onRouteMatched: function () {

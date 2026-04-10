@@ -14,8 +14,9 @@ sap.ui.define([
     "nhvr/bridgemanagement/util/HelpAssistantMixin",
     "nhvr/bridgemanagement/util/AlvToolbarMixin",
     "nhvr/bridgemanagement/util/AuthFetch",
-    "nhvr/bridgemanagement/util/UserAnalytics"
-], function (Controller, JSONModel, MessageToast, ExcelExport, BridgeAttrs, CsvExport, CsvTemplate, RoleManager, TablePersonalisation, HelpAssistantMixin, AlvToolbarMixin, AuthFetch, UserAnalytics) {
+    "nhvr/bridgemanagement/util/UserAnalytics",
+    "nhvr/bridgemanagement/util/LookupService"
+], function (Controller, JSONModel, MessageToast, ExcelExport, BridgeAttrs, CsvExport, CsvTemplate, RoleManager, TablePersonalisation, HelpAssistantMixin, AlvToolbarMixin, AuthFetch, UserAnalytics, LookupService) {
     "use strict";
 
     const BASE = "/bridge-management";
@@ -76,6 +77,14 @@ sap.ui.define([
             // Attach route matched to handle navigation params from Map
             const router = this.getOwnerComponent().getRouter();
             router.getRoute("BridgesList").attachPatternMatched(this._onRouteMatched, this);
+
+            LookupService.load().then(function () {
+                LookupService.populateSelect(this.byId("filterState"),     "STATE",          "All States");
+                LookupService.populateSelect(this.byId("filterCondition"), "CONDITION",      "All");
+                LookupService.populateSelect(this.byId("filterPosting"),   "POSTING_STATUS", "All Statuses");
+                LookupService.populateSelect(this.byId("filterScour"),     "SCOUR_RISK",     "All");
+                LookupService.populateSelect(this.byId("filterRiskBand"),  "RISK_BAND",      "All");
+            }.bind(this));
         },
 
         onAfterRendering: function () {

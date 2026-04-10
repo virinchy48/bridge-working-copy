@@ -74,16 +74,7 @@
                                 change="onBancActiveChange"/>
 
                             <Label text="State Code" design="Bold" required="true"/>
-                            <Select id="bancStateCode" selectedKey="{cfgModel>/banc/bancStateCode}">
-                                <core:Item key="NSW" text="New South Wales (NSW)"/>
-                                <core:Item key="VIC" text="Victoria (VIC)"/>
-                                <core:Item key="QLD" text="Queensland (QLD)"/>
-                                <core:Item key="SA"  text="South Australia (SA)"/>
-                                <core:Item key="WA"  text="Western Australia (WA)"/>
-                                <core:Item key="TAS" text="Tasmania (TAS)"/>
-                                <core:Item key="NT"  text="Northern Territory (NT)"/>
-                                <core:Item key="ACT" text="ACT"/>
-                            </Select>
+                            <Select id="bancStateCode" selectedKey="{cfgModel>/banc/bancStateCode}"/>
 
                             <Label text="Agency Code" design="Bold" required="true"/>
                             <Input id="bancAgencyCode" value="{cfgModel>/banc/bancAgencyCode}"

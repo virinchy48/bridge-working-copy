@@ -5,8 +5,9 @@ sap.ui.define([
     "sap/m/MessageBox",
     "nhvr/bridgemanagement/model/CapabilityManager",
     "nhvr/bridgemanagement/util/AuthFetch",
-    "nhvr/bridgemanagement/util/UserAnalytics"
-], function (Controller, JSONModel, MessageToast, MessageBox, CapabilityManager, AuthFetch, UserAnalytics) {
+    "nhvr/bridgemanagement/util/UserAnalytics",
+    "nhvr/bridgemanagement/util/LookupService"
+], function (Controller, JSONModel, MessageToast, MessageBox, CapabilityManager, AuthFetch, UserAnalytics, LookupService) {
     "use strict";
 
     var BASE = "/bridge-management";
@@ -19,6 +20,11 @@ sap.ui.define([
             var oRouter = this.getOwnerComponent().getRouter();
             oRouter.getRoute("FreightRoutes").attachPatternMatched(this._onRouteMatched, this);
             this._allRoutes = [];
+
+            LookupService.load().then(function () {
+                LookupService.populateSelect(this.byId("routeStateFilter"), "STATE", "All States");
+                LookupService.populateFormSelect(this.byId("fRouteState"), "STATE");
+            }.bind(this));
         },
 
         _onRouteMatched: function () {

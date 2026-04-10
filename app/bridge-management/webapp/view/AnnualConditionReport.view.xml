@@ -47,27 +47,11 @@
                 <HBox wrap="Wrap" class="sapUiSmallMarginBeginEnd sapUiSmallMarginTopBottom" alignItems="Center">
                     <VBox class="sapUiSmallMarginEnd">
                         <Label text="Reporting Year" design="Bold"/>
-                        <Select id="reportYear" change="onParameterChange" width="120px">
-                            <core:Item key="2026" text="2025-26"/>
-                            <core:Item key="2025" text="2024-25"/>
-                            <core:Item key="2024" text="2023-24"/>
-                            <core:Item key="2023" text="2022-23"/>
-                            <core:Item key="2022" text="2021-22"/>
-                        </Select>
+                        <Select id="reportYear" change="onParameterChange" width="120px"/>
                     </VBox>
                     <VBox class="sapUiSmallMarginEnd">
                         <Label text="Jurisdiction" design="Bold"/>
-                        <Select id="reportJurisdiction" change="onParameterChange" width="140px">
-                            <core:Item key="ALL" text="All States"/>
-                            <core:Item key="NSW" text="NSW"/>
-                            <core:Item key="VIC" text="VIC"/>
-                            <core:Item key="QLD" text="QLD"/>
-                            <core:Item key="WA" text="WA"/>
-                            <core:Item key="SA" text="SA"/>
-                            <core:Item key="TAS" text="TAS"/>
-                            <core:Item key="ACT" text="ACT"/>
-                            <core:Item key="NT" text="NT"/>
-                        </Select>
+                        <Select id="reportJurisdiction" change="onParameterChange" width="140px"/>
                     </VBox>
                     <VBox class="sapUiSmallMarginEnd">
                         <Label text="Route Type" design="Bold"/>

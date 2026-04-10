@@ -6,8 +6,9 @@ sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/ui/model/json/JSONModel",
     "sap/m/MessageToast",
-    "sap/m/MessageBox"
-], function (Controller, JSONModel, MessageToast, MessageBox) {
+    "sap/m/MessageBox",
+    "nhvr/bridgemanagement/util/LookupService"
+], function (Controller, JSONModel, MessageToast, MessageBox, LookupService) {
     "use strict";
 
     const BASE = "/bridge-management";
@@ -25,6 +26,22 @@ sap.ui.define([
 
             var router = this.getOwnerComponent().getRouter();
             router.getRoute("AnnualConditionReport").attachPatternMatched(this._onRouteMatched, this);
+
+            // Populate year Select dynamically (rolling 5-year window)
+            var oYearSelect = this.byId("reportYear");
+            if (oYearSelect) {
+                oYearSelect.removeAllItems();
+                var currentYear = new Date().getFullYear();
+                for (var y = currentYear; y >= currentYear - 4; y--) {
+                    var fyLabel = (y - 1) + "-" + String(y).slice(2);
+                    oYearSelect.addItem(new sap.ui.core.Item({ key: String(y), text: fyLabel }));
+                }
+            }
+
+            // Populate state Select from OData Lookups
+            LookupService.load().then(function () {
+                LookupService.populateSelect(this.byId("reportJurisdiction"), "STATE", "All States");
+            }.bind(this));
         },
 
         _onRouteMatched: function () {

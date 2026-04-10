@@ -19,11 +19,12 @@ sap.ui.define([
     "sap/ui/core/Item",
     "nhvr/bridgemanagement/model/CapabilityManager",
     "nhvr/bridgemanagement/util/UserAnalytics",
-    "nhvr/bridgemanagement/util/ReferenceData"
+    "nhvr/bridgemanagement/util/ReferenceData",
+    "nhvr/bridgemanagement/util/LookupService"
 ], function (
     Controller, JSONModel, MessageToast, MessageBox,
     Column, Text, Input, Select, DatePicker, CheckBox, Button,
-    ColumnListItem, CoreItem, CapabilityManager, UserAnalytics, ReferenceData
+    ColumnListItem, CoreItem, CapabilityManager, UserAnalytics, ReferenceData, LookupService
 ) {
     "use strict";
 
@@ -38,19 +39,21 @@ sap.ui.define([
     }
 
     // ─────────────────────────────────────────────────────────────
-    // STATIC OPTIONS
+    // DYNAMIC OPTIONS — populated from OData Lookups via LookupService
     // ─────────────────────────────────────────────────────────────
-    // STATE_OPTIONS is populated from OData via ReferenceData.js — see onInit
-    const CONDITION_OPTIONS   = [["","—"],["GOOD","Good"],["FAIR","Fair"],["POOR","Poor"],["CRITICAL","Critical"]];
-    const POSTING_OPTIONS     = [["","—"],["UNRESTRICTED","Unrestricted"],["POSTED","Posted"],["CLOSED","Closed"]];
-    const SCOUR_OPTIONS       = [["","—"],["LOW","Low"],["MEDIUM","Medium"],["HIGH","High"],["CRITICAL","Critical"]];
-    const SEVERITY_OPTIONS    = [["","—"],["LOW","Low"],["MEDIUM","Medium"],["HIGH","High"],["CRITICAL","Critical"]];
-    const DEFECT_STATUS_OPT   = [["","—"],["OPEN","Open"],["IN_PROGRESS","In Progress"],["CLOSED","Closed"]];
-    const RESTR_STATUS_OPT    = [["","—"],["ACTIVE","Active"],["INACTIVE","Inactive"],["EXPIRED","Expired"]];
-    const INSP_STATUS_OPT     = [["","—"],["PLANNED","Planned"],["IN_PROGRESS","In Progress"],["COMPLETED","Completed"],["CANCELLED","Cancelled"]];
-    const PRIORITY_OPTIONS    = [["","—"],["LOW","Low"],["NORMAL","Normal"],["HIGH","High"],["URGENT","Urgent"]];
-    const RESTR_TYPE_OPTIONS  = [["","—"],["MASS_GROSS","Mass Gross"],["MASS_AXLE","Mass Axle"],["HEIGHT","Height"],["WIDTH","Width"],["SPEED","Speed"],["VEHICLE_TYPE","Vehicle Type"]];
-    const PERMIT_STATUS_OPT   = [["","—"],["DRAFT","Draft"],["SUBMITTED","Submitted"],["APPROVED","Approved"],["REJECTED","Rejected"],["EXPIRED","Expired"]];
+    // All option arrays below start empty and are patched in onInit after
+    // LookupService.load() resolves. This ensures zero hardcoded business data.
+    var CONDITION_OPTIONS   = [["", "—"]];
+    var POSTING_OPTIONS     = [["", "—"]];
+    var SCOUR_OPTIONS       = [["", "—"]];
+    var SEVERITY_OPTIONS    = [["", "—"]];
+    var DEFECT_STATUS_OPT   = [["", "—"]];
+    var RESTR_STATUS_OPT    = [["", "—"]];
+    var INSP_STATUS_OPT     = [["", "—"]];
+    var DEFECT_PRIORITY_OPT = [["", "—"]];
+    var RESTR_TYPE_OPTIONS  = [["", "—"]];
+    var PERMIT_STATUS_OPT   = [["", "—"]];
+    var PERMIT_TYPE_OPT     = [["", "—"]];
 
     // ─────────────────────────────────────────────────────────────
     // ENTITY CONFIGURATION
@@ -151,7 +154,7 @@ sap.ui.define([
                 defectCategory:  { label: "Category",        type: "text",    width: "150px" },
                 severity:        { label: "Severity",        type: "select",  width: "100px", options: SEVERITY_OPTIONS },
                 status:          { label: "Status",          type: "select",  width: "110px", options: DEFECT_STATUS_OPT },
-                priority:        { label: "Priority",        type: "select",  width: "100px", options: PRIORITY_OPTIONS },
+                priority:        { label: "Priority",        type: "select",  width: "100px", options: DEFECT_PRIORITY_OPT },
                 detectedDate:    { label: "Detected Date",   type: "date",    width: "110px" },
                 closedDate:      { label: "Closed Date",     type: "date",    width: "110px" },
                 elementGroup:    { label: "Element Group",   type: "text",    width: "130px" },
@@ -245,6 +248,20 @@ sap.ui.define([
                 customAttrInfo: ""
             });
             this.getView().setModel(this._model, "massEdit");
+            // Load all lookup options from OData — replaces all hardcoded option arrays
+            LookupService.load().then(function () {
+                CONDITION_OPTIONS.length   = 0; Array.prototype.push.apply(CONDITION_OPTIONS,   LookupService.getMassEditOptions("CONDITION"));
+                POSTING_OPTIONS.length     = 0; Array.prototype.push.apply(POSTING_OPTIONS,     LookupService.getMassEditOptions("POSTING_STATUS"));
+                SCOUR_OPTIONS.length       = 0; Array.prototype.push.apply(SCOUR_OPTIONS,       LookupService.getMassEditOptions("SCOUR_RISK"));
+                SEVERITY_OPTIONS.length    = 0; Array.prototype.push.apply(SEVERITY_OPTIONS,    LookupService.getMassEditOptions("DEFECT_SEVERITY"));
+                DEFECT_STATUS_OPT.length   = 0; Array.prototype.push.apply(DEFECT_STATUS_OPT,   LookupService.getMassEditOptions("DEFECT_STATUS"));
+                RESTR_STATUS_OPT.length    = 0; Array.prototype.push.apply(RESTR_STATUS_OPT,    LookupService.getMassEditOptions("RESTRICTION_STATUS"));
+                INSP_STATUS_OPT.length     = 0; Array.prototype.push.apply(INSP_STATUS_OPT,     LookupService.getMassEditOptions("INSPECTION_STATUS"));
+                DEFECT_PRIORITY_OPT.length = 0; Array.prototype.push.apply(DEFECT_PRIORITY_OPT, LookupService.getMassEditOptions("DEFECT_PRIORITY"));
+                RESTR_TYPE_OPTIONS.length  = 0; Array.prototype.push.apply(RESTR_TYPE_OPTIONS,  LookupService.getMassEditOptions("RESTRICTION_TYPE"));
+                PERMIT_STATUS_OPT.length   = 0; Array.prototype.push.apply(PERMIT_STATUS_OPT,   LookupService.getMassEditOptions("PERMIT_STATUS"));
+                PERMIT_TYPE_OPT.length     = 0; Array.prototype.push.apply(PERMIT_TYPE_OPT,     LookupService.getMassEditOptions("PERMIT_TYPE"));
+            });
             // Load state options from OData and update the BRIDGE field config
             ReferenceData.load().then(function () {
                 ENTITY_CONFIG.BRIDGE.fields.state.options = ReferenceData.getStateOptions();

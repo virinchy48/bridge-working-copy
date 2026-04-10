@@ -6,8 +6,9 @@ sap.ui.define([
     "sap/m/MessageToast",
     "sap/m/MessageBox",
     "nhvr/bridgemanagement/model/RoleManager",
-    "nhvr/bridgemanagement/util/ReferenceData"
-], function (Controller, MessageToast, MessageBox, RoleManager, ReferenceData) {
+    "nhvr/bridgemanagement/util/ReferenceData",
+    "nhvr/bridgemanagement/util/LookupService"
+], function (Controller, MessageToast, MessageBox, RoleManager, ReferenceData, LookupService) {
     "use strict";
 
     const BASE = "/bridge-management";
@@ -48,6 +49,11 @@ sap.ui.define([
             router.getRoute("BridgeEdit").attachPatternMatched(this._onEdit, this);
             // Load geographic reference data from OData
             ReferenceData.load();
+
+            LookupService.load().then(function () {
+                LookupService.populateFormSelect(this.byId("fAssetClass"), "ASSET_CLASS");
+                LookupService.populateFormSelect(this.byId("fState"), "STATE");
+            }.bind(this));
         },
 
         // v4.7.9: Field-level RBAC for the Bridge create/edit form.

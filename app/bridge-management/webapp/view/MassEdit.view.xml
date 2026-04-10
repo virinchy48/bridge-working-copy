@@ -57,17 +57,7 @@
                     <HBox wrap="Wrap" alignItems="Center">
                         <VBox class="sapUiSmallMarginEnd" visible="{massEdit>/showStateFilter}">
                             <Label text="State" design="Bold"/>
-                            <Select id="meFilterState" change="onMEFilterChange" width="110px">
-                                <core:Item key="ALL" text="All States"/>
-                                <core:Item key="NSW" text="NSW"/>
-                                <core:Item key="VIC" text="VIC"/>
-                                <core:Item key="QLD" text="QLD"/>
-                                <core:Item key="WA"  text="WA"/>
-                                <core:Item key="SA"  text="SA"/>
-                                <core:Item key="TAS" text="TAS"/>
-                                <core:Item key="ACT" text="ACT"/>
-                                <core:Item key="NT"  text="NT"/>
-                            </Select>
+                            <Select id="meFilterState" change="onMEFilterChange" width="110px"/>
                         </VBox>
                         <VBox class="sapUiSmallMarginEnd">
                             <Label text="Search" design="Bold"/>
