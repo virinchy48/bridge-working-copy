@@ -8,7 +8,9 @@
     "scripts": {
         "start": "cds-serve",
         "watch": "cds watch",
+        "watch:hana": "cds watch --profile local-hana,production",
         "build": "cds build --production",
+        "deploy:hana": "cds deploy --profile local-hana,production --to hana",
         "test": "jest --testPathPattern=test/ --forceExit --passWithNoTests",
         "test:unit": "jest --testPathPattern=test/unit --forceExit",
         "test:integration": "jest --testPathPattern=test/integration --forceExit",

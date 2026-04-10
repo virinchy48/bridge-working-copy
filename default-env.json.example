@@ -1,0 +1,20 @@
+{
+    "VCAP_SERVICES": {
+        "hana": [
+            {
+                "name": "nhvr-db",
+                "label": "hana",
+                "plan": "hdi-shared",
+                "credentials": {
+                    "schema": "<HDI_SCHEMA>",
+                    "user": "<HDI_USER>",
+                    "password": "<HDI_PASSWORD>",
+                    "host": "<HANA_HOST>",
+                    "port": "443",
+                    "url": "<SERVICE_KEY_URL>",
+                    "certificate": "-----BEGIN CERTIFICATE-----\\n...\\n-----END CERTIFICATE-----"
+                }
+            }
+        ]
+    }
+}

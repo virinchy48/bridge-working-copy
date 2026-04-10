@@ -104,6 +104,46 @@
             }
         }
     },
+    "[local-hana]": {
+        "requires": {
+            "db": {
+                "kind": "hana-cloud"
+            },
+            "auth": {
+                "kind": "mocked",
+                "users": {
+                    "admin": {
+                        "password": "admin",
+                        "roles": ["Admin", "BridgeManager", "Viewer"]
+                    },
+                    "manager": {
+                        "password": "manager",
+                        "roles": ["BridgeManager", "Viewer"]
+                    },
+                    "viewer": {
+                        "password": "viewer",
+                        "roles": ["Viewer"]
+                    },
+                    "executive": {
+                        "password": "executive",
+                        "roles": ["Executive", "Viewer"]
+                    },
+                    "inspector": {
+                        "password": "inspector",
+                        "roles": ["Inspector", "Viewer"]
+                    },
+                    "operator": {
+                        "password": "operator",
+                        "roles": ["Operator", "Viewer"]
+                    },
+                    "anonymous": {
+                        "password": "",
+                        "roles": ["Admin", "BridgeManager", "Viewer"]
+                    }
+                }
+            }
+        }
+    },
     "features": {
         "serve_on_root": false
     },
