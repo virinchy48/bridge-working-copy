@@ -33,8 +33,6 @@ One controller per view. View files live in `../view/<Name>.view.xml`.
 | `AnnualConditionReport` | `AnnualConditionReport.view.xml` | `Bridge` | `reports.js` |
 | `DataQuality` | `DataQuality.view.xml` | (DQ checks) | `data-quality.js` |
 | `AdminConfig` | `AdminConfig.view.xml` | `AttributeDefinition`, `RoleConfig`, `Lookup` | `attributes.js`, `system.js` |
-| `AdminRestrictionTypes` | `AdminRestrictionTypes.view.xml` | `RestrictionTypeConfig` | `system.js` |
-| `AdminVehicleTypes` | `AdminVehicleTypes.view.xml` | `VehicleType` | `system.js` |
 | `AppAdmin` | `AppAdmin.view.xml` | `RoleConfig` + system | `system.js` |
 | `BmsTechAdmin` | `BmsTechAdmin.view.xml` | System config | `system.js` |
 | `LicenseConfig` | `LicenseConfig.view.xml` | License metadata | `system.js` |

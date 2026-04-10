@@ -64,8 +64,6 @@
 .nhvrLaunchTile.tileBridges    .sapMGTHdrTxt { color: #0070F2 !important; }
 .nhvrLaunchTile.tileRestrict   .sapMGTHdrTxt { color: #BB0000 !important; }
 .nhvrLaunchTile.tileMap        .sapMGTHdrTxt { color: #107E3E !important; }
-.nhvrLaunchTile.tileReports    .sapMGTHdrTxt { color: #6A6D70 !important; }
-.nhvrLaunchTile.tileAdmin      .sapMGTHdrTxt { color: #E9730C !important; }
 
 /* Quick-stats bar at bottom of home */
 .nhvrQuickStats {
@@ -674,7 +672,6 @@
 
 /* Launch tile extras */
 .nhvrLaunchTile.tileUpload     .sapMGTHdrTxt { color: #0070F2 !important; }
-.nhvrLaunchTile.tileExecutive  .sapMGTHdrTxt { color: #6400E4 !important; }
 
 /* ── Executive Dashboard ──────────────────────────────────────── */
 .nhvrExecHeader {
@@ -1668,8 +1665,6 @@
 .sapMDialog .sapUiRespGrid {
     width: 100% !important;
 }
-/* ── Tech Admin section tile colour ─────────────────────────── */
-.nhvrLaunchTile.tileTechAdmin .sapMGTHdrTxt { color: #6B2D8B !important; }
 /* BMS Business Admin tile colour  */
 .nhvrLaunchTile.tileBizAdmin  .sapMGTHdrTxt { color: #E9730C !important; }
 

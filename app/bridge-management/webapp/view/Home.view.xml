@@ -115,6 +115,16 @@
                             </TileContent>
                         </GenericTile>
 
+                        <GenericTile id="tileBridgeMap" class="nhvrLaunchTile tileMap sapUiTinyMargin"
+                            header="Map View"
+                            subheader="Geographic Explorer"
+                            press="onNavToMap"
+                            frameType="OneByOne">
+                            <TileContent>
+                                <ImageContent src="sap-icon://map-2"/>
+                            </TileContent>
+                        </GenericTile>
+
                     </FlexBox>
                 </VBox>
 
@@ -138,44 +148,6 @@
                             icon="{home>icon}"
                             type="Active"/>
                     </List>
-                </VBox>
-
-                <!-- ── Section: Analytics ────────────────────────────── -->
-                <VBox class="nhvrDashSection sapUiMediumMarginTop">
-                    <Title text="Analytics" level="H3" class="nhvrDashSectionTitle"/>
-                    <FlexBox wrap="Wrap" justifyContent="Start" alignItems="Start" class="sapUiTinyMarginTop">
-
-                        <GenericTile id="tileReports" class="nhvrLaunchTile tileReports sapUiTinyMargin"
-                            header="Reports"
-                            subheader="Compliance &amp; Export"
-                            press="onNavToReports"
-                            frameType="OneByOne">
-                            <TileContent>
-                                <ImageContent src="sap-icon://bar-chart"/>
-                            </TileContent>
-                        </GenericTile>
-
-                        <GenericTile id="tileAnnualConditionReport" class="nhvrLaunchTile sapUiTinyMargin"
-                            header="Annual Condition Report"
-                            subheader="Statutory — AS 5100 / BIMM"
-                            press="onNavToAnnualConditionReport"
-                            frameType="TwoByOne">
-                            <TileContent footer="Minister/Parliament submission">
-                                <ImageContent src="sap-icon://bar-chart"/>
-                            </TileContent>
-                        </GenericTile>
-
-                        <GenericTile id="tileAnalyticsMap" class="nhvrLaunchTile sapUiTinyMargin"
-                            header="{i18n>tile.analyticsMap}"
-                            subheader="{i18n>tile.analyticsMap.sub}"
-                            press="onNavToMap"
-                            frameType="OneByOne">
-                            <TileContent>
-                                <ImageContent src="sap-icon://map-2"/>
-                            </TileContent>
-                        </GenericTile>
-
-                    </FlexBox>
                 </VBox>
 
                 <!-- ── Section: BMS Business Admin (Admin only) ─────── -->
@@ -202,30 +174,11 @@
                                 <ImageContent src="sap-icon://settings"/>
                             </TileContent>
                         </GenericTile>
-
-
-
-                        <GenericTile id="restrictionTypesTile" class="nhvrLaunchTile sapUiTinyMargin"
-                            header="Restriction Types" subheader="Configure Types"
-                            press="onNavToRestrictionTypes" frameType="OneByOne">
-                            <TileContent>
-                                <ImageContent src="sap-icon://category"/>
-                            </TileContent>
-                        </GenericTile>
-
                         <GenericTile id="massEditTile" class="nhvrLaunchTile sapUiTinyMargin"
                             header="Mass Edit" subheader="In-App Grid Editor"
                             press="onNavToMassEdit" frameType="OneByOne">
                             <TileContent>
                                 <ImageContent src="sap-icon://edit-outside"/>
-                            </TileContent>
-                        </GenericTile>
-
-                        <GenericTile id="vehicleTypesTile" class="nhvrLaunchTile sapUiTinyMargin"
-                            header="Vehicle Types" subheader="NHVR Vehicle Classes"
-                            press="onNavToVehicleTypes" frameType="OneByOne">
-                            <TileContent>
-                                <ImageContent src="sap-icon://bus-public-transport"/>
                             </TileContent>
                         </GenericTile>
 
@@ -254,44 +207,6 @@
                             frameType="OneByOne">
                             <TileContent>
                                 <ImageContent src="sap-icon://warning2"/>
-                            </TileContent>
-                        </GenericTile>
-
-                    </FlexBox>
-                </VBox>
-
-                <!-- ── Section: Network Tools ──────────────────────── -->
-                <VBox id="sectionNetworkTools" class="nhvrDashSection sapUiMediumMarginTop">
-                    <Title text="Network Tools" level="H3" class="nhvrDashSectionTitle"/>
-                    <FlexBox wrap="Wrap" justifyContent="Start" alignItems="Start" class="sapUiTinyMarginTop">
-
-                        <GenericTile id="tileBridgeMap" class="nhvrLaunchTile tileMap sapUiTinyMargin"
-                            header="Map View"
-                            subheader="Geographic Explorer"
-                            press="onNavToMap"
-                            frameType="OneByOne">
-                            <TileContent>
-                                <ImageContent src="sap-icon://map-2"/>
-                            </TileContent>
-                        </GenericTile>
-
-                        <GenericTile id="tileRecordInspection" class="nhvrLaunchTile sapUiTinyMargin"
-                            header="Record Inspection"
-                            subheader="AS 5100.7 Form"
-                            press="onNavToInspectionCreate"
-                            frameType="OneByOne">
-                            <TileContent>
-                                <ImageContent src="sap-icon://inspection"/>
-                            </TileContent>
-                        </GenericTile>
-
-                        <GenericTile id="tileFreightCorridors" class="nhvrLaunchTile sapUiTinyMargin"
-                            header="Freight Corridors"
-                            subheader="PBS / HML Routes"
-                            press="onNavToFreightRoutes"
-                            frameType="OneByOne">
-                            <TileContent>
-                                <ImageContent src="sap-icon://shipping-status"/>
                             </TileContent>
                         </GenericTile>
 

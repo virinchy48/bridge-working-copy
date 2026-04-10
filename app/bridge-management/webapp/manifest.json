@@ -137,9 +137,7 @@
                 { "pattern": "BridgeNew",              "name": "BridgeNew",             "target": "BridgeNew" },
                 { "pattern": "BridgeEdit/{bridgeId}",  "name": "BridgeEdit",            "target": "BridgeEdit" },
                 { "pattern": "VehicleCombinations:?query:", "name": "VehicleCombinations", "target": "VehicleCombinations" },
-                { "pattern": "AdminRestrictionTypes", "name": "AdminRestrictionTypes", "target": "AdminRestrictionTypes" },
                 { "pattern": "MassEdit", "name": "MassEdit", "target": "MassEdit" },
-                { "pattern": "AdminVehicleTypes", "name": "AdminVehicleTypes", "target": "AdminVehicleTypes" },
                 { "pattern": "Permits:?query:", "name": "Permits", "target": "Permits" },
                 { "pattern": "Permits/{permitId}", "name": "PermitDetail", "target": "Permits" },
                 { "pattern": "RouteAssessment", "name": "RouteAssessment", "target": "RouteAssessment" },
@@ -214,20 +212,10 @@
                     "type": "XML", "viewLevel": 1,
                     "viewName": "nhvr.bridgemanagement.view.VehicleCombinations"
                 },
-                "AdminRestrictionTypes": {
-                    "type": "XML", "viewLevel": 1,
-                    "viewId": "AdminRestrictionTypes",
-                    "viewName": "nhvr.bridgemanagement.view.AdminRestrictionTypes"
-                },
                 "MassEdit": {
                     "type": "XML", "viewLevel": 1,
                     "viewId": "MassEdit",
                     "viewName": "nhvr.bridgemanagement.view.MassEdit"
-                },
-                "AdminVehicleTypes": {
-                    "type": "XML", "viewLevel": 1,
-                    "viewId": "AdminVehicleTypes",
-                    "viewName": "nhvr.bridgemanagement.view.AdminVehicleTypes"
                 },
                 "Permits": {
                     "type": "XML", "viewLevel": 1,

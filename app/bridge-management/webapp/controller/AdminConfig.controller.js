@@ -17,14 +17,12 @@ sap.ui.define([
 
     // Section-to-featureKey mapping for Home screen tile grouping
     var SECTION_TILE_MAP = [
-        { name: "Operations",              keys: ["dashboard","bridges","restrictions"] },
-        { name: "Analytics",               keys: ["reports","analyticsMap"] },
-        { name: "BMS Business Admin",      keys: ["massupload","adminconfig","massedit","restrictionTypes","vehicletypes","licenseConfig"] },
+        { name: "Operations",              keys: ["dashboard","bridges","restrictions","bridgeMap"] },
+        { name: "BMS Business Admin",      keys: ["massupload","adminconfig","massedit","licenseConfig"] },
         { name: "BMS Tech Admin",          keys: ["techAdmin","integrationHub"] },
         { name: "Inspection & Defects",    keys: ["inspections","defects"] },
         { name: "Operator Tools",          keys: ["permits","vehicleaccess","routeassessment","routePlanner"] },
-        { name: "Road Capacity & Permits", keys: ["vehiclePermits","capacityReports"] },
-        { name: "Network Tools",           keys: ["bridgeMap","recordInspection","freightCorridors"] }
+        { name: "Road Capacity & Permits", keys: ["vehiclePermits","capacityReports"] }
     ];
 
     // Build a lookup: featureKey → section name

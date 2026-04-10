@@ -213,28 +213,12 @@ sap.ui.define([
         onNavToBridges:      function () { this._navTo("BridgesList"); },
         onNavToRestrictions: function () { this._navTo("RestrictionsList"); },
 
-        // ── KPI drill-down with pre-applied filters ───────────────
-        onNavToClosedBridges: function () {
-            this.getOwnerComponent().getRouter().navTo("BridgesList", { "?query": { postingStatus: "CLOSED" } });
-        },
-        onNavToPermitRestrictions: function () {
-            this.getOwnerComponent().getRouter().navTo("RestrictionsList", { "?query": { permitRequired: "true" } });
-        },
         onNavToMap:          function () { this._navTo("MapView"); },
-        onNavToReports:      function () { this._navTo("Reports"); },
-        onNavToAnnualConditionReport: function () { this._navTo("AnnualConditionReport"); },
-        onNavToExecutive:    function () { this._navTo("Dashboard"); },
         onNavToMassUpload:   function () { this._navTo("MassUpload"); },
         onNavToAdmin:        function () { this._navTo("AdminConfig"); },
         onNavToInspections:          function () { this._navTo("InspectionDashboard"); },
         onNavToDefects:              function () { this._navTo("DefectRegister"); },
-        onNavToRestrictionTypes:     function () { this._navTo("AdminRestrictionTypes"); },
         onNavToMassEdit:             function () { this._navTo("MassEdit"); },
-        onNavToVehicleTypes:         function () { this._navTo("AdminVehicleTypes"); },
-        onNavToIntegrationHub:       function () { this._navTo("integrationHub"); },
-        onNavToInspectionCreate:     function () { this._navTo("InspectionCreateNew"); },
-        onNavToFreightRoutes:        function () { this._navTo("FreightRoutes"); },
-        onNavToAnalytics:            function () { this._navTo("AnalyticsDashboard"); },
 
         _navTo: function (routeName) {
             this.getOwnerComponent().getRouter().navTo(routeName);
@@ -256,7 +240,7 @@ sap.ui.define([
                 { id: "tileDashboard",       key: "dashboard" },
                 { id: "tileBridges",         key: "bridges" },
                 { id: "tileRestrictions",    key: "restrictions" },
-                { id: "tileReports",         key: "reports" },
+                { id: "tileBridgeMap",       key: "bridgeMap" },
                 { id: "tileVehicleAccess",   key: "vehicleaccess" },
                 { id: "tileRouteAssessment", key: "routeassessment" }
             ];
@@ -264,10 +248,6 @@ sap.ui.define([
                 const tile = this.byId(tileConfig.id);
                 if (tile) tile.setVisible(RoleManager.isVisible(tileConfig.key));
             });
-
-            // Analytics section — Map View tile (visible to all roles)
-            if (this.byId("tileAnalyticsMap"))
-                this.byId("tileAnalyticsMap").setVisible(RoleManager.isVisible("analyticsMap"));
 
             // BMS Business Admin section — show for Admin role (adminconfig, massupload, massedit)
             const showAdmin = RoleManager.isVisible("adminconfig") ||
@@ -282,9 +262,7 @@ sap.ui.define([
                 { id: "adminConfigTile",        key: "adminconfig" },
                 { id: "inspectionsTile",        key: "inspections" },
                 { id: "defectsTile",            key: "defects" },
-                { id: "restrictionTypesTile",   key: "restrictionTypes" },
-                { id: "massEditTile",           key: "massedit" },
-                { id: "vehicleTypesTile",       key: "vehicletypes" }
+                { id: "massEditTile",           key: "massedit" }
             ];
             adminTiles.forEach(tileConfig => {
                 const tile = this.byId(tileConfig.id);
@@ -298,17 +276,6 @@ sap.ui.define([
             if (this.byId("inspectionsTileMain")) this.byId("inspectionsTileMain").setVisible(RoleManager.isVisible("inspections"));
             if (this.byId("defectsTileMain"))     this.byId("defectsTileMain").setVisible(RoleManager.isVisible("defects"));
 
-            // ── Network Tools section ──────────────────────────────────────
-            var showNetworkTools = RoleManager.isVisible("bridgeMap") ||
-                                   RoleManager.isVisible("recordInspection") ||
-                                   RoleManager.isVisible("freightCorridors");
-            var sectionNetworkTools = this.byId("sectionNetworkTools");
-            if (sectionNetworkTools) sectionNetworkTools.setVisible(showNetworkTools);
-            if (this.byId("tileBridgeMap"))        this.byId("tileBridgeMap").setVisible(RoleManager.isVisible("bridgeMap"));
-            if (this.byId("tileRecordInspection")) this.byId("tileRecordInspection").setVisible(RoleManager.isVisible("recordInspection"));
-            if (this.byId("tileFreightCorridors")) this.byId("tileFreightCorridors").setVisible(RoleManager.isVisible("freightCorridors"));
-
-
         },
 
         // ── Capability gating for home tiles ─────────────────────
@@ -320,11 +287,9 @@ sap.ui.define([
                 { id: "tileInspectionMain",   capability: "INSPECTIONS" },
                 { id: "tileInspectionCard",   capability: "INSPECTIONS" },
                 { id: "inspectionsTileMain",  capability: "INSPECTIONS" },
-                { id: "tileRecordInspection", capability: "INSPECTIONS" },
                 { id: "tileDefectsMain",      capability: "DEFECTS" },
                 { id: "tileDefectsCard",      capability: "DEFECTS" },
                 { id: "defectsTileMain",      capability: "DEFECTS" },
-                { id: "tileFreightCorridors", capability: "FREIGHT_ROUTES" },
                 // Work Orders
                 { id: "tileWorkOrdersMain",   capability: "WORK_ORDERS" },
                 // Admin section
