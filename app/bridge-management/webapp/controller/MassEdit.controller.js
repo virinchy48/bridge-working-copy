@@ -18,11 +18,12 @@ sap.ui.define([
     "sap/m/ColumnListItem",
     "sap/ui/core/Item",
     "nhvr/bridgemanagement/model/CapabilityManager",
-    "nhvr/bridgemanagement/util/UserAnalytics"
+    "nhvr/bridgemanagement/util/UserAnalytics",
+    "nhvr/bridgemanagement/util/ReferenceData"
 ], function (
     Controller, JSONModel, MessageToast, MessageBox,
     Column, Text, Input, Select, DatePicker, CheckBox, Button,
-    ColumnListItem, CoreItem, CapabilityManager, UserAnalytics
+    ColumnListItem, CoreItem, CapabilityManager, UserAnalytics, ReferenceData
 ) {
     "use strict";
 
@@ -39,7 +40,7 @@ sap.ui.define([
     // ─────────────────────────────────────────────────────────────
     // STATIC OPTIONS
     // ─────────────────────────────────────────────────────────────
-    const STATE_OPTIONS       = [["","—"],["NSW","NSW"],["VIC","VIC"],["QLD","QLD"],["WA","WA"],["SA","SA"],["TAS","TAS"],["ACT","ACT"],["NT","NT"]];
+    // STATE_OPTIONS is populated from OData via ReferenceData.js — see onInit
     const CONDITION_OPTIONS   = [["","—"],["GOOD","Good"],["FAIR","Fair"],["POOR","Poor"],["CRITICAL","Critical"]];
     const POSTING_OPTIONS     = [["","—"],["UNRESTRICTED","Unrestricted"],["POSTED","Posted"],["CLOSED","Closed"]];
     const SCOUR_OPTIONS       = [["","—"],["LOW","Low"],["MEDIUM","Medium"],["HIGH","High"],["CRITICAL","Critical"]];
@@ -71,7 +72,7 @@ sap.ui.define([
             fields: {
                 bridgeId:             { label: "Bridge ID",           type: "text",    width: "130px", editable: "new" },
                 name:                 { label: "Name",                type: "text",    width: "200px" },
-                state:                { label: "State",               type: "select",  width: "80px",  options: STATE_OPTIONS },
+                state:                { label: "State",               type: "select",  width: "80px",  options: [["","—"]] },
                 region:               { label: "Region",              type: "text",    width: "130px" },
                 condition:            { label: "Condition",           type: "select",  width: "100px", options: CONDITION_OPTIONS },
                 conditionRating:      { label: "Rating (1-10)",       type: "number",  width: "80px" },
@@ -244,6 +245,10 @@ sap.ui.define([
                 customAttrInfo: ""
             });
             this.getView().setModel(this._model, "massEdit");
+            // Load state options from OData and update the BRIDGE field config
+            ReferenceData.load().then(function () {
+                ENTITY_CONFIG.BRIDGE.fields.state.options = ReferenceData.getStateOptions();
+            });
 
             var self = this;
             CapabilityManager.load().then(function () {

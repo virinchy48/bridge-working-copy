@@ -9,8 +9,9 @@ sap.ui.define([
     "sap/m/MessageToast",
     "sap/m/MessageBox",
     "nhvr/bridgemanagement/util/ExcelExport",
-    "nhvr/bridgemanagement/util/UserAnalytics"
-], function (Controller, JSONModel, MessageToast, MessageBox, ExcelExport, UserAnalytics) {
+    "nhvr/bridgemanagement/util/UserAnalytics",
+    "nhvr/bridgemanagement/util/ReferenceData"
+], function (Controller, JSONModel, MessageToast, MessageBox, ExcelExport, UserAnalytics, ReferenceData) {
     "use strict";
 
     const BASE     = "/bridge-management";
@@ -22,23 +23,7 @@ sap.ui.define([
         return opts;
     }
 
-    const REGIONS = {
-        NSW: ["Central West","Far North Coast","Far West","Hunter","Illawarra","Mid North Coast",
-              "New England","Northern Tablelands","Riverina Murray","South East","South West Slopes",
-              "Southern Highlands","Southern Tablelands","Sydney Metro","Western NSW"],
-        VIC: ["Barwon South West","Gippsland","Grampians","Hume","Inner Metropolitan",
-              "Loddon Mallee","Outer Metropolitan"],
-        QLD: ["Cape York","Central QLD","Darling Downs","Far North QLD","Fitzroy","Gold Coast",
-              "Mackay","North QLD","South East QLD","South West QLD","Sunshine Coast","Wide Bay Burnett"],
-        WA:  ["Gascoyne","Goldfields Esperance","Great Southern","Kimberley","Mid West",
-              "Peel","Perth Metro","Pilbara","South West","Wheatbelt"],
-        SA:  ["Adelaide Hills","Barossa","Clare Valley","Eyre Peninsula","Far North",
-              "Fleurieu","Flinders Ranges","Kangaroo Island","Limestone Coast","Mid North",
-              "Murray Mallee","Riverland","Yorke Peninsula"],
-        TAS: ["East Coast","Far North West","Launceston","North West","Northern","Southern"],
-        ACT: ["Australian Capital Territory"],
-        NT:  ["Barkly","Big Rivers","Darwin","Katherine","MacDonnell","Top End","Victoria Daly"]
-    };
+    // Region data is loaded from OData at runtime via ReferenceData.js
 
     // ────────────────────────────────────────────────────────────
     // REPORT CATALOGUE  (15 reports)
@@ -381,6 +366,8 @@ sap.ui.define([
             });
             this.getView().setModel(this._model, "reports");
             this._filteredCatalogue = REPORT_CATALOGUE.slice();
+            // Load geographic reference data from OData
+            ReferenceData.load();
 
             // Hub model initialisation
             this._initHubModel();
@@ -1071,8 +1058,9 @@ sap.ui.define([
             if (!sel) return;
             while (sel.getItems().length > 0) sel.removeItem(0);
             sel.addItem(new sap.ui.core.Item({ key: "", text: "All Regions" }));
-            (REGIONS[state] || []).forEach(r =>
-                sel.addItem(new sap.ui.core.Item({ key: r, text: r })));
+            ReferenceData.getRegions(state).forEach(function (region) {
+                sel.addItem(new sap.ui.core.Item({ key: region, text: region }));
+            });
             sel.setSelectedKey("");
         },
 

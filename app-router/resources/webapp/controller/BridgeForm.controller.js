@@ -5,8 +5,9 @@ sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/m/MessageToast",
     "sap/m/MessageBox",
-    "nhvr/bridgemanagement/model/RoleManager"
-], function (Controller, MessageToast, MessageBox, RoleManager) {
+    "nhvr/bridgemanagement/model/RoleManager",
+    "nhvr/bridgemanagement/util/ReferenceData"
+], function (Controller, MessageToast, MessageBox, RoleManager, ReferenceData) {
     "use strict";
 
     const BASE = "/bridge-management";
@@ -19,23 +20,7 @@ sap.ui.define([
         return opts;
     }
 
-    const REGIONS = {
-        NSW: ["Central West","Far North Coast","Far West","Hunter","Illawarra","Mid North Coast",
-              "New England","Northern Tablelands","Riverina Murray","South East","South West Slopes",
-              "Southern Highlands","Southern Tablelands","Sydney Metro","Western NSW"],
-        VIC: ["Barwon South West","Gippsland","Grampians","Hume","Inner Metropolitan",
-              "Loddon Mallee","Outer Metropolitan"],
-        QLD: ["Cape York","Central QLD","Darling Downs","Far North QLD","Fitzroy","Gold Coast",
-              "Mackay","North QLD","South East QLD","South West QLD","Sunshine Coast","Wide Bay Burnett"],
-        WA:  ["Gascoyne","Goldfields Esperance","Great Southern","Kimberley","Mid West",
-              "Peel","Perth Metro","Pilbara","South West","Wheatbelt"],
-        SA:  ["Adelaide Hills","Barossa","Clare Valley","Eyre Peninsula","Far North",
-              "Fleurieu","Flinders Ranges","Kangaroo Island","Limestone Coast","Mid North",
-              "Murray Mallee","Riverland","Yorke Peninsula"],
-        TAS: ["East Coast","Far North West","Launceston","North West","Northern","Southern"],
-        ACT: ["Australian Capital Territory"],
-        NT:  ["Barkly","Big Rivers","Darwin","Katherine","MacDonnell","Top End","Victoria Daly"]
-    };
+    // Region data is loaded from OData at runtime via ReferenceData.js
 
     // Rating → condition label map (AS 5100 scale)
     const RATING_MAP = {
@@ -61,6 +46,8 @@ sap.ui.define([
             const router = this.getOwnerComponent().getRouter();
             router.getRoute("BridgeNew").attachPatternMatched(this._onNew, this);
             router.getRoute("BridgeEdit").attachPatternMatched(this._onEdit, this);
+            // Load geographic reference data from OData
+            ReferenceData.load();
         },
 
         // v4.7.9: Field-level RBAC for the Bridge create/edit form.
@@ -290,8 +277,9 @@ sap.ui.define([
             if (!sel) return;
             while (sel.getItems().length > 0) sel.removeItem(0);
             sel.addItem(new sap.ui.core.Item({ key: "", text: "— Select Region —" }));
-            (REGIONS[state] || []).forEach(r =>
-                sel.addItem(new sap.ui.core.Item({ key: r, text: r })));
+            ReferenceData.getRegions(state).forEach(function (region) {
+                sel.addItem(new sap.ui.core.Item({ key: region, text: region }));
+            });
             sel.setSelectedKey("");
         },
 

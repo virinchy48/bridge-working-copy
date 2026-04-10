@@ -71,10 +71,10 @@ cds.on('bootstrap', (app) => {
         res.setHeader('Content-Security-Policy',
             "default-src 'self'; " +
             "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://ui5.sap.com https://sapui5.hana.ondemand.com https://sdk.openui5.org https://unpkg.com https://cdnjs.cloudflare.com; " +
-            "style-src 'self' 'unsafe-inline' https://ui5.sap.com https://sapui5.hana.ondemand.com https://sdk.openui5.org https://unpkg.com; " +
+            "style-src 'self' 'unsafe-inline' https://ui5.sap.com https://sapui5.hana.ondemand.com https://sdk.openui5.org https://unpkg.com https://cdnjs.cloudflare.com; " +
             "font-src 'self' https://ui5.sap.com https://sapui5.hana.ondemand.com https://sdk.openui5.org data:; " +
             "img-src 'self' data: blob: https://*.tile.openstreetmap.org https://ui5.sap.com https://sapui5.hana.ondemand.com; " +
-            "connect-src 'self' https://api.openrouteservice.org https://*.hana.ondemand.com;"
+            "connect-src 'self' https://api.openrouteservice.org https://*.hana.ondemand.com https://cdnjs.cloudflare.com;"
         );
         next();
     });
@@ -85,8 +85,8 @@ cds.on('bootstrap', (app) => {
     // When sapui5.hana.ondemand.com is unreachable from the browser (503),
     // proxy requests through the CDS server where curl/https works fine.
     const https = require('https');
-    app.get('/ui5cdn/*path', (req, res) => {
-        const path = req.params.path;
+    app.get('/ui5cdn/*', (req, res) => {
+        const path = req.params[0];
         const cdnUrl = 'https://sapui5.hana.ondemand.com/1.133.0/resources/' + path;
         https.get(cdnUrl, (cdnRes) => {
             if (cdnRes.statusCode >= 400) {
