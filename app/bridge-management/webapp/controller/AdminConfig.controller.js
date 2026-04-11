@@ -283,16 +283,35 @@ sap.ui.define([
 
         // ── Audit Log ─────────────────────────────────────────────────
         _loadAuditLog: function () {
-            fetch(`${BASE}/AuditLogs?$orderby=timestamp desc&$top=200`, { headers: H, credentials: CREDS })
+            // Raised from $top=200 → $top=5000 (the CDS query-limit max declared
+            // in .cdsrc.json). Include $count=true so the UI can show a
+            // truncation warning if the live row count exceeds 5000.
+            fetch(`${BASE}/AuditLogs?$orderby=timestamp desc&$top=5000&$count=true`, { headers: H, credentials: CREDS })
                 .then(async r => {
                     if (!r.ok) { const b = await r.json().catch(() => ({})); throw new Error(_errMsg(r.status, b)); }
                     return r.json();
                 })
                 .then(j => {
                     this._allAudit = j.value || [];
+                    this._auditTotal = j["@odata.count"] || this._allAudit.length;
                     this._applyAuditFilter();
+                    this._updateAuditTruncationBanner();
                 })
                 .catch(err => MessageBox.error("Could not load audit log: " + err.message));
+        },
+
+        _updateAuditTruncationBanner: function () {
+            const banner = this.byId("auditTruncationBanner");
+            if (!banner) return;
+            const loaded = this._allAudit.length;
+            const total  = this._auditTotal || loaded;
+            if (loaded < total) {
+                banner.setText(`Showing the most recent ${loaded} of ${total} audit entries. Refine filters to see older events.`);
+                banner.setVisible(true);
+                banner.setType("Warning");
+            } else {
+                banner.setVisible(false);
+            }
         },
 
         onRefreshAudit: function () {
@@ -443,10 +462,14 @@ sap.ui.define([
         // ── Lookup Management ─────────────────────────────────────────
 
         _loadLookups: function () {
-            fetch(`${BASE}/Lookups?$orderby=category asc,displayOrder asc,code asc`, { headers: H, credentials: CREDS })
-                .then(r => r.ok ? r.json() : { value: [] })
+            // Raised from implicit default to $top=5000 (CDS max) + $count=true
+            // so the UI can show a truncation warning if the live catalogue
+            // exceeds 5000 rows.
+            fetch(`${BASE}/Lookups?$orderby=category asc,displayOrder asc,code asc&$top=5000&$count=true`, { headers: H, credentials: CREDS })
+                .then(r => r.ok ? r.json() : { value: [], "@odata.count": 0 })
                 .then(j => {
                     this._allLookups = j.value || [];
+                    this._lookupTotal = j["@odata.count"] || this._allLookups.length;
                     // Populate category filter
                     const cats = [...new Set(this._allLookups.map(l => l.category))].sort();
                     const sel  = this.byId("lookupCategoryFilter");
@@ -455,8 +478,23 @@ sap.ui.define([
                         cats.forEach(c => sel.addItem(new sap.ui.core.Item({ key: c, text: c })));
                     }
                     this._applyLookupFilter();
+                    this._updateLookupTruncationBanner();
                 })
                 .catch(() => {});
+        },
+
+        _updateLookupTruncationBanner: function () {
+            const banner = this.byId("lookupTruncationBanner");
+            if (!banner) return;
+            const loaded = this._allLookups.length;
+            const total  = this._lookupTotal || loaded;
+            if (loaded < total) {
+                banner.setText(`Showing ${loaded} of ${total} lookup rows. Use the category filter to narrow the list.`);
+                banner.setVisible(true);
+                banner.setType("Warning");
+            } else {
+                banner.setVisible(false);
+            }
         },
 
         _applyLookupFilter: function () {

@@ -94,6 +94,11 @@
                         <MessageStrip text="Lookup values power dropdown fields across the application. Changes are effective immediately."
                             type="Information" showIcon="true" class="sapUiSmallMarginTop sapUiSmallMarginBottom"/>
 
+                        <!-- Truncation warning — shown only when live row count exceeds $top cap (5000). -->
+                        <MessageStrip id="lookupTruncationBanner"
+                            text="" type="Warning" showIcon="true" visible="false"
+                            class="sapUiSmallMarginBottom"/>
+
                         <Table id="lookupTable"
                             items="{lookups>/items}"
                             headerText="Lookup Values"
@@ -157,6 +162,12 @@
                                 </items>
                             </Select>
                         </HBox>
+
+                        <!-- Truncation warning — shown only when live row count exceeds $top cap (5000). -->
+                        <MessageStrip id="auditTruncationBanner"
+                            text="" type="Warning" showIcon="true" visible="false"
+                            class="sapUiSmallMarginBottom"/>
+
                         <Table id="auditTable"
                             items="{auditLog>/items}"
                             growing="true"
