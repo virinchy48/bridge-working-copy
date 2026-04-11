@@ -700,7 +700,7 @@ sap.ui.define([
             const search = (this.byId("meSearch") ? this.byId("meSearch").getValue() : "").toLowerCase();
 
             let data = this._allRows;
-            if (cfg.filterStateField && state !== "ALL") {
+            if (cfg.filterStateField && state) {
                 data = data.filter(function (r) { return r[cfg.filterStateField] === state; });
             }
             if (search) {

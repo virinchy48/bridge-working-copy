@@ -35,7 +35,9 @@ sap.ui.define([
                 LookupService.populateSelect(this.byId("severityFilter"), "DEFECT_SEVERITY", "All Severities");
                 LookupService.populateSelect(this.byId("categoryFilter"), "DEFECT_CATEGORY", "All Categories");
                 LookupService.populateSelect(this.byId("priorityFilter"), "DEFECT_PRIORITY", "All Priorities");
-                LookupService.populateFormSelect(this.byId("fWoPriority"), "WORK_ORDER_PRIORITY");
+                // WORK_ORDER_PRIORITY wiring removed in cut-down BIS variant
+                // (fWoPriority control lived in the Create Work Order dialog
+                //  which was deleted along with the WorkOrder feature area).
             }.bind(this));
         },
 
