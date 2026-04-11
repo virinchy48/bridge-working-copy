@@ -13,7 +13,7 @@ using { nhvr.Bridge } from './core';
 // ─────────────────────────────────────────────────────────────
 entity RoleConfig : managed {
     key ID         : String(100) @mandatory;  // Human-readable key e.g. 'rc-admin-addbridge'
-    role           : String(50)  @mandatory;  // ADMIN | BRIDGE_MANAGER | INSPECTOR | OPERATOR | READ_ONLY
+    role           : String(50)  @mandatory;  // ADMIN | BRIDGE_MANAGER | READ_ONLY — must match util/model/RoleManager.js
     featureKey     : String(100) @mandatory;  // tab key or feature key (e.g. 'bridges', 'restrictions-tab')
     featureType    : String(20)  @mandatory;  // TAB | ACTION | MENU | FIELD | SECTION
     label          : String(200);

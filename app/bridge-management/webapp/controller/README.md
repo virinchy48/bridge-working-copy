@@ -12,10 +12,8 @@ One controller per view. View files live in `../view/<Name>.view.xml`.
 | `BridgeDetail` | `BridgeDetail.view.xml` | `Bridge` | `bridges.js` |
 | `BridgeForm` | `BridgeForm.view.xml` | `Bridge`, `BridgeAttribute` | `bridges.js`, `attributes.js` |
 | `Restrictions` | `Restrictions.view.xml` | `Restriction` | `restrictions.js`, `restriction-feed.js` |
-| `InspectionDashboard` | `InspectionDashboard.view.xml` | `InspectionOrder` | `inspections.js` |
 | `InspectionCreate` | `InspectionCreate.view.xml` | `InspectionRecord` | `inspections.js` |
 | `Defects` | `Defects.view.xml` | `BridgeDefect` | `bridges.js` |
-| `WorkOrders` | `WorkOrders.view.xml` | `BridgeDefect` | `bridges.js` |
 | `Permits` | `Permits.view.xml` | `Permit` | `bridges.js` |
 | `PermitRegisterReport` | `PermitRegisterReport.view.xml` | `Permit` | `reports.js` |
 | `FreightRoutes` | `FreightRoutes.view.xml` | `FreightRoute` | `routing-engine.js` |
@@ -29,7 +27,6 @@ One controller per view. View files live in `../view/<Name>.view.xml`.
 | `Reports` | `Reports.view.xml` | (report projections) | `reports.js` |
 | `AnalyticsDashboard` | `AnalyticsDashboard.view.xml` | (analytics) | `analytics-report.js` |
 | `AnnualConditionReport` | `AnnualConditionReport.view.xml` | `Bridge` | `reports.js` |
-| `DataQuality` | `DataQuality.view.xml` | (DQ checks) | `data-quality.js` |
 | `AdminConfig` | `AdminConfig.view.xml` | `AttributeDefinition`, `RoleConfig`, `Lookup` | `attributes.js`, `system.js` |
 | `AppAdmin` | `AppAdmin.view.xml` | `RoleConfig` + system | `system.js` |
 | `BmsTechAdmin` | `BmsTechAdmin.view.xml` | System config | `system.js` |

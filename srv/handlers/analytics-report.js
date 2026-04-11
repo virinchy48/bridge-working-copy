@@ -15,7 +15,7 @@ const DEFAULT_KNOWN_ROUTES = [
     'BridgeNew', 'BridgeEdit', 'Restrictions', 'MapView', 'Reports',
     'AdminConfig', 'MassUpload', 'MassEdit',
     'InspectionCreate', 'FreightRoutes', 'FreightRouteDetail',
-    'Permits', 'VehicleClasses', 'RouteAssessment', 'DataQuality',
+    'Permits', 'VehicleClasses', 'RouteAssessment',
     'RiskPrioritisation', 'AnalyticsDashboard'
 ];
 
