@@ -10,8 +10,10 @@ sap.ui.define([
     "sap/m/MessageBox",
     "nhvr/bridgemanagement/util/HelpAssistantMixin",
     "nhvr/bridgemanagement/model/CapabilityManager",
-    "nhvr/bridgemanagement/util/UserAnalytics"
-], function (Controller, JSONModel, MessageToast, MessageBox, HelpAssistantMixin, CapabilityManager, UserAnalytics) {
+    "nhvr/bridgemanagement/util/UserAnalytics",
+    "nhvr/bridgemanagement/util/LookupService",
+    "nhvr/bridgemanagement/util/ReferenceData"
+], function (Controller, JSONModel, MessageToast, MessageBox, HelpAssistantMixin, CapabilityManager, UserAnalytics, LookupService, ReferenceData) {
     "use strict";
 
     const BASE = "/bridge-management";
@@ -675,6 +677,20 @@ sap.ui.define([
             const errors    = j.errors || "";
             const timestamp = new Date().toLocaleString("en-AU");
             const typeLabel = ENTITY_CONFIG[this._uploadType].label;
+
+            // ── Cache invalidation ─────────────────────────────────────
+            // LookupService and ReferenceData memoise their load promise
+            // for the session, so without this step the values just created
+            // server-side are invisible to every other screen until the user
+            // does a full page reload. Drop the affected cache so the next
+            // consumer (e.g. BridgeForm state → region cascade) refetches.
+            if (created + updated > 0) {
+                if (this._uploadType === "lookups") {
+                    LookupService.reload();
+                } else if (this._uploadType === "bridges") {
+                    ReferenceData.reload();
+                }
+            }
 
             const result = this.byId("uploadResult");
             if (result) {

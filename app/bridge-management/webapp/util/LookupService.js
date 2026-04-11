@@ -62,6 +62,19 @@ sap.ui.define([], function () {
         },
 
         /**
+         * Force a fresh fetch, discarding the memoised promise and cache.
+         * Call this after admin actions that mutate the Lookup table (e.g. a
+         * successful Mass Upload of Lookup Values) so that subsequent screens
+         * see the new rows without a full page reload.
+         */
+        reload: function () {
+            _cache       = {};
+            _loadPromise = null;
+            _isLoaded    = false;
+            return LookupService.load();
+        },
+
+        /**
          * Populates a sap.m.Select or ComboBox from a lookup category.
          * Prepends an "All …" leading item when allText is provided.
          *
