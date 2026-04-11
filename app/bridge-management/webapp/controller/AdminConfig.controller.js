@@ -234,7 +234,12 @@ sap.ui.define([
 
         _loadValidValues: function (attrId) {
             if (!attrId) { this.getView().getModel("attrValidValues").setProperty("/items", []); return; }
-            fetch(`${BASE}/AttributeValidValues?$filter=attribute_ID eq ${attrId}&$orderby=displayOrder`, { headers: H, credentials: CREDS })
+            // OData v4 containment mode (see `.cdsrc.json` →
+            // odata.containment=true) means AttributeValidValue is not
+            // a top-level entity set; we have to navigate via the parent
+            // AttributeDefinition. A previous version hit
+            // /AttributeValidValues?$filter=... which 404'd.
+            fetch(`${BASE}/AttributeDefinitions(${attrId})/validValues?$orderby=displayOrder`, { headers: H, credentials: CREDS })
                 .then(r => r.ok ? r.json() : { value: [] })
                 .then(j => this.getView().getModel("attrValidValues").setProperty("/items", j.value || []))
                 .catch(() => {});
@@ -260,7 +265,12 @@ sap.ui.define([
             items.forEach(v => {
                 if (!v.value) return;
                 if (v._isNew) {
-                    AuthFetch.post(`${BASE}/AttributeValidValues`, { attribute_ID: attrId, value: v.value, label: v.label || v.value, displayOrder: v.displayOrder || 0, isActive: true }).catch(() => {});
+                    // POST through the parent's navigation path — containment
+                    // mode exposes validValues under AttributeDefinitions(id),
+                    // not as a standalone AttributeValidValues collection.
+                    // The parent key is implicit, so we omit attribute_ID from
+                    // the body.
+                    AuthFetch.post(`${BASE}/AttributeDefinitions(${attrId})/validValues`, { value: v.value, label: v.label || v.value, displayOrder: v.displayOrder || 0, isActive: true }).catch(() => {});
                 }
             });
         },

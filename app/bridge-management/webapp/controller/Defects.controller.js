@@ -10,9 +10,8 @@ sap.ui.define([
     "nhvr/bridgemanagement/model/CapabilityManager",
     "nhvr/bridgemanagement/util/AlvToolbarMixin",
     "nhvr/bridgemanagement/util/UserAnalytics",
-    "nhvr/bridgemanagement/model/RoleManager",
     "nhvr/bridgemanagement/util/LookupService"
-], function (Controller, JSONModel, MessageToast, MessageBox, ExcelExport, CapabilityManager, AlvToolbarMixin, UserAnalytics, RoleManager, LookupService) {
+], function (Controller, JSONModel, MessageToast, MessageBox, ExcelExport, CapabilityManager, AlvToolbarMixin, UserAnalytics, LookupService) {
     "use strict";
 
     const BASE = "/bridge-management";
@@ -35,9 +34,6 @@ sap.ui.define([
                 LookupService.populateSelect(this.byId("severityFilter"), "DEFECT_SEVERITY", "All Severities");
                 LookupService.populateSelect(this.byId("categoryFilter"), "DEFECT_CATEGORY", "All Categories");
                 LookupService.populateSelect(this.byId("priorityFilter"), "DEFECT_PRIORITY", "All Priorities");
-                // WORK_ORDER_PRIORITY wiring removed in cut-down BIS variant
-                // (fWoPriority control lived in the Create Work Order dialog
-                //  which was deleted along with the WorkOrder feature area).
             }.bind(this));
         },
 
@@ -254,73 +250,6 @@ sap.ui.define([
             this.getOwnerComponent().getRouter().navTo("BridgeDetail", {
                 bridgeId: encodeURIComponent(d.bridgeId)
             });
-        },
-
-        // ── P04: Work Order creation ───────────────────────────────
-        onCreateWorkOrder: function () {
-            UserAnalytics.trackAction("create_work_order", "Defects");
-            if (!this._selectedDefect) { sap.m.MessageToast.show("Select a defect first"); return; }
-            const dlg = this.byId("createWoDialog");
-            if (dlg) {
-                this.byId("fWoPriority").setSelectedKey("MEDIUM");
-                this.byId("fWoPlannedDate").setValue("");
-                this.byId("fWoAssignedTo").setValue("");
-                this.byId("fWoEstCost").setValue("");
-                this.byId("fWoNotes").setValue("");
-                dlg.open();
-                // v4.7.6: apply field-level RBAC from RoleConfig
-                this._applyDefectWoFieldRBAC();
-            }
-        },
-
-        // v4.7.6: Field-level RBAC for Create Work Order dialog.
-        _applyDefectWoFieldRBAC: function () {
-            try {
-                RoleManager.applyFields(this.getView(), [
-                    { id: "fWoPriority",    field: "defect.wo.priority" },
-                    { id: "fWoPlannedDate", field: "defect.wo.plannedDate" },
-                    { id: "fWoAssignedTo",  field: "defect.wo.assignedTo" },
-                    { id: "fWoEstCost",     field: "defect.wo.estCost" },
-                    { id: "fWoNotes",       field: "defect.wo.notes" }
-                ]);
-            } catch (_) { /* RoleManager unavailable — leave defaults */ }
-        },
-
-        onSaveWorkOrder: function () {
-            const defect = this._selectedDefect;
-            if (!defect || !defect.ID) { sap.m.MessageToast.show("No defect selected"); return; }
-            const payload = {
-                defectId   : defect.ID,
-                priority   : this.byId("fWoPriority").getSelectedKey(),
-                plannedDate: this.byId("fWoPlannedDate").getValue() || null,
-                assignedTo : this.byId("fWoAssignedTo").getValue().trim(),
-                notes      : this.byId("fWoNotes").getValue().trim()
-            };
-            const self = this;
-            fetch("/bridge-management/createWorkOrder", {
-                method : "POST",
-                headers: { "Content-Type": "application/json", Accept: "application/json" },
-                body   : JSON.stringify(payload)
-            })
-                .then(r => r.json())
-                .then(j => {
-                    if (j.error) {
-                        sap.m.MessageBox.error(j.error.message || "Failed to create work order");
-                    } else {
-                        sap.m.MessageToast.show("Work order " + j.woNumber + " created successfully");
-                        self.byId("createWoDialog").close();
-                        self._selectedDefect = null;
-                        const btn = self.byId("btnCreateWo");
-                        if (btn) btn.setEnabled(false);
-                        self._loadDefects();
-                    }
-                })
-                .catch(() => sap.m.MessageBox.error("Failed to create work order"));
-        },
-
-        onCloseWoDialog: function () {
-            const dlg = this.byId("createWoDialog");
-            if (dlg) dlg.close();
         },
 
         // ── Column Chooser ────────────────────────────────────

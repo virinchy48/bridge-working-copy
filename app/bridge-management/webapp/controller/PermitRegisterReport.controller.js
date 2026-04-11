@@ -43,7 +43,7 @@ sap.ui.define([
             const page = this.byId("permitRegisterPage");
             if (page) page.setBusy(true);
 
-            fetch(BASE + "/Permits?$orderby=issueDate desc&$top=2000", {
+            fetch(BASE + "/VehiclePermits?$orderby=issueDate desc&$top=2000", {
                 headers: { Accept: "application/json" }
             })
             .then(function (r) {

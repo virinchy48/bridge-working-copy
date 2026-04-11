@@ -42,27 +42,32 @@ sap.ui.define([
         },
 
         _loadAppConfig: function () {
-            const oModel = this.getOwnerComponent().getModel();
-            oModel.bindContext("/getAppConfig(...)").requestObject()
+            // `getAppConfig` is a CDS `function` (GET-only). Using
+            // oModel.bindContext("/getAppConfig(...)").requestObject()
+            // emits HTTP POST and the server returns 405. Use a plain GET
+            // with OData function-call syntax instead.
+            fetch("/bridge-management/getAppConfig()", _credOpts())
+                .then(r => r.ok ? r.json() : Promise.reject(new Error(r.status + " " + r.statusText)))
                 .then(data => {
                     this._oModel.setProperty("/appMode", data.mode || "full");
                     this._oModel.setProperty("/appVersion", data.version || "3.2.1");
                 })
-                .catch(e => {
+                .catch(() => {
                     // non-fatal — display defaults
                 });
         },
 
         _loadCurrentUser: function () {
-            const oModel = this.getOwnerComponent().getModel();
-            oModel.bindContext("/me(...)").requestObject()
+            // `me` is also a CDS function — same POST/405 hazard. Plain GET.
+            fetch("/bridge-management/me()", _credOpts())
+                .then(r => r.ok ? r.json() : Promise.reject(new Error(r.status + " " + r.statusText)))
                 .then(data => {
                     this._oModel.setProperty("/currentUser", data.id || "—");
                     this._oModel.setProperty("/currentRoles", (data.roles || []).join(", ") || "None");
                     const mode = data.appMode || "full";
                     this._oModel.setProperty("/appMode", mode);
                 })
-                .catch(e => {});
+                .catch(() => {});
         },
 
         _loadTenants: function () {
@@ -79,10 +84,11 @@ sap.ui.define([
         },
 
         onRunHealthCheck: function () {
-            const oModel = this.getOwnerComponent().getModel();
             this._oModel.setProperty("/healthStatus", "Checking…");
             this._oModel.setProperty("/dbStatus", "—");
-            oModel.bindContext("/health(...)").requestObject()
+            // `health` is a CDS function — use plain GET to avoid 405.
+            fetch("/bridge-management/health()", _credOpts())
+                .then(r => r.ok ? r.json() : Promise.reject(new Error(r.status + " " + r.statusText)))
                 .then(data => {
                     this._oModel.setProperty("/healthStatus", data.status || "UNKNOWN");
                     this._oModel.setProperty("/dbStatus", data.db || "—");

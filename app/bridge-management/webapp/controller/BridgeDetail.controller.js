@@ -31,7 +31,6 @@ sap.ui.define([
         _miniMap   : null,
 
         _selectedDefectId        : null,
-        _selectedInspOrderId     : null,
         _selectedRestrictionId   : null,
         _allEventLog             : [],
 
@@ -41,7 +40,6 @@ sap.ui.define([
                 attributes       : [],
                 history          : [],
                 inspections      : [],
-                inspectionOrders : [],
                 defects          : [],
                 externalRefs     : [],
                 attachments      : [],
@@ -115,8 +113,6 @@ sap.ui.define([
             // Apply role to quick-action toolbar buttons (Overview tab)
             const actAddRest = this.byId("btnAddRestInHeader");
             if (actAddRest) actAddRest.setVisible(RoleManager.isVisible("addRestriction"));
-            const actNewInsp = this.byId("btnNewInspOrder");
-            if (actNewInsp) actNewInsp.setVisible(RoleManager.isVisible("newInspectionOrder"));
             const actDefect  = this.byId("btnRaiseDefect");
             if (actDefect)  actDefect.setVisible(RoleManager.isVisible("raiseDefect"));
             const actCond    = this.byId("btnReportCondition");
@@ -136,14 +132,13 @@ sap.ui.define([
             if (!AppConfig.isLite()) return;
             var oView = this.getView();
             // Tab IDs — match the key/id set on <IconTabFilter> in BridgeDetail.view.xml
-            var aLiteHiddenTabs = ['tabInspections', 'tabInspectionOrders', 'tabDefects'];
+            var aLiteHiddenTabs = ['tabInspections', 'tabDefects'];
             aLiteHiddenTabs.forEach(function (sId) {
                 var oTab = oView.byId(sId);
                 if (oTab) oTab.setVisible(false);
             });
             // Hide quick-action buttons that relate to lite-hidden features
             AppConfig.applyToControls({
-                'inspectionOrders' : [oView.byId('btnNewInspOrder')],
                 'defects'          : [oView.byId('btnRaiseDefect')]
             });
         },
@@ -157,7 +152,6 @@ sap.ui.define([
             // Mapping: tab key → capability code
             var mTabCapability = {
                 "inspections"      : "INSPECTIONS",
-                "inspectionOrders" : "INSPECTIONS",
                 "defects"          : "DEFECTS",
                 "risk"             : "CAPACITY_RATINGS",
                 "investment"       : "CAPACITY_RATINGS",
@@ -179,10 +173,6 @@ sap.ui.define([
             });
             // Also hide quick-action buttons for disabled capabilities
             var oView = this.getView();
-            if (!CapabilityManager.canView("INSPECTIONS")) {
-                var btnInsp = oView.byId("btnNewInspOrder");
-                if (btnInsp) btnInsp.setVisible(false);
-            }
             if (!CapabilityManager.canView("DEFECTS")) {
                 var btnDefect = oView.byId("btnRaiseDefect");
                 if (btnDefect) btnDefect.setVisible(false);
@@ -221,7 +211,6 @@ sap.ui.define([
                     // Capability-gated data loads (A6 — skip OData requests for disabled groups)
                     if (CapabilityManager.canView("INSPECTIONS")) {
                         this._loadInspections(b.ID);
-                        this._loadInspectionOrders(b.ID);
                     }
                     if (CapabilityManager.canView("DEFECTS")) {
                         this._loadDefects(b.ID);
@@ -1309,14 +1298,6 @@ sap.ui.define([
             this.byId("vehicleAccessDialog").close();
         },
 
-        // ── Load Inspection Orders (no-op in cut-down BIS variant) ──────────
-        // The InspectionOrders entity was removed from the service layer.
-        // Keep the function so existing call sites don't NPE; just set an
-        // empty array on the model.
-        _loadInspectionOrders: function (/* bridgeUUID */) {
-            this._model.setProperty("/inspectionOrders", []);
-        },
-
         // ── Load Defects ──────────────────────────────────────
         _loadDefects: function (bridgeUUID) {
             const h = { Accept: "application/json" };
@@ -1393,7 +1374,6 @@ sap.ui.define([
                     "No SAP S/4HANA link configured for this bridge.\n\n" +
                     "SAP EAM Object Mapping:\n" +
                     "  Bridge Asset  →  SAP Functional Location (FLOC)\n" +
-                    "  Inspection Order  →  SAP PM Order (PM02/PM03)\n" +
                     "  Bridge Defect  →  SAP PM Notification (M2)\n" +
                     "  Restriction  →  SAP Engineering Change Record\n\n" +
                     "To link this bridge to SAP, use the External Systems tab and add a reference with System Type = OTHER, description = SAP S4HANA, with the Fiori launchpad tile URL.",
@@ -1413,161 +1393,6 @@ sap.ui.define([
                 .then(r => r.json())
                 .then(j => this._model.setProperty("/defects", j.value || []))
                 .catch(() => {});
-        },
-
-        // ── Create Inspection Order ───────────────────────────
-        onCreateInspectionOrder: function () {
-            if (!this._bridge) { MessageToast.show("Bridge not loaded"); return; }
-            const dlg = this.byId("createInspOrderDialog");
-            if (dlg) dlg.open();
-        },
-
-        onSaveInspectionOrder: function () {
-            const orderNumber  = this.byId("ioOrderNumber")  ? this.byId("ioOrderNumber").getValue()  : "";
-            const type         = this.byId("ioType")         ? this.byId("ioType").getSelectedKey()   : "ROUTINE";
-            const plannedDate  = this.byId("ioPlannedDate")  ? this.byId("ioPlannedDate").getValue()  : "";
-            const inspector    = this.byId("ioInspector")    ? this.byId("ioInspector").getValue()    : "";
-            const inspectorOrg = this.byId("ioInspectorOrg") ? this.byId("ioInspectorOrg").getValue() : "";
-            const accessMethod = this.byId("ioAccessMethod") ? this.byId("ioAccessMethod").getSelectedKey() : "";
-            const ratingMethod = this.byId("ioRatingMethod") ? this.byId("ioRatingMethod").getSelectedKey() : "";
-            const notes        = this.byId("ioNotes")        ? this.byId("ioNotes").getValue()        : "";
-
-            if (!orderNumber || !plannedDate) {
-                MessageToast.show("Order Number and Planned Date are required");
-                return;
-            }
-
-            AuthFetch.post(`${BASE}/createInspectionOrder`, {
-                    bridge_ID      : this._bridge.ID,
-                    orderNumber    : orderNumber,
-                    inspectionType : type,
-                    plannedDate    : plannedDate,
-                    inspector      : inspector,
-                    inspectorOrg   : inspectorOrg,
-                    accessMethod   : accessMethod || null,
-                    ratingMethod   : ratingMethod || null,
-                    notes          : notes
-                })
-            .then(r => r.json())
-            .then(j => {
-                if (j.status === "SUCCESS") {
-                    MessageToast.show(`Inspection order ${orderNumber} created`);
-                    this.byId("createInspOrderDialog").close();
-                    this._clearInspOrderForm();
-                    this._loadInspectionOrders(this._bridge.ID);
-                } else {
-                    MessageBox.error("Failed to create order: " + (j.error ? j.error.message : "Unknown error"));
-                }
-            })
-            .catch(() => MessageBox.error("Network error creating inspection order"));
-        },
-
-        onCancelInspectionOrder: function () {
-            this.byId("createInspOrderDialog").close();
-            this._clearInspOrderForm();
-        },
-
-        _clearInspOrderForm: function () {
-            ["ioOrderNumber","ioInspector","ioInspectorOrg","ioNotes"].forEach(id => {
-                const c = this.byId(id); if (c) c.setValue("");
-            });
-            if (this.byId("ioPlannedDate")) this.byId("ioPlannedDate").setValue("");
-            if (this.byId("ioType")) this.byId("ioType").setSelectedKey("ROUTINE");
-        },
-
-        // ── Start / Complete Inspection ───────────────────────
-        onStartInspection: function (e) {
-            const ctx = e.getSource().getBindingContext("detail");
-            const order = ctx ? ctx.getObject() : null;
-            if (!order || !order.ID) return;
-            if (order.status !== "PLANNED") { MessageToast.show("Only PLANNED orders can be started"); return; }
-
-            MessageBox.confirm(`Start inspection order "${order.orderNumber}"?`, {
-                title: "Start Inspection",
-                onClose: (action) => {
-                    if (action !== MessageBox.Action.OK) return;
-                    AuthFetch.post(`${BASE}/InspectionOrders(${order.ID})/startInspection`, {})
-                    .then(r => r.json())
-                    .then(j => {
-                        MessageToast.show(j.message || "Inspection started");
-                        this._loadInspectionOrders(this._bridge.ID);
-                    })
-                    .catch(() => MessageBox.error("Failed to start inspection"));
-                }
-            });
-        },
-
-        onCompleteInspection: function (e) {
-            const ctx = e.getSource().getBindingContext("detail");
-            const order = ctx ? ctx.getObject() : null;
-            if (!order) return;
-            this._selectedInspOrderId = order.ID;
-            // Set default slider label
-            const slider = this.byId("ciRating");
-            if (slider) {
-                slider.setValue(7);
-                this._updateRatingLabel(7);
-                slider.attachLiveChange(() => this._updateRatingLabel(slider.getValue()));
-            }
-            const dlg = this.byId("completeInspDialog");
-            if (dlg) dlg.open();
-        },
-
-        _updateRatingLabel: function (val) {
-            const lbl = this.byId("ciRatingLabel");
-            if (lbl) lbl.setText(`Rating: ${val} / 10 — ${val >= 7 ? "Good" : val >= 5 ? "Fair" : "Poor/Critical"}`);
-        },
-
-        onSaveCompleteInspection: function () {
-            const rating     = this.byId("ciRating")           ? this.byId("ciRating").getValue()              : null;
-            const adequacy   = this.byId("ciAdequacy")         ? this.byId("ciAdequacy").getSelectedKey()      : "";
-            const urgency    = this.byId("ciUrgency")          ? this.byId("ciUrgency").getSelectedKey()       : "";
-            const reportRef  = this.byId("ciReportRef")        ? this.byId("ciReportRef").getValue()           : "";
-            const nextDue    = this.byId("ciNextDue")          ? this.byId("ciNextDue").getValue()             : "";
-            const recs       = this.byId("ciRecommendations")  ? this.byId("ciRecommendations").getValue()     : "";
-            const notes      = this.byId("ciNotes")            ? this.byId("ciNotes").getValue()               : "";
-
-            if (!this._selectedInspOrderId) return;
-
-            AuthFetch.post(`${BASE}/InspectionOrders(${this._selectedInspOrderId})/completeInspection`, {
-                    overallConditionRating: rating,
-                    structuralAdequacy    : adequacy || null,
-                    maintenanceUrgency    : urgency || null,
-                    recommendations       : recs || null,
-                    reportRef             : reportRef || null,
-                    nextInspectionDue     : nextDue || null,
-                    notes                 : notes || null
-                })
-            .then(r => r.json())
-            .then(j => {
-                MessageToast.show(j.message || "Inspection completed");
-                this.byId("completeInspDialog").close();
-                this._clearCompleteInspForm();
-                this._selectedInspOrderId = null;
-                this._loadInspectionOrders(this._bridge.ID);
-                this._loadBridge(); // Refresh condition rating
-            })
-            .catch(() => MessageBox.error("Failed to complete inspection"));
-        },
-
-        onCancelCompleteInspection: function () {
-            this.byId("completeInspDialog").close();
-            this._selectedInspOrderId = null;
-        },
-
-        _clearCompleteInspForm: function () {
-            ["ciReportRef","ciRecommendations","ciNotes"].forEach(id => {
-                const c = this.byId(id); if (c) c.setValue("");
-            });
-            if (this.byId("ciNextDue")) this.byId("ciNextDue").setValue("");
-            if (this.byId("ciRating")) this.byId("ciRating").setValue(7);
-        },
-
-        onOpenInspectionOrder: function (e) {
-            const ctx = e.getSource().getBindingContext("detail");
-            const order = ctx ? ctx.getObject() : null;
-            if (!order) return;
-            MessageToast.show(`Order: ${order.orderNumber} | Status: ${order.status}`);
         },
 
         // ── Raise Defect ──────────────────────────────────────
@@ -2347,8 +2172,6 @@ sap.ui.define([
             if (statusSelect) statusSelect.setSelectedKey("PROPOSED");
             const fundingInput = this.byId("invFundingSource");
             if (fundingInput) fundingInput.setValue("");
-            const woInput = this.byId("invWorkOrderRef");
-            if (woInput) woInput.setValue("");
             const notesArea = this.byId("invNotes");
             if (notesArea) notesArea.setValue("");
             const dlg = this.byId("investmentPlanDialog");
@@ -2364,7 +2187,6 @@ sap.ui.define([
             const bcrInput      = this.byId("invBcr");
             const statusSelect  = this.byId("invStatus");
             const fundingInput  = this.byId("invFundingSource");
-            const woInput       = this.byId("invWorkOrderRef");
             const notesArea     = this.byId("invNotes");
 
             const yearVal = yearInput ? parseInt(yearInput.getValue(), 10) : null;
@@ -2383,7 +2205,6 @@ sap.ui.define([
                 benefitCostRatio : bcrInput    && bcrInput.getValue()      ? parseFloat(bcrInput.getValue())      : null,
                 programmeStatus  : statusSelect ? statusSelect.getSelectedKey() : "PROPOSED",
                 fundingSource    : fundingInput ? fundingInput.getValue().trim() : "",
-                workOrderRef     : woInput      ? woInput.getValue().trim()      : "",
                 notes            : notesArea    ? notesArea.getValue()           : ""
             };
 
@@ -2478,21 +2299,6 @@ sap.ui.define([
                 "• VEHICLE_TYPE — restricts specific vehicle classes\n\n" +
                 "Temporary restrictions have a defined from/to date range and are automatically expired by the system.\n\n" +
                 "NHVR permit holders may be granted overrides for POSTED bridges via approved permit conditions."
-            );
-        },
-
-        onInfoPressInspectionOrders: function (oEvent) {
-            this._showInfoPopover(
-                oEvent.getSource(),
-                "About Inspection Orders",
-                "Inspection orders are formal work orders for AS 5100.7 or AustRoads BIMM bridge inspections.\n\n" +
-                "Order Types:\n" +
-                "• PRINCIPAL — full principal inspection per AS 5100.7 (every 5 years)\n" +
-                "• ROUTINE — routine maintenance inspection (annual)\n" +
-                "• SPECIAL — special inspection triggered by incident or defect\n" +
-                "• LOAD_RATING — load rating assessment\n\n" +
-                "Statuses: PLANNED → IN_PROGRESS → COMPLETED or CANCELLED.\n\n" +
-                "Completing an order automatically updates the bridge's lastPrincipalInspDate / lastRoutineInspDate and recalculates nextInspectionDueDate."
             );
         },
 
