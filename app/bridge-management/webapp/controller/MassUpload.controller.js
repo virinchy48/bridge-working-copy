@@ -221,7 +221,8 @@ sap.ui.define([
 
         onInit: function () {
             UserAnalytics.trackView("MassUpload");
-            this._model = new JSONModel({ rows: [] });
+            this._model = new JSONModel({ rows: [], rowResults: [] });
+            this._allRowResults = [];
             this.getView().setModel(this._model, "upload");
             window.__uploadViewId = this.getView().getId();
             // Apply initial entity config
@@ -312,9 +313,11 @@ sap.ui.define([
         },
 
         _processFile: function (file) {
-            // Extension check
-            if (!file.name.toLowerCase().endsWith(".csv")) {
-                MessageToast.show("Please upload a .csv file");
+            const lower = file.name.toLowerCase();
+            const isCsv  = lower.endsWith(".csv");
+            const isXlsx = lower.endsWith(".xlsx") || lower.endsWith(".xls");
+            if (!isCsv && !isXlsx) {
+                MessageToast.show("Please upload a .csv or .xlsx file");
                 return;
             }
             // File size check (10 MB limit)
@@ -322,15 +325,48 @@ sap.ui.define([
                 MessageBox.error("File exceeds maximum size of 10 MB. Please split into smaller files.");
                 return;
             }
-            // MIME type check
-            if (file.type && file.type !== "text/csv" && file.type !== "application/vnd.ms-excel" && file.type !== "text/plain") {
-                MessageBox.error("Invalid file type (" + escapeHtml(file.type) + "). Please upload a CSV file.");
+            this._setText("selectedFileName", file.name);
+            this._uploadedFileName = file.name;
+            this._uploadedIsXlsx   = isXlsx;
+
+            if (isXlsx) {
+                // Xlsx is parsed server-side. Keep the raw bytes as base64 so
+                // _doUpload can POST them to the massUploadLookups action.
+                // We still build a preview client-side using a minimal xlsx
+                // decoder so the user can see rows before submitting. Since
+                // we don't want to bundle xlsx.js in the UI, we fall back to
+                // a simple "X rows in workbook" preview for xlsx files and
+                // let the server produce authoritative row results.
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    // Convert ArrayBuffer → base64 without blowing the stack on
+                    // large files.
+                    const bytes = new Uint8Array(e.target.result);
+                    let bin = "";
+                    for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+                    this._rawFileBase64 = btoa(bin);
+                    this._rawCSV = null;
+                    this._parsedRows = [{
+                        rowNum: 1,
+                        _c1: "— xlsx —",
+                        _c2: `${file.name}`,
+                        _c3: `${Math.round(file.size / 1024)} KB`,
+                        _c4: "(server will validate row-by-row)",
+                        _c5: "",
+                        hasError: false,
+                        error: ""
+                    }];
+                    this._showPreview();
+                };
+                reader.readAsArrayBuffer(file);
                 return;
             }
-            this._setText("selectedFileName", file.name);
+
+            // CSV path (existing behaviour)
             const reader = new FileReader();
             reader.onload = (e) => {
                 this._rawCSV = e.target.result;
+                this._rawFileBase64 = null;
                 // Validate CSV headers match expected template
                 if (!this._validateCsvHeaders(e.target.result)) {
                     return;
@@ -538,21 +574,63 @@ sap.ui.define([
             if (busy) busy.setVisible(true);
             if (btn)  btn.setEnabled(false);
 
-            const action    = ENTITY_CONFIG[this._uploadType].action;
-            const BATCH_SIZE = 200;
-            const headers    = { Accept: "application/json", "Content-Type": "application/json" };
+            const action  = ENTITY_CONFIG[this._uploadType].action;
+            const headers = { Accept: "application/json", "Content-Type": "application/json" };
 
+            // ── xlsx path — send the raw workbook as base64, server parses it.
+            // The client-side preview is a single placeholder row; the server
+            // returns authoritative per-row results.
+            if (this._uploadedIsXlsx && this._rawFileBase64) {
+                fetch(`${BASE}/${action}`, {
+                    method: "POST",
+                    headers,
+                    body: JSON.stringify({
+                        csvData   : "",
+                        fileBase64: this._rawFileBase64,
+                        fileName  : this._uploadedFileName || "upload.xlsx"
+                    })
+                })
+                .then(r => r.json())
+                .then(j => {
+                    if (busy) busy.setVisible(false);
+                    if (btn)  btn.setEnabled(true);
+                    this._showUploadResult({
+                        successCount: j.successCount || 0,
+                        updatedCount: j.updatedCount || 0,
+                        failureCount: j.failureCount || 0,
+                        totalRecords: j.totalRecords || 0,
+                        errors      : j.errors || "",
+                        rowResults  : j.rowResults || "[]",
+                        status      : (j.failureCount || 0) === 0 ? "SUCCESS" : "PARTIAL_SUCCESS"
+                    }, j.totalRecords || 0);
+                })
+                .catch(err => {
+                    if (busy) busy.setVisible(false);
+                    if (btn)  btn.setEnabled(true);
+                    MessageBox.error("Upload failed: " + err.message);
+                    console.error(err);
+                });
+                return;
+            }
+
+            // ── CSV path — batched for very large files (>200 rows per batch)
+            const BATCH_SIZE = 200;
             const batches = [];
             for (let i = 0; i < rows.length; i += BATCH_SIZE) {
                 batches.push(rows.slice(i, i + BATCH_SIZE));
             }
 
-            const totals = { successCount: 0, updatedCount: 0, failureCount: 0, totalRecords: 0, errors: "" };
+            const totals = {
+                successCount: 0, updatedCount: 0, failureCount: 0,
+                totalRecords: 0, errors: "", rowResults: "[]"
+            };
+            const allRowResults = [];
 
             const sendBatch = (idx) => {
                 if (idx >= batches.length) {
                     if (busy) busy.setVisible(false);
                     if (btn)  btn.setEnabled(true);
+                    totals.rowResults = JSON.stringify(allRowResults);
                     this._showUploadResult(totals, rows.length);
                     return;
                 }
@@ -560,7 +638,7 @@ sap.ui.define([
                 fetch(`${BASE}/${action}`, {
                     method: "POST",
                     headers,
-                    body: JSON.stringify({ csvData })
+                    body: JSON.stringify({ csvData, fileBase64: "", fileName: "" })
                 })
                 .then(r => r.json())
                 .then(j => {
@@ -569,13 +647,19 @@ sap.ui.define([
                     totals.failureCount += j.failureCount || 0;
                     totals.totalRecords += j.totalRecords || 0;
                     if (j.errors) totals.errors += (totals.errors ? "\n" : "") + escapeHtml(j.errors);
+                    if (j.rowResults) {
+                        try {
+                            const parsed = JSON.parse(j.rowResults);
+                            if (Array.isArray(parsed)) parsed.forEach(r => allRowResults.push(r));
+                        } catch (e) { /* ignore */ }
+                    }
                     totals.status = totals.failureCount === 0 ? "SUCCESS" : "PARTIAL_SUCCESS";
                     sendBatch(idx + 1);
                 })
                 .catch(err => {
                     if (busy) busy.setVisible(false);
                     if (btn)  btn.setEnabled(true);
-                    MessageToast.show("Upload failed — check console for details");
+                    MessageBox.error("Upload failed: " + err.message);
                     console.error(err);
                 });
             };
@@ -614,10 +698,7 @@ sap.ui.define([
                 if (errorsEl) {
                     errorsEl.setVisible(!!(errors && errors.trim()));
                     // resultErrors is a sap.m.TextArea — its API is setValue(),
-                    // not setText(). Calling setText here threw and routed the
-                    // whole upload into the .catch handler, surfacing the
-                    // misleading "Upload failed — check console for details"
-                    // toast even though the server-side insert succeeded.
+                    // not setText().
                     const text = errors ? `Errors:\n${escapeHtml(errors)}` : "";
                     if (typeof errorsEl.setValue === "function") {
                         errorsEl.setValue(text);
@@ -626,6 +707,35 @@ sap.ui.define([
                     }
                 }
             }
+
+            // ── Populate the row-by-row results table ────────────────
+            // The server returns a `rowResults` JSON string with one entry per
+            // processed row: { row, category, code, status, message }.
+            // Stored on the upload model so the <Table> binding in the view
+            // (items="{upload>/rowResults}") renders it automatically.
+            let rowResults = [];
+            if (j.rowResults) {
+                try {
+                    const parsed = typeof j.rowResults === "string"
+                        ? JSON.parse(j.rowResults)
+                        : j.rowResults;
+                    if (Array.isArray(parsed)) rowResults = parsed;
+                } catch (e) { /* ignore malformed payload */ }
+            }
+            this._allRowResults = rowResults;
+            this._model.setProperty("/rowResults", rowResults);
+            // Reset the filter to "ALL" whenever a new upload lands
+            const filter = this.byId("rowResultsFilter");
+            if (filter && filter.setSelectedKey) filter.setSelectedKey("ALL");
+        },
+
+        onRowResultsFilter: function (e) {
+            const key = e && e.getParameter && e.getParameter("item")
+                ? e.getParameter("item").getKey()
+                : "ALL";
+            const all = this._allRowResults || [];
+            const filtered = (key === "ALL") ? all : all.filter(r => r.status === key);
+            this._model.setProperty("/rowResults", filtered);
         },
 
         onClearUpload: function () {

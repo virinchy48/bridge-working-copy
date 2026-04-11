@@ -128,14 +128,24 @@ action massUploadBridgeDefects(csvData: LargeString) returns {
 };
 
 // ── Mass Upload — Lookups ─────────────────────────────────
+// Accepts either `csvData` (plain CSV string) OR `fileBase64`
+// (an xlsx file encoded as base64). When `fileBase64` is set, the
+// server decodes the workbook, converts the first sheet to CSV,
+// and runs the same row-by-row pipeline. Allows admins to upload
+// either the downloaded xlsx template directly or a CSV export.
 @restrict: [{ to: ['BridgeManager','Admin'] }]
-action massUploadLookups(csvData: LargeString) returns {
+action massUploadLookups(
+    csvData    : LargeString,
+    fileBase64 : LargeString,
+    fileName   : String
+) returns {
     status       : String;
     totalRecords : Integer;
     successCount : Integer;
     updatedCount : Integer;
     failureCount : Integer;
     errors       : LargeString;
+    rowResults   : LargeString;
 };
 
 // ── System Info (mode detection for demo/training) ────────

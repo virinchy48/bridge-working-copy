@@ -89,7 +89,7 @@
                     </HBox>
 
                     <core:HTML id="dropZone"
-                        content="&lt;div id='nhvr-drop-zone' class='nhvrDropZone' ondragover='event.preventDefault();this.classList.add(&quot;nhvrDropZoneActive&quot;)' ondragleave='this.classList.remove(&quot;nhvrDropZoneActive&quot;)' ondrop='sap.ui.getCore().byId(window.__uploadViewId).getController().onFileDrop(event);this.classList.remove(&quot;nhvrDropZoneActive&quot;)'&gt;&lt;div class='nhvrDropZoneIcon'&gt;&#128194;&lt;/div&gt;&lt;div class='nhvrDropZoneText'&gt;Drag &amp; drop your CSV file here&lt;/div&gt;&lt;div class='nhvrDropZoneSubtext'&gt;or click Browse below&lt;/div&gt;&lt;/div&gt;"
+                        content="&lt;div id='nhvr-drop-zone' class='nhvrDropZone' ondragover='event.preventDefault();this.classList.add(&quot;nhvrDropZoneActive&quot;)' ondragleave='this.classList.remove(&quot;nhvrDropZoneActive&quot;)' ondrop='sap.ui.getCore().byId(window.__uploadViewId).getController().onFileDrop(event);this.classList.remove(&quot;nhvrDropZoneActive&quot;)'&gt;&lt;div class='nhvrDropZoneIcon'&gt;&#128194;&lt;/div&gt;&lt;div class='nhvrDropZoneText'&gt;Drag &amp; drop your CSV or Excel (.xlsx) file here&lt;/div&gt;&lt;div class='nhvrDropZoneSubtext'&gt;or click Browse below&lt;/div&gt;&lt;/div&gt;"
                         afterRendering="onDropZoneRendered"/>
 
                     <HBox alignItems="Center" class="sapUiSmallMarginTop">
@@ -97,7 +97,7 @@
                             press="onBrowseFile" type="Emphasized" class="sapUiTinyMarginEnd"/>
                         <Text id="selectedFileName" text="No file selected" class="sapUiSmallMarginBegin"/>
                         <core:HTML id="fileInputHolder"
-                            content="&lt;input type='file' id='nhvrFileInput' accept='.csv' style='display:none' /&gt;"
+                            content="&lt;input type='file' id='nhvrFileInput' accept='.csv,.xlsx,.xls' style='display:none' /&gt;"
                             afterRendering="onFileInputRendered"/>
                     </HBox>
                 </VBox>
@@ -209,6 +209,52 @@
                     <Text id="resultAuditInfo" text="" class="sapUiSmallMarginBottom" wrapping="true"/>
                     <TextArea id="resultErrors" rows="4" width="100%" editable="false"
                         visible="false" class="sapUiSmallMarginTop"/>
+
+                    <!-- ── Row-by-row results ─────────────────── -->
+                    <Title text="Row-by-row results" level="H5"
+                        class="sapUiMediumMarginTop sapUiTinyMarginBottom"/>
+                    <Text text="Each row in the uploaded file is listed below with its final status (CREATED / UPDATED / ERROR). Use this to trace exactly which records landed in the database." class="sapUiTinyMarginBottom nhvrSubText" wrapping="true"/>
+                    <Table id="rowResultsTable"
+                        items="{upload>/rowResults}"
+                        noDataText="Row-level results will appear after upload"
+                        growing="true" growingThreshold="50"
+                        alternateRowColors="true"
+                        class="sapUiSmallMarginTop">
+                        <headerToolbar>
+                            <OverflowToolbar>
+                                <Title text="Row Status"/>
+                                <ToolbarSpacer/>
+                                <SegmentedButton id="rowResultsFilter" selectedKey="ALL"
+                                    selectionChange="onRowResultsFilter">
+                                    <items>
+                                        <SegmentedButtonItem key="ALL"     text="All"/>
+                                        <SegmentedButtonItem key="CREATED" text="Created"/>
+                                        <SegmentedButtonItem key="UPDATED" text="Updated"/>
+                                        <SegmentedButtonItem key="ERROR"   text="Errors"/>
+                                    </items>
+                                </SegmentedButton>
+                            </OverflowToolbar>
+                        </headerToolbar>
+                        <columns>
+                            <Column width="70px" hAlign="Center"><Text text="Row"/></Column>
+                            <Column width="160px"><Text text="Category"/></Column>
+                            <Column width="160px"><Text text="Code"/></Column>
+                            <Column width="130px" hAlign="Center"><Text text="Status"/></Column>
+                            <Column><Text text="Message"/></Column>
+                        </columns>
+                        <items>
+                            <ColumnListItem highlight="{= ${upload>status} === 'ERROR' ? 'Error' : ${upload>status} === 'CREATED' ? 'Success' : ${upload>status} === 'UPDATED' ? 'Information' : 'None'}">
+                                <cells>
+                                    <Text text="{upload>row}"/>
+                                    <Text text="{upload>category}" wrapping="false"/>
+                                    <Text text="{upload>code}" wrapping="false"/>
+                                    <ObjectStatus text="{upload>status}"
+                                        state="{= ${upload>status} === 'ERROR' ? 'Error' : ${upload>status} === 'CREATED' ? 'Success' : ${upload>status} === 'UPDATED' ? 'Information' : 'None'}"/>
+                                    <Text text="{upload>message}" wrapping="true"/>
+                                </cells>
+                            </ColumnListItem>
+                        </items>
+                    </Table>
                 </VBox>
 
             </VBox>

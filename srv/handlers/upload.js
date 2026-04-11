@@ -373,11 +373,39 @@ module.exports = function registerUploadHandlers(srv, helpers) {
     const LOOKUP_CODE_MAX     = 200;
     const LOOKUP_DESC_MAX     = 300;
 
-    srv.on('massUploadLookups', async (req) => {
-        const { csvData } = req.data;
-        if (!csvData || csvData.trim() === '') return req.error(400, 'CSV data is empty');
+    // Convert an xlsx (base64-encoded) workbook's first sheet to CSV text.
+    // Uses the `xlsx` package (SheetJS). Throws on parse error so the
+    // outer handler can return a 400 with a friendly message.
+    function xlsxBase64ToCsv(base64) {
+        const XLSX = require('xlsx');
+        const buf = Buffer.from(base64, 'base64');
+        const wb = XLSX.read(buf, { type: 'buffer' });
+        if (!wb.SheetNames || !wb.SheetNames.length) {
+            throw new Error('Workbook contains no sheets');
+        }
+        // Prefer a sheet named "Lookups" (our own template), fall back to first
+        const sheetName = wb.SheetNames.includes('Lookups') ? 'Lookups' : wb.SheetNames[0];
+        const ws = wb.Sheets[sheetName];
+        return XLSX.utils.sheet_to_csv(ws);
+    }
 
-        const lines = csvData.trim().split('\n');
+    srv.on('massUploadLookups', async (req) => {
+        let { csvData, fileBase64, fileName } = req.data;
+
+        // If the client sent an xlsx file, decode it server-side and turn the
+        // first sheet into CSV. We then run the exact same pipeline as a plain
+        // csvData upload — no code duplication.
+        if (fileBase64 && fileBase64.length > 0) {
+            try {
+                csvData = xlsxBase64ToCsv(fileBase64);
+            } catch (e) {
+                return req.error(400, `Could not parse xlsx file: ${e.message}`);
+            }
+        }
+
+        if (!csvData || csvData.trim() === '') return req.error(400, 'CSV / xlsx data is empty');
+
+        const lines = csvData.trim().split(/\r?\n/);
         if (lines.length < 2) return req.error(400, 'CSV must contain a header row and at least one data row');
 
         const headers = parseCSVLine(lines[0]).map(h => h.replace(/"/g, '').trim());
@@ -396,6 +424,7 @@ module.exports = function registerUploadHandlers(srv, helpers) {
 
         let successCount = 0, updatedCount = 0, failureCount = 0;
         const errors = [];
+        const rowResults = [];   // { row, category, code, status, message }
         const tx = cds.tx(req);
 
         try {
@@ -407,8 +436,16 @@ module.exports = function registerUploadHandlers(srv, helpers) {
                     headers.forEach((hdr, idx) => { row[hdr] = values[idx] !== undefined ? values[idx] : ''; });
 
                     // Required fields
-                    if (!row.category) { errors.push(`Row ${rowNum}: category required`); failureCount++; continue; }
-                    if (!row.code)     { errors.push(`Row ${rowNum}: code required`);     failureCount++; continue; }
+                    if (!row.category) {
+                        errors.push(`Row ${rowNum}: category required`);
+                        rowResults.push({ row: rowNum, category: '', code: row.code || '', status: 'ERROR', message: 'category required' });
+                        failureCount++; continue;
+                    }
+                    if (!row.code) {
+                        errors.push(`Row ${rowNum}: code required`);
+                        rowResults.push({ row: rowNum, category: row.category || '', code: '', status: 'ERROR', message: 'code required' });
+                        failureCount++; continue;
+                    }
 
                     // Normalise: upper-case + trim (prevents near-duplicate categories)
                     row.category = String(row.category).trim().toUpperCase();
@@ -416,10 +453,14 @@ module.exports = function registerUploadHandlers(srv, helpers) {
 
                     // Length enforcement (matches schema String(N))
                     if (row.category.length > LOOKUP_CATEGORY_MAX) {
-                        errors.push(`Row ${rowNum}: category exceeds ${LOOKUP_CATEGORY_MAX} chars`); failureCount++; continue;
+                        errors.push(`Row ${rowNum}: category exceeds ${LOOKUP_CATEGORY_MAX} chars`);
+                        rowResults.push({ row: rowNum, category: row.category, code: row.code, status: 'ERROR', message: `category exceeds ${LOOKUP_CATEGORY_MAX} chars` });
+                        failureCount++; continue;
                     }
                     if (row.code.length > LOOKUP_CODE_MAX) {
-                        errors.push(`Row ${rowNum}: code exceeds ${LOOKUP_CODE_MAX} chars`); failureCount++; continue;
+                        errors.push(`Row ${rowNum}: code exceeds ${LOOKUP_CODE_MAX} chars`);
+                        rowResults.push({ row: rowNum, category: row.category, code: row.code, status: 'ERROR', message: `code exceeds ${LOOKUP_CODE_MAX} chars` });
+                        failureCount++; continue;
                     }
                     if (row.description && row.description.length > LOOKUP_DESC_MAX) {
                         row.description = row.description.substring(0, LOOKUP_DESC_MAX);
@@ -428,7 +469,11 @@ module.exports = function registerUploadHandlers(srv, helpers) {
                     // Coerce typed fields
                     if (row.displayOrder) {
                         const n = parseInt(row.displayOrder);
-                        if (Number.isNaN(n)) { errors.push(`Row ${rowNum}: displayOrder must be numeric`); failureCount++; continue; }
+                        if (Number.isNaN(n)) {
+                            errors.push(`Row ${rowNum}: displayOrder must be numeric`);
+                            rowResults.push({ row: rowNum, category: row.category, code: row.code, status: 'ERROR', message: 'displayOrder must be numeric' });
+                            failureCount++; continue;
+                        }
                         row.displayOrder = n;
                     }
                     if (row.isActive !== undefined && row.isActive !== '') {
@@ -449,6 +494,7 @@ module.exports = function registerUploadHandlers(srv, helpers) {
                         delete updatePayload.code;
                         await tx.run(UPDATE('nhvr.Lookup').set(updatePayload).where({ category, code }));
                         updatedCount++;
+                        rowResults.push({ row: rowNum, category, code, status: 'UPDATED', message: 'existing row updated' });
                         // Per-row change log in AuditLog (old → new snapshot for traceability)
                         await tx.run(INSERT.into('nhvr.AuditLog').entries({
                             timestamp  : new Date().toISOString(),
@@ -468,6 +514,7 @@ module.exports = function registerUploadHandlers(srv, helpers) {
                         row.isActive = row.isActive !== undefined ? row.isActive : true;
                         await tx.run(INSERT.into('nhvr.Lookup').entries(row));
                         successCount++;
+                        rowResults.push({ row: rowNum, category: row.category, code: row.code, status: 'CREATED', message: 'new row inserted' });
                         await tx.run(INSERT.into('nhvr.AuditLog').entries({
                             timestamp  : new Date().toISOString(),
                             userId     : auditUser,
@@ -482,6 +529,7 @@ module.exports = function registerUploadHandlers(srv, helpers) {
                     }
                 } catch (err) {
                     errors.push(`Row ${rowNum}: ${err.message}`);
+                    rowResults.push({ row: rowNum, category: '', code: '', status: 'ERROR', message: err.message });
                     failureCount++;
                 }
             }
@@ -490,7 +538,7 @@ module.exports = function registerUploadHandlers(srv, helpers) {
 
             // Persist UploadLog (inside tx — rolls back on fatal errors only)
             await tx.run(INSERT.into('nhvr.UploadLog').entries({
-                fileName    : 'mass-upload-lookups.csv',
+                fileName    : fileName || (fileBase64 ? 'mass-upload-lookups.xlsx' : 'mass-upload-lookups.csv'),
                 uploadType  : 'LOOKUP',
                 totalRecords: totalProcessed,
                 successCount: successCount + updatedCount,
@@ -525,7 +573,8 @@ module.exports = function registerUploadHandlers(srv, helpers) {
                 successCount,
                 updatedCount,
                 failureCount,
-                errors      : errors.join('\n')
+                errors      : errors.join('\n'),
+                rowResults  : JSON.stringify(rowResults)
             };
         } catch (e) {
             try { await tx.rollback(); } catch (_) { /* ignore */ }
