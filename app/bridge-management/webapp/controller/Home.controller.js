@@ -297,7 +297,6 @@ sap.ui.define([
                 { id: "tileMassEditMain",     capability: "MASS_EDIT" },
                 { id: "tileIntegrationMain",  capability: "INTEGRATION_HUB" },
             ]);
-            // LicenseConfig manages the capability system itself — always visible to Admins.
             // Visibility is controlled by the Admin section container (sectionAdmin), not capability.
             // No additional check needed here; the tile defaults to visible=true in the view.
         },

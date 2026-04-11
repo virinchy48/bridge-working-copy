@@ -27,9 +27,6 @@
                     <Button id="btnAssessCorridor" text="Assess Corridor" icon="sap-icon://detail-view"
                         type="Default" press="onAssessCorridor" enabled="false"/>
                 </f:actions>
-                <f:navigationActions>
-                    <Button icon="sap-icon://nav-back" tooltip="Back" press="onNavHome"/>
-                </f:navigationActions>
             </f:DynamicPageTitle>
         </f:title>
 

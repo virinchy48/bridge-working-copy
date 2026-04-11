@@ -15,7 +15,7 @@
 //   freight.cds          — Freight routes + routing engine
 //   integration.cds      — Documents, S/4HANA, BANC, ESRI, IoT
 //   admin.cds            — Lookups, attributes, config, audit, notifications
-//   tenancy.cds          — Multi-tenant licensing
+//   tenancy.cds          — Tenant metadata
 //   reporting.cds        — Views, analytics, utility functions, proxies
 //   _annotations.cds     — All UI + value-help annotations
 //

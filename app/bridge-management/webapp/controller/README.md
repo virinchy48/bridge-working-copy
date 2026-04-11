@@ -33,7 +33,6 @@ One controller per view. View files live in `../view/<Name>.view.xml`.
 | `AdminConfig` | `AdminConfig.view.xml` | `AttributeDefinition`, `RoleConfig`, `Lookup` | `attributes.js`, `system.js` |
 | `AppAdmin` | `AppAdmin.view.xml` | `RoleConfig` + system | `system.js` |
 | `BmsTechAdmin` | `BmsTechAdmin.view.xml` | System config | `system.js` |
-| `LicenseConfig` | `LicenseConfig.view.xml` | License metadata | `system.js` |
 | `IntegrationHub` | `IntegrationHub.view.xml` | — | `srv/integration/handlers.js` |
 
 ## Controller conventions

@@ -30,7 +30,6 @@
                         tooltip="Export permits to Excel (.xlsx)"/>
                     <Button icon="sap-icon://hint" type="Transparent" press=".onInfoPressPermits"
                         tooltip="Permit types and status guide"/>
-                    <Button text="Home" icon="sap-icon://home" press=".onNavHome" type="Transparent"/>
                 </f:actions>
             </f:DynamicPageTitle>
         </f:title>

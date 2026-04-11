@@ -30,7 +30,6 @@
                         visible="{= ${assess>/results}.length > 0}"/>
                     <Button text="Show Map" icon="sap-icon://map" press="onToggleAssessMap" type="Default"
                         visible="{= ${assess>/results}.length > 0}"/>
-                    <Button text="Home" icon="sap-icon://home" press="onNavHome" type="Transparent"/>
                 </f:actions>
                 <f:breadcrumbs>
                     <Breadcrumbs>

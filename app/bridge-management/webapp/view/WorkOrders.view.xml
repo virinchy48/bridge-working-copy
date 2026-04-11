@@ -19,9 +19,6 @@
                         <Link text="Work Orders"/>
                     </Breadcrumbs>
                 </f:breadcrumbs>
-                <f:navigationActions>
-                    <Button icon="sap-icon://nav-back" tooltip="Back" press="onNavHome"/>
-                </f:navigationActions>
             </f:DynamicPageTitle>
         </f:title>
 

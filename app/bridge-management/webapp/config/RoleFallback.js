@@ -45,7 +45,6 @@ sap.ui.define([], function () {
         defects:          { visible: MGR_PLUS,  editable: MGR_PLUS,  enabled: MGR_PLUS },
         massedit:         { visible: MGR_PLUS,   editable: MGR_PLUS,   enabled: MGR_PLUS },
         integrationHub:   { visible: MGR_PLUS, editable: MGR_PLUS, enabled: MGR_PLUS },
-        licenseConfig:    { visible: MGR_PLUS, editable: MGR_PLUS, enabled: MGR_PLUS },
         routePlanner:     { visible: MGR_PLUS,     editable: MGR_PLUS,     enabled: MGR_PLUS },
 
         // ── Bridge detail tabs ─────────────────────────────────

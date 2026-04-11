@@ -16,7 +16,7 @@
 //   risk-investment.cds  — risk, investment, deterioration, scour
 //   freight.cds          — freight routes, bridge assignments
 //   integration.cds      — external refs, docs, sensors, S/4
-//   tenancy.cds          — multi-tenant licensing
+//   tenancy.cds          — tenant metadata
 //   admin.cds            — config, audit, notifications, thresholds
 //
 // srv/service.cds imports via `using nhvr from '../db/schema';`

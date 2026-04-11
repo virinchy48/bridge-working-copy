@@ -31,7 +31,6 @@ sap.ui.define([
         "WorkOrders": "WORK_ORDERS",
         "IntegrationHub": "INTEGRATION_HUB",
         "AnalyticsDashboard": "BRIDGE_IQ",
-        "LicenseConfig": "ADMIN_CONFIG",
         "AdminConfig": "ADMIN_CONFIG",
         "AppAdmin": "ADMIN_CONFIG",
         "BmsTechAdmin": "ADMIN_CONFIG"

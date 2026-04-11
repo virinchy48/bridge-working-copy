@@ -23,7 +23,6 @@
                     <Button icon="sap-icon://hint" type="Transparent" press="onInfoPressDashboard"
                         tooltip="KPI definitions and dashboard guide"/>
                     <Button text="Refresh" icon="sap-icon://refresh" press="onRefresh" type="Transparent"/>
-                    <Button text="Home" icon="sap-icon://home" press="onNavHome" type="Transparent"/>
                 </f:actions>
                 <f:breadcrumbs>
                     <Breadcrumbs>

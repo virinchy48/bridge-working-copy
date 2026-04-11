@@ -1,6 +1,5 @@
 // ============================================================
-// MULTI-TENANCY & LICENSING
-// Tenant, FeatureCatalog, TenantFeature, TenantRoleCapability
+// TENANT METADATA
 // + tenant association extends on core entities
 // ============================================================
 
@@ -16,72 +15,19 @@ using { nhvr.VehiclePermit } from './capacity-permits';
 // TENANT — client organisation
 // ─────────────────────────────────────────────────────────────
 entity Tenant : cuid, managed {
-    tenantCode       : String(50)  @mandatory;
-    displayName      : String(200) @mandatory;
-    shortName        : String(50);
-    jurisdiction     : String(20);
-    contactEmail     : String(200);
-    contactName      : String(200);
-    licenseStartDate : Date;
-    licenseEndDate   : Date;
-    licenseStatus    : String(20) default 'ACTIVE';
-    maxUsers         : Integer;
-    notes            : String(1000);
-    isActive         : Boolean default true;
-    features         : Composition of many TenantFeature         on features.tenant = $self;
-    roleCapabilities : Composition of many TenantRoleCapability  on roleCapabilities.tenant = $self;
-}
-
-// ── Deployment Mode extend ───────────────────────────────────
-extend Tenant with {
+    tenantCode   : String(50)  @mandatory;
+    displayName  : String(200) @mandatory;
+    shortName    : String(50);
+    jurisdiction : String(20);
+    contactEmail : String(200);
+    contactName  : String(200);
+    notes        : String(1000);
+    isActive     : Boolean default true;
     deploymentMode : String(20) default 'FULL';
 }
 
-// ─────────────────────────────────────────────────────────────
-// FEATURE CATALOG — system-wide master list
-// ─────────────────────────────────────────────────────────────
-entity FeatureCatalog : cuid {
-    capabilityCode  : String(50)  @mandatory;
-    displayName     : String(200) @mandatory;
-    description     : String(500);
-    category        : String(50);
-    isCoreFeature   : Boolean default false;
-    defaultEnabled  : Boolean default false;
-    sortOrder       : Integer default 0;
-    iconUri         : String(200);
-    minRoleRequired : String(50);
-    isActive        : Boolean default true;
-    dependsOn       : String(500);
-}
-
-// ─────────────────────────────────────────────────────────────
-// TENANT FEATURE — licensed capabilities per tenant
-// ─────────────────────────────────────────────────────────────
-entity TenantFeature : cuid, managed {
-    tenant         : Association to Tenant       @mandatory;
-    capabilityCode : String(50)                  @mandatory;
-    featureCatalog : Association to FeatureCatalog;
-    isEnabled      : Boolean default true;
-    validFrom      : Date;
-    validTo        : Date;
-    licenseNote    : String(500);
-}
-
-// ─────────────────────────────────────────────────────────────
-// TENANT ROLE CAPABILITY — per-tenant, per-role access
-// ─────────────────────────────────────────────────────────────
-entity TenantRoleCapability : cuid, managed {
-    tenant         : Association to Tenant  @mandatory;
-    capabilityCode : String(50)             @mandatory;
-    role           : String(50)             @mandatory;
-    canView        : Boolean default true;
-    canEdit        : Boolean default false;
-    canAdmin       : Boolean default false;
-    notes          : String(500);
-}
-
 // ── Annotations ──────────────────────────────────────────────
-annotate FeatureCatalog with { capabilityCode @assert.unique; };
+annotate Tenant with { tenantCode @assert.unique; };
 
 // ── Tenant association extends on core entities ──────────────
 extend Bridge with {

@@ -23,10 +23,6 @@
                     </Breadcrumbs>
                 </f:breadcrumbs>
                 <f:actions>
-                    <Button text="Client Licensing" icon="sap-icon://key-user-settings"
-                        type="Emphasized" press="onNavToLicenseConfig"
-                        tooltip="Manage organisation licences and feature capabilities"/>
-                    <Button text="Back" icon="sap-icon://nav-back" press="onNavHome" type="Transparent"/>
                 </f:actions>
             </f:DynamicPageTitle>
         </f:title>

@@ -25,7 +25,6 @@
                 </f:breadcrumbs>
                 <f:actions>
                     <Button text="Help" icon="sap-icon://sys-help" press="onOpenHelp" type="Transparent"/>
-                    <Button text="Home" icon="sap-icon://home" press="onNavHome" type="Transparent"/>
                 </f:actions>
             </f:DynamicPageTitle>
         </f:title>

@@ -27,7 +27,6 @@
                 </f:breadcrumbs>
                 <f:actions>
                     <Button text="Refresh" icon="sap-icon://refresh" type="Transparent" press="onRefresh"/>
-                    <Button text="Home" icon="sap-icon://home" type="Transparent" press="onNavHome"/>
                 </f:actions>
             </f:DynamicPageTitle>
         </f:title>

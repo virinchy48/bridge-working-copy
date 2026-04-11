@@ -38,7 +38,6 @@
                     <Button icon="sap-icon://hint" type="Transparent" press="onInfoPress"
                         tooltip="About the Permit Register — statutory requirements"/>
                     <Button text="Reports" icon="sap-icon://nav-back" press="onNavToReports" type="Transparent"/>
-                    <Button text="Home" icon="sap-icon://home" press="onNavHome" type="Transparent"/>
                 </f:actions>
             </f:DynamicPageTitle>
         </f:title>

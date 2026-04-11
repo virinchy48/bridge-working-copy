@@ -147,7 +147,6 @@
                 { "pattern": "IntegrationHub", "name": "integrationHub", "target": "IntegrationHub" },
                 { "pattern": "inspection/create/{bridgeId}", "name": "InspectionCreate", "target": "InspectionCreate" },
                 { "pattern": "inspection/create", "name": "InspectionCreateNew", "target": "InspectionCreate" },
-                { "pattern": "LicenseConfig", "name": "LicenseConfig", "target": "LicenseConfig" },
                 { "pattern": "RoutePlanner", "name": "RoutePlanner", "target": "RoutePlanner" },
                 { "pattern": "AppAdmin", "name": "AppAdmin", "target": "AppAdmin" },
                 { "pattern": "BmsTechAdmin", "name": "BmsTechAdmin", "target": "BmsTechAdmin" },
@@ -251,11 +250,6 @@
                     "type": "XML", "viewLevel": 2,
                     "viewId": "InspectionCreate",
                     "viewName": "nhvr.bridgemanagement.view.InspectionCreate"
-                },
-                "LicenseConfig": {
-                    "type": "XML", "viewLevel": 1,
-                    "viewId": "LicenseConfig",
-                    "viewName": "nhvr.bridgemanagement.view.LicenseConfig"
                 },
                 "RoutePlanner": {
                     "type": "XML", "viewLevel": 1,

@@ -2,8 +2,7 @@
      BMS Tech Admin — Technical Configuration
      Access: Admin + NHVR_TechAdmin role
      Contains: Jurisdiction Access, Standards Profile, Map Config,
-               Deployment Configuration
-     ============================================================ -->
+               ============================================================ -->
 <mvc:View
     controllerName="nhvr.bridgemanagement.controller.BmsTechAdmin"
     xmlns:mvc="sap.ui.core.mvc"
@@ -284,49 +283,6 @@
                         </VBox>
                     </IconTabFilter>
 
-                    <!-- ── Tab 4: Deployment Configuration ────────── -->
-                    <IconTabFilter id="tabDeploymentConfig" icon="sap-icon://shipping-status"
-                        text="Deployment Config" iconColor="Critical">
-                        <VBox class="sapUiMediumMarginBeginEnd sapUiMediumMarginTopBottom">
-
-                            <MessageStrip
-                                text="Deployment configuration controls which feature groups are active for this tenant. Disabling a group hides its screens and returns 403 on related entities. Changes take effect after save."
-                                type="Warning" showIcon="true" class="sapUiSmallMarginBottom"/>
-
-                            <!-- Deployment Mode Selector (Phase B9) -->
-                            <Panel headerText="Deployment Mode" expandable="false" class="sapUiSmallMarginBottom">
-                                <content>
-                                    <HBox alignItems="Center" class="sapUiSmallMargin">
-                                        <Label text="Mode:" design="Bold" class="sapUiSmallMarginEnd" width="80px"/>
-                                        <Select id="deploymentModeSelect"
-                                            selectedKey="{deploy>/deploymentMode}"
-                                            change="onDeploymentModeChange"
-                                            width="280px">
-                                            <core:Item key="FULL"     text="Full — All feature groups enabled"/>
-                                            <core:Item key="STANDARD" text="Standard — Core + Inspection + Compliance"/>
-                                            <core:Item key="CORE"     text="Core — Core Platform only"/>
-                                            <core:Item key="LITE"     text="Lite — Core minus some features"/>
-                                            <core:Item key="CUSTOM"   text="Custom — Manual group toggles"/>
-                                        </Select>
-                                        <Text id="deploymentModeHint" text=""
-                                            class="sapUiSmallMarginBegin"/>
-                                    </HBox>
-                                </content>
-                            </Panel>
-
-                            <!-- Feature Group Cards container — rendered by controller -->
-                            <Toolbar>
-                                <Title text="Feature Groups" level="H3"/>
-                                <ToolbarSpacer/>
-                                <Button text="Save Deployment Config" icon="sap-icon://save"
-                                    type="Emphasized" press="onSaveDeploymentConfig"/>
-                            </Toolbar>
-
-                            <VBox id="featureGroupCardsContainer" class="sapUiSmallMarginTop"/>
-
-                        </VBox>
-                    </IconTabFilter>
-
                 </items>
             </IconTabBar>
         </content>
@@ -371,55 +327,6 @@
         <buttons>
             <Button text="Grant Access" type="Emphasized" press="onConfirmGrantAccess"/>
             <Button text="Cancel" type="Transparent" press="onCancelGrantAccess"/>
-        </buttons>
-    </Dialog>
-
-    <!-- ── Deployment Impact Preview Dialog (Phase B10) ──────── -->
-    <Dialog id="deploymentImpactDialog" title="Deployment Impact Preview"
-        contentWidth="560px" draggable="true" resizable="true">
-        <content>
-            <VBox class="sapUiSmallMargin">
-                <MessageStrip
-                    text="Review the impact of the deployment configuration changes before saving."
-                    type="Warning" showIcon="true" class="sapUiSmallMarginBottom"/>
-
-                <Panel headerText="Summary" expandable="false">
-                    <content>
-                        <VBox class="sapUiSmallMargin">
-                            <HBox class="sapUiTinyMarginBottom">
-                                <Label text="Screens that will be hidden:" design="Bold" width="220px"/>
-                                <ObjectStatus id="impactHiddenScreens" text="0" state="None"/>
-                            </HBox>
-                            <HBox class="sapUiTinyMarginBottom">
-                                <Label text="Entities returning 403:" design="Bold" width="220px"/>
-                                <ObjectStatus id="impactBlockedEntities" text="0" state="None"/>
-                            </HBox>
-                            <HBox class="sapUiTinyMarginBottom">
-                                <Label text="Groups being disabled:" design="Bold" width="220px"/>
-                                <Text id="impactDisabledGroups" text="None"/>
-                            </HBox>
-                            <HBox id="impactCascadeRow" visible="false">
-                                <Label text="Cascade disables:" design="Bold" width="220px"/>
-                                <ObjectStatus id="impactCascadeDisables" text="" state="Warning"/>
-                            </HBox>
-                        </VBox>
-                    </content>
-                </Panel>
-
-                <!-- Disabled groups detail list -->
-                <Panel id="impactDetailPanel" headerText="Disabled Groups Detail"
-                    expandable="true" expanded="false"
-                    class="sapUiSmallMarginTop" visible="false">
-                    <content>
-                        <List id="impactDisabledGroupList"
-                            noDataText="No groups disabled"/>
-                    </content>
-                </Panel>
-            </VBox>
-        </content>
-        <buttons>
-            <Button text="Confirm and Save" type="Emphasized" press="onConfirmDeploymentSave"/>
-            <Button text="Cancel" type="Transparent" press="onCancelDeploymentSave"/>
         </buttons>
     </Dialog>
 

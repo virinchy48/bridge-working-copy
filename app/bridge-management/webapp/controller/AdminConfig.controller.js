@@ -18,7 +18,7 @@ sap.ui.define([
     // Section-to-featureKey mapping for Home screen tile grouping
     var SECTION_TILE_MAP = [
         { name: "Operations",              keys: ["dashboard","bridges","restrictions","bridgeMap"] },
-        { name: "BMS Business Admin",      keys: ["massupload","adminconfig","massedit","licenseConfig"] },
+        { name: "BMS Business Admin",      keys: ["massupload","adminconfig","massedit"] },
         { name: "BMS Tech Admin",          keys: ["techAdmin","integrationHub"] },
         { name: "Inspection & Defects",    keys: ["inspections","defects"] },
         { name: "Operator Tools",          keys: ["permits","vehicleaccess","routeassessment","routePlanner"] },
@@ -107,10 +107,6 @@ sap.ui.define([
         // ── Navigation ────────────────────────────────────────────────
         onNavHome: function () {
             this.getOwnerComponent().getRouter().navTo("Home");
-        },
-
-        onNavToLicenseConfig: function () {
-            this.getOwnerComponent().getRouter().navTo("LicenseConfig");
         },
 
         onTabSelect: function () {},

@@ -30,7 +30,6 @@
                     </Breadcrumbs>
                 </f:breadcrumbs>
                 <f:actions>
-                    <Button text="Home" icon="sap-icon://home" press="onNavBack" type="Transparent"/>
                     <Button id="rpSettingsBtn" icon="sap-icon://action-settings" press="onOpenSettings"
                         tooltip="API Key Settings" type="Transparent"/>
                 </f:actions>

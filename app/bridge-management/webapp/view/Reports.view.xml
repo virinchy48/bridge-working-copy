@@ -25,7 +25,6 @@
                     <Button icon="sap-icon://hint" type="Transparent" press="onInfoPressReports"
                         tooltip="Reports guide and help"/>
                     <Button text="Refresh" icon="sap-icon://refresh" press="onRefresh" type="Transparent"/>
-                    <Button text="Home" icon="sap-icon://home" press="onNavHome" type="Transparent"/>
                 </f:actions>
                 <f:breadcrumbs>
                     <Breadcrumbs>
