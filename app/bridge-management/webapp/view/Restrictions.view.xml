@@ -20,9 +20,11 @@
                     <Title text="Restrictions" level="H2"/>
                 </f:snappedHeading>
                 <f:actions>
+                    <Button id="btnAddRestriction" text="Add Restriction"
+                        press="onAddRestriction" type="Emphasized"
+                        visible="{ui>/canAddRestriction}"/>
                     <Button icon="sap-icon://hint" type="Transparent" press="onInfoPressRestrictions"
                         tooltip="Restriction types and field guide"/>
-                    <Button text="Home" icon="sap-icon://home" press="onNavHome" type="Transparent"/>
                 </f:actions>
                 <f:breadcrumbs>
                     <Breadcrumbs>
@@ -39,22 +41,22 @@
                 <HBox wrap="Wrap" class="sapUiSmallMarginBeginEnd sapUiSmallMarginTop sapUiSmallMarginBottom" alignItems="Center">
                     <VBox class="sapUiSmallMarginEnd">
                         <Label text="Search" design="Bold"/>
-                        <SearchField id="searchField" width="300px" placeholder="Restriction ref, bridge, type, value…"
+                        <SearchField id="searchField" width="240px" placeholder="Restriction ref, bridge, type, value…"
                             search="onSearch" liveChange="onLiveSearch"/>
                     </VBox>
                     <VBox class="sapUiSmallMarginEnd">
                         <Label text="Status" design="Bold"/>
-                        <Select id="filterStatus" change="onFilterChange" width="160px">
+                        <Select id="filterStatus" change="onFilterChange" width="150px">
                         </Select>
                     </VBox>
                     <VBox class="sapUiSmallMarginEnd">
                         <Label text="Type" design="Bold"/>
-                        <Select id="filterType" change="onFilterChange" width="180px">
+                        <Select id="filterType" change="onFilterChange" width="150px">
                         </Select>
                     </VBox>
                     <VBox class="sapUiSmallMarginEnd">
                         <Label text="Permit" design="Bold"/>
-                        <Select id="filterPermit" change="onFilterChange" width="140px">
+                        <Select id="filterPermit" change="onFilterChange" width="150px">
                             <core:Item key="ALL"   text="All"/>
                             <core:Item key="YES"   text="Required"/>
                             <core:Item key="NO"    text="Not Required"/>
@@ -62,7 +64,7 @@
                     </VBox>
                     <VBox class="sapUiSmallMarginEnd">
                         <Label text="Temporary" design="Bold"/>
-                        <Select id="filterTemporary" change="onFilterChange" width="130px">
+                        <Select id="filterTemporary" change="onFilterChange" width="150px">
                             <core:Item key="ALL" text="All"/>
                             <core:Item key="YES" text="Temporary Only"/>
                             <core:Item key="NO"  text="Permanent Only"/>
@@ -76,7 +78,7 @@
 
                 <!-- ── Advanced Filter Panel ──────────────────── -->
                 <Panel id="advFilterPanel" expandable="true" expanded="false"
-                    headerText="⚙ Advanced Filter — Slice restriction data by any field"
+                    headerText="Advanced Filter — Slice &amp; Dice Restriction Data"
                     class="sapUiSmallMarginTop">
                     <content>
                         <VBox class="sapUiSmallMarginBeginEnd sapUiSmallMarginTopBottom">
@@ -174,14 +176,23 @@
                     rowHeight="40"
                     class="nhvrGridTable sapUiSmallMarginBeginEnd">
 
+                    <t:noData>
+                        <VBox alignItems="Center" class="sapUiMediumMarginTop sapUiMediumMarginBottom">
+                            <core:Icon src="sap-icon://filter" size="3rem" color="#8396A8" class="sapUiSmallMarginBottom"/>
+                            <Title text="No restrictions found" level="H3" class="sapUiSmallMarginBottom"/>
+                            <Text text="No restrictions match your current filters." class="nhvrSubText"/>
+                            <Text text="Try adjusting your search criteria or clearing the filters." class="nhvrSubText sapUiTinyMarginBottom"/>
+                            <Button text="Clear All Filters" icon="sap-icon://clear-filter"
+                                press="onClearFilters" type="Emphasized" class="sapUiSmallMarginTop"/>
+                        </VBox>
+                    </t:noData>
+
                     <t:extension>
                         <OverflowToolbar>
                             <Text id="alvRecordCount" text="" class="nhvrSubText"/>
                             <ToolbarSeparator/>
                             <Title id="tableTitle" text="Restrictions" level="H3"/>
                             <ToolbarSpacer/>
-                            <Button text="Add Restriction" icon="sap-icon://add" press="onAddRestriction" type="Emphasized"
-                                visible="{ui>/canAddRestriction}"/>
                             <Button icon="sap-icon://sort" text="Sort"
                                 press="onAlvSort" type="Transparent" tooltip="Sort options"/>
                             <Button id="btnTableSettings" icon="sap-icon://action-settings" text="Columns"

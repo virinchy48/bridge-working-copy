@@ -115,7 +115,9 @@ sap.ui.define([
             });
         },
 
-        getRole:  function () { return _role || "READ_ONLY"; }, // RK-09: fail-closed default
+        getRole:  function () {
+            return _role || sessionStorage.getItem(STORAGE_KEY) || "READ_ONLY";
+        }, // RK-09: fail-closed default
         getLabel: function () { return ROLE_LABELS[_role] || _role; },
 
         /** Is feature visible for current role? Default: false (fail-closed, RK-09) */

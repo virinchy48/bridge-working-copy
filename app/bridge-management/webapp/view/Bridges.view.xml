@@ -22,12 +22,9 @@
                     <Title text="Bridges" level="H2"/>
                 </f:snappedHeading>
                 <f:actions>
-                    <Button id="btnAddBridge" text="Add Bridge" icon="sap-icon://add" press="onAddBridge" type="Emphasized"/>
-                    <Button text="Go" icon="sap-icon://search" press="onSearch" type="Default"/>
-                    <Button text="Refresh" icon="sap-icon://refresh" press="onRefresh" type="Transparent"/>
+                    <Button id="btnAddBridge" text="Add Bridge" press="onAddBridge" type="Emphasized"/>
                     <Button icon="sap-icon://hint" type="Transparent" press="onInfoPressBridges"
                         tooltip="Column and field guide"/>
-                    <Button text="Home" icon="sap-icon://home" press="onNavHome" type="Transparent"/>
                 </f:actions>
                 <f:breadcrumbs>
                     <Breadcrumbs>

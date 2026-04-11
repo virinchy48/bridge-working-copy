@@ -9,9 +9,10 @@ sap.ui.define([
     "sap/m/ToolbarSpacer",
     "sap/m/ToolbarSeparator",
     "nhvr/bridgemanagement/model/AppConfig",
+    "nhvr/bridgemanagement/model/RoleManager",
     "nhvr/bridgemanagement/util/AnalyticsService",
     "nhvr/bridgemanagement/model/CapabilityManager"
-], function (UIComponent, App, Toolbar, OverflowToolbar, ToolbarSpacer, ToolbarSeparator, AppConfig, AnalyticsService, CapabilityManager) {
+], function (UIComponent, App, Toolbar, OverflowToolbar, ToolbarSpacer, ToolbarSeparator, AppConfig, RoleManager, AnalyticsService, CapabilityManager) {
     "use strict";
 
     // ── Route → Capability mapping for feature isolation ──────
@@ -44,9 +45,13 @@ sap.ui.define([
         init: function () {
             UIComponent.prototype.init.apply(this, arguments);
 
-            // Fetch app mode (full/lite) before router starts — so first navigation is correct
+            // Initialize app mode and role config before routing so feature-gated
+            // buttons render consistently even when users land on deep links.
             var oRouter = this.getRouter();
-            AppConfig.init().then(function () {
+            Promise.all([
+                AppConfig.init(),
+                RoleManager.loadConfig().catch(function () { return null; })
+            ]).then(function () {
                 oRouter.initialize();
 
                 // Initialize analytics (fire-and-forget — never blocks app start)
