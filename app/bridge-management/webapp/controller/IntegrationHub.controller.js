@@ -118,6 +118,14 @@ sap.ui.define([
             });
             this.getView().setModel(this._oIntModel, 'integrationModel');
 
+            // Filter dropdowns + cross-launch target selector sourced from Lookup table
+            var self = this;
+            LookupService.load().then(function () {
+                LookupService.populateSelect(self.byId("logSystemFilter"),   "EXTERNAL_SYSTEM_TYPE", "All Systems");
+                LookupService.populateSelect(self.byId("logStatusFilter"),   "INTEGRATION_STATUS",   "All Status");
+                LookupService.populateFormSelect(self.byId("crossLaunchTestSystem"), "EXTERNAL_SYSTEM_TYPE");
+            });
+
             // Integration config form model (S/4HANA, BANC, ESRI settings)
             this._oCfgModel = new JSONModel({
                 s4  : { isActive: false, baseUrl: '', username: '', _password: '', s4Client: '100',
@@ -153,10 +161,8 @@ sap.ui.define([
             // SAP EAM / S4HANA object mapping (displayed in Tab 1 EAM panel)
             var eamMapping = [
                 { bmsObject: 'Bridge',                      sapObject: 'Functional Location (FLOC)',    tCode: 'IL01/IL03',   status: 'Planned', fieldMapping: 'bridgeId → FLOC ID; name → Description; state → Work Center; region → Plant; condition → User Status' },
-                { bmsObject: 'InspectionOrder',             sapObject: 'PM Order (Type PM03)',          tCode: 'IW31/IW33',   status: 'Planned', fieldMapping: 'orderNumber → PM Order#; plannedDate → Basic Start; inspector → Personnel No.; accessMethod → Operation Text; status → System Status' },
                 { bmsObject: 'BridgeDefect',                sapObject: 'PM Notification (Type M2)',     tCode: 'IW21/IW22',   status: 'Planned', fieldMapping: 'defectCategory → Damage Code; severity → Priority; description → Long Text; structuralRisk → Effect; closureDate → Completion Date' },
                 { bmsObject: 'Restriction',                 sapObject: 'Permit to Work / Eng. Change',  tCode: 'CN01/PTPN',   status: 'Planned', fieldMapping: 'restrictionType → Permit Type; value → Limit Value; validFromDate → Valid From; gazetteRef → Document Ref' },
-                { bmsObject: 'MeasurementDocument',         sapObject: 'Measurement Document',          tCode: 'IK11/IK12',   status: 'Planned', fieldMapping: 'conditionRating → Measured Value; inspectionDate → Reading Date; inspector → Entered By' },
                 { bmsObject: 'BridgeCapacity',              sapObject: 'Classification / Characteristic', tCode: 'CL20N/CT04', status: 'Planned', fieldMapping: 'loadStandard → Characteristic; grossVehicleMass → Value; ratingDate → Date; ratingRef → Document' },
                 { bmsObject: 'Route',                       sapObject: 'Linear Asset / Work Center',    tCode: 'IR01/CR01',   status: 'Planned', fieldMapping: 'routeCode → Linear ID; description → Short Text; state → Company Code; region → Plant' },
                 { bmsObject: 'AuditLog',                    sapObject: 'Change Document / CDH',         tCode: 'RSSCD100',    status: 'Active',  fieldMapping: 'userId → User; action → Change Type; timestamp → Changed At; entity → Object Class; changes → Change Fields' },

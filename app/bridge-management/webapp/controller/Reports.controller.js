@@ -175,7 +175,7 @@ sap.ui.define([
             info: {
                 purpose: "Track inspection programme delivery and identify overdue inspections requiring urgent action.",
                 users: "Inspection managers, bridge engineers, state maintenance teams",
-                sources: "getInspectionStatusReport function — InspectionOrder + Bridge entities",
+                sources: "getInspectionStatusReport function — Bridge.nextInspectionDueDate",
                 logic: "All inspection orders. daysOverdue = today - plannedDate (if not completed). OVERDUE flag if status != COMPLETED and plannedDate < today.",
                 refresh: "Real-time (live OData query)"
             },

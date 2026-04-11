@@ -14,6 +14,8 @@ mta-op-*/
 db.sqlite
 *.db
 *.sqlite
+*.sqlite-shm
+*.sqlite-wal
 
 # Environment / secrets
 .env

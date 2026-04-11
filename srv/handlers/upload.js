@@ -286,63 +286,9 @@ module.exports = function registerUploadHandlers(srv, helpers) {
             totalRecords: totalProcessed, successCount, updatedCount, failureCount, errors: errors.join('\n') };
     });
 
-    // ── massUploadInspectionOrders ─────────────────────────────
-    srv.on('massUploadInspectionOrders', async (req) => {
-        const { csvData } = req.data;
-        if (!csvData || csvData.trim() === '') return req.error(400, 'CSV data is empty');
-        const db = await cds.connect.to('db');
-        const lines = csvData.trim().split('\n');
-        const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
-        const dataLines = lines.slice(1);
-        let successCount = 0, updatedCount = 0, failureCount = 0, totalProcessed = 0;
-        const errors = [];
-        const bridges = await db.run(SELECT.from('nhvr.Bridge').columns('ID', 'bridgeId'));
-        const bridgeMap = {};
-        bridges.forEach(b => { bridgeMap[b.bridgeId] = b.ID; });
-        const tx = cds.tx(req);
-        try {
-            for (let i = 0; i < dataLines.length; i++) {
-                const line = dataLines[i].trim();
-                if (!line) continue;
-                const rowNum = i + 2;
-                try {
-                    const values = parseCSVLine(line);
-                    const row = {};
-                    headers.forEach((hdr, idx) => { row[hdr] = values[idx] || ''; });
-                    if (!row.bridgeId)    { errors.push(`Row ${rowNum}: bridgeId required`);    failureCount++; continue; }
-                    if (!row.orderNumber) { errors.push(`Row ${rowNum}: orderNumber required`); failureCount++; continue; }
-                    if (!row.plannedDate) { errors.push(`Row ${rowNum}: plannedDate required`); failureCount++; continue; }
-                    row.bridge_ID = bridgeMap[row.bridgeId];
-                    if (!row.bridge_ID) { errors.push(`Row ${rowNum}: Bridge "${row.bridgeId}" not found`); failureCount++; continue; }
-                    delete row.bridgeId;
-                    if (row.overallConditionRating) row.overallConditionRating = parseInt(row.overallConditionRating);
-                    const existing = await db.run(SELECT.one.from('nhvr.InspectionOrder').where({ orderNumber: row.orderNumber }));
-                    if (existing) {
-                        const orderNum = row.orderNumber; delete row.orderNumber;
-                        await tx.run(UPDATE('nhvr.InspectionOrder').set(row).where({ orderNumber: orderNum })); updatedCount++;
-                    } else {
-                        row.status = row.status || 'PLANNED';
-                        row.inspectionType = row.inspectionType || 'ROUTINE';
-                        await tx.run(INSERT.into('nhvr.InspectionOrder').entries(row)); successCount++;
-                    }
-                } catch (err) { errors.push(`Row ${rowNum}: ${err.message}`); failureCount++; }
-            }
-            totalProcessed = dataLines.filter(l => l.trim()).length;
-            await tx.run(INSERT.into('nhvr.UploadLog').entries({
-                fileName: 'mass-upload-inspection-orders.csv', uploadType: 'INSPECTION_ORDER',
-                totalRecords: totalProcessed, successCount: successCount + updatedCount, failureCount,
-                status: failureCount === 0 ? 'COMPLETED' : 'COMPLETED_WITH_ERRORS', errorDetails: errors.join('\n')
-            }));
-            await tx.commit();
-        } catch (e) {
-            await tx.rollback();
-            return req.error(500, `InspectionOrder upload failed: ${e.message}. All changes rolled back.`);
-        }
-        await logAudit('ACTION', 'UploadLogs', 'mass-upload', 'InspectionOrder Upload',
-            `Mass upload: ${successCount} created, ${updatedCount} updated, ${failureCount} failed`, null, req);
-        return { status: failureCount === 0 ? 'SUCCESS' : 'PARTIAL_SUCCESS',
-            totalRecords: totalProcessed, successCount, updatedCount, failureCount, errors: errors.join('\n') };
-    });
+    // massUploadInspectionOrders removed in cut-down BIS variant
+    // (InspectionOrder entity was removed). Mass upload of bridge
+    // defects below still works without an inspection-order parent.
 
     // ── massUploadBridgeDefects ────────────────────────────────
     srv.on('massUploadBridgeDefects', async (req) => {
@@ -414,55 +360,226 @@ module.exports = function registerUploadHandlers(srv, helpers) {
     });
 
     // ── massUploadLookups ──────────────────────────────────────
+    // Hardened mass-upload for admin-configurable lookup values.
+    // Design goals:
+    //   • Header whitelist (fail fast on typos / unknown columns)
+    //   • Row cap (denial-of-service guard)
+    //   • Category/code normalisation + length enforcement
+    //   • Per-row change capture in LookupChangeLog
+    //   • Transaction-safe audit log (writes BEFORE commit)
+    //   • UploadLog persisted even on partial failure (inside tx)
+    const LOOKUP_HEADERS = new Set(['category','code','description','displayOrder','isActive']);
+    const LOOKUP_CATEGORY_MAX = 50;
+    const LOOKUP_CODE_MAX     = 200;
+    const LOOKUP_DESC_MAX     = 300;
+
+    // Convert an xlsx (base64-encoded) workbook's first sheet to CSV text.
+    // Uses the `xlsx` package (SheetJS). Throws on parse error so the
+    // outer handler can return a 400 with a friendly message.
+    function xlsxBase64ToCsv(base64) {
+        const XLSX = require('xlsx');
+        const buf = Buffer.from(base64, 'base64');
+        const wb = XLSX.read(buf, { type: 'buffer' });
+        if (!wb.SheetNames || !wb.SheetNames.length) {
+            throw new Error('Workbook contains no sheets');
+        }
+        // Prefer a sheet named "Lookups" (our own template), fall back to first
+        const sheetName = wb.SheetNames.includes('Lookups') ? 'Lookups' : wb.SheetNames[0];
+        const ws = wb.Sheets[sheetName];
+        return XLSX.utils.sheet_to_csv(ws);
+    }
+
     srv.on('massUploadLookups', async (req) => {
-        const { csvData } = req.data;
-        if (!csvData || csvData.trim() === '') return req.error(400, 'CSV data is empty');
-        const db = await cds.connect.to('db');
-        const lines = csvData.trim().split('\n');
-        const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
-        const dataLines = lines.slice(1);
-        let successCount = 0, updatedCount = 0, failureCount = 0, totalProcessed = 0;
+        let { csvData, fileBase64, fileName } = req.data;
+
+        // If the client sent an xlsx file, decode it server-side and turn the
+        // first sheet into CSV. We then run the exact same pipeline as a plain
+        // csvData upload — no code duplication.
+        if (fileBase64 && fileBase64.length > 0) {
+            try {
+                csvData = xlsxBase64ToCsv(fileBase64);
+            } catch (e) {
+                return req.error(400, `Could not parse xlsx file: ${e.message}`);
+            }
+        }
+
+        if (!csvData || csvData.trim() === '') return req.error(400, 'CSV / xlsx data is empty');
+
+        const lines = csvData.trim().split(/\r?\n/);
+        if (lines.length < 2) return req.error(400, 'CSV must contain a header row and at least one data row');
+
+        const headers = parseCSVLine(lines[0]).map(h => h.replace(/"/g, '').trim());
+        const badCols = headers.filter(h => h && !LOOKUP_HEADERS.has(h));
+        if (badCols.length) {
+            return req.error(400, `Unknown column(s): ${badCols.join(', ')}. Allowed: ${Array.from(LOOKUP_HEADERS).join(', ')}`);
+        }
+        if (!headers.includes('category') || !headers.includes('code')) {
+            return req.error(400, "CSV must include 'category' and 'code' columns");
+        }
+
+        const dataLines = lines.slice(1).filter(l => l.trim());
+        if (dataLines.length > MAX_CSV_ROWS) {
+            return req.error(400, `CSV exceeds maximum of ${MAX_CSV_ROWS} rows (got ${dataLines.length})`);
+        }
+
+        let successCount = 0, updatedCount = 0, failureCount = 0;
         const errors = [];
+        const rowResults = [];   // { row, category, code, status, message }
         const tx = cds.tx(req);
+
         try {
             for (let i = 0; i < dataLines.length; i++) {
-                const line = dataLines[i].trim();
-                if (!line) continue;
-                const rowNum = i + 2;
+                const rowNum = i + 2; // +1 for header, +1 for 1-indexed
                 try {
-                    const values = parseCSVLine(line);
+                    const values = parseCSVLine(dataLines[i]);
                     const row = {};
-                    headers.forEach((hdr, idx) => { row[hdr] = values[idx] || ''; });
-                    if (!row.category) { errors.push(`Row ${rowNum}: category required`); failureCount++; continue; }
-                    if (!row.code)     { errors.push(`Row ${rowNum}: code required`);     failureCount++; continue; }
-                    if (row.displayOrder) row.displayOrder = parseInt(row.displayOrder);
-                    if (row.isActive !== undefined && row.isActive !== '')
+                    headers.forEach((hdr, idx) => { row[hdr] = values[idx] !== undefined ? values[idx] : ''; });
+
+                    // Required fields
+                    if (!row.category) {
+                        errors.push(`Row ${rowNum}: category required`);
+                        rowResults.push({ row: rowNum, category: '', code: row.code || '', status: 'ERROR', message: 'category required' });
+                        failureCount++; continue;
+                    }
+                    if (!row.code) {
+                        errors.push(`Row ${rowNum}: code required`);
+                        rowResults.push({ row: rowNum, category: row.category || '', code: '', status: 'ERROR', message: 'code required' });
+                        failureCount++; continue;
+                    }
+
+                    // Normalise: upper-case + trim (prevents near-duplicate categories)
+                    row.category = String(row.category).trim().toUpperCase();
+                    row.code     = String(row.code).trim().toUpperCase();
+
+                    // Length enforcement (matches schema String(N))
+                    if (row.category.length > LOOKUP_CATEGORY_MAX) {
+                        errors.push(`Row ${rowNum}: category exceeds ${LOOKUP_CATEGORY_MAX} chars`);
+                        rowResults.push({ row: rowNum, category: row.category, code: row.code, status: 'ERROR', message: `category exceeds ${LOOKUP_CATEGORY_MAX} chars` });
+                        failureCount++; continue;
+                    }
+                    if (row.code.length > LOOKUP_CODE_MAX) {
+                        errors.push(`Row ${rowNum}: code exceeds ${LOOKUP_CODE_MAX} chars`);
+                        rowResults.push({ row: rowNum, category: row.category, code: row.code, status: 'ERROR', message: `code exceeds ${LOOKUP_CODE_MAX} chars` });
+                        failureCount++; continue;
+                    }
+                    if (row.description && row.description.length > LOOKUP_DESC_MAX) {
+                        row.description = row.description.substring(0, LOOKUP_DESC_MAX);
+                    }
+
+                    // Coerce typed fields
+                    if (row.displayOrder) {
+                        const n = parseInt(row.displayOrder);
+                        if (Number.isNaN(n)) {
+                            errors.push(`Row ${rowNum}: displayOrder must be numeric`);
+                            rowResults.push({ row: rowNum, category: row.category, code: row.code, status: 'ERROR', message: 'displayOrder must be numeric' });
+                            failureCount++; continue;
+                        }
+                        row.displayOrder = n;
+                    }
+                    if (row.isActive !== undefined && row.isActive !== '') {
                         row.isActive = (row.isActive === 'true' || row.isActive === 'TRUE' || row.isActive === '1');
-                    const existing = await db.run(SELECT.one.from('nhvr.Lookup').where({ category: row.category, code: row.code }));
+                    }
+
+                    const existing = await tx.run(
+                        SELECT.one.from('nhvr.Lookup').where({ category: row.category, code: row.code })
+                    );
+
+                    const auditUser = req && req.user ? req.user.id : 'system';
+                    const auditRole = (['Admin','BridgeManager','Viewer'].find(r => req && req.user && req.user.is && req.user.is(r))) || 'Unknown';
+
                     if (existing) {
-                        const { category, code } = row; delete row.category; delete row.code;
-                        await tx.run(UPDATE('nhvr.Lookup').set(row).where({ category, code })); updatedCount++;
+                        const { category, code } = row;
+                        const updatePayload = { ...row };
+                        delete updatePayload.category;
+                        delete updatePayload.code;
+                        await tx.run(UPDATE('nhvr.Lookup').set(updatePayload).where({ category, code }));
+                        updatedCount++;
+                        rowResults.push({ row: rowNum, category, code, status: 'UPDATED', message: 'existing row updated' });
+                        // Per-row change log in AuditLog (old → new snapshot for traceability)
+                        await tx.run(INSERT.into('nhvr.AuditLog').entries({
+                            timestamp  : new Date().toISOString(),
+                            userId     : auditUser,
+                            userRole   : auditRole,
+                            action     : 'UPDATE',
+                            entity     : 'Lookups',
+                            entityId   : `${category}/${code}`,
+                            entityName : `${category}/${code}`,
+                            changes    : JSON.stringify({
+                                before: { description: existing.description, displayOrder: existing.displayOrder, isActive: existing.isActive },
+                                after : { description: updatePayload.description, displayOrder: updatePayload.displayOrder, isActive: updatePayload.isActive }
+                            }),
+                            description: `Lookup updated via mass upload (row ${rowNum})`
+                        }));
                     } else {
                         row.isActive = row.isActive !== undefined ? row.isActive : true;
-                        await tx.run(INSERT.into('nhvr.Lookup').entries(row)); successCount++;
+                        await tx.run(INSERT.into('nhvr.Lookup').entries(row));
+                        successCount++;
+                        rowResults.push({ row: rowNum, category: row.category, code: row.code, status: 'CREATED', message: 'new row inserted' });
+                        await tx.run(INSERT.into('nhvr.AuditLog').entries({
+                            timestamp  : new Date().toISOString(),
+                            userId     : auditUser,
+                            userRole   : auditRole,
+                            action     : 'CREATE',
+                            entity     : 'Lookups',
+                            entityId   : `${row.category}/${row.code}`,
+                            entityName : `${row.category}/${row.code}`,
+                            changes    : JSON.stringify({ after: row }),
+                            description: `Lookup created via mass upload (row ${rowNum})`
+                        }));
                     }
-                } catch (err) { errors.push(`Row ${rowNum}: ${err.message}`); failureCount++; }
+                } catch (err) {
+                    errors.push(`Row ${rowNum}: ${err.message}`);
+                    rowResults.push({ row: rowNum, category: '', code: '', status: 'ERROR', message: err.message });
+                    failureCount++;
+                }
             }
-            totalProcessed = dataLines.filter(l => l.trim()).length;
+
+            const totalProcessed = dataLines.length;
+
+            // Persist UploadLog (inside tx — rolls back on fatal errors only)
             await tx.run(INSERT.into('nhvr.UploadLog').entries({
-                fileName: 'mass-upload-lookups.csv', uploadType: 'LOOKUP',
-                totalRecords: totalProcessed, successCount: successCount + updatedCount, failureCount,
-                status: failureCount === 0 ? 'COMPLETED' : 'COMPLETED_WITH_ERRORS', errorDetails: errors.join('\n')
+                fileName    : fileName || (fileBase64 ? 'mass-upload-lookups.xlsx' : 'mass-upload-lookups.csv'),
+                uploadType  : 'LOOKUP',
+                totalRecords: totalProcessed,
+                successCount: successCount + updatedCount,
+                failureCount,
+                status      : failureCount === 0 ? 'COMPLETED' : 'COMPLETED_WITH_ERRORS',
+                errorDetails: errors.join('\n')
             }));
+
+            // Audit log BEFORE commit so it shares the transaction
+            try {
+                await tx.run(INSERT.into('nhvr.AuditLog').entries({
+                    timestamp  : new Date().toISOString(),
+                    userId     : req && req.user ? req.user.id : 'system',
+                    userRole   : (['Admin','BridgeManager','Viewer'].find(r => req && req.user && req.user.is && req.user.is(r))) || 'Unknown',
+                    action     : 'ACTION',
+                    entity     : 'UploadLogs',
+                    entityId   : 'mass-upload-lookups',
+                    entityName : 'Lookup Upload',
+                    changes    : JSON.stringify({ successCount, updatedCount, failureCount, totalProcessed }),
+                    description: `Mass upload: ${successCount} created, ${updatedCount} updated, ${failureCount} failed`
+                }));
+            } catch (auditErr) {
+                // Don't fail the whole upload if audit insert has schema drift
+                cds.log('nhvr-upload').warn('Audit log insert failed:', auditErr.message);
+            }
+
             await tx.commit();
+
+            return {
+                status      : failureCount === 0 ? 'SUCCESS' : 'PARTIAL_SUCCESS',
+                totalRecords: totalProcessed,
+                successCount,
+                updatedCount,
+                failureCount,
+                errors      : errors.join('\n'),
+                rowResults  : JSON.stringify(rowResults)
+            };
         } catch (e) {
-            await tx.rollback();
+            try { await tx.rollback(); } catch (_) { /* ignore */ }
             return req.error(500, `Lookup upload failed: ${e.message}. All changes rolled back.`);
         }
-        await logAudit('ACTION', 'UploadLogs', 'mass-upload', 'Lookup Upload',
-            `Mass upload: ${successCount} created, ${updatedCount} updated, ${failureCount} failed`, null, req);
-        return { status: failureCount === 0 ? 'SUCCESS' : 'PARTIAL_SUCCESS',
-            totalRecords: totalProcessed, successCount, updatedCount, failureCount, errors: errors.join('\n') };
     });
 
     // ── massDownloadBridges ────────────────────────────────────

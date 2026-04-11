@@ -122,15 +122,8 @@ action createS4MaintenanceNotification(
     notificationNumber : String;
 };
 
-// ── S/4HANA: InspectionOrder → PM Work Order ─────────────────
-@restrict: [{ to: ['BridgeManager','Admin'] }]
-action createS4MaintenanceOrder(
-    inspectionOrderId : UUID
-) returns {
-    status      : String;
-    message     : String;
-    orderNumber : String;
-};
+// createS4MaintenanceOrder action removed in cut-down BIS variant
+// (InspectionOrder + WorkOrder removed).
 
 // ── BANC: Generate BANC-format CSV export ────────────────────
 @restrict: [{ to: ['BridgeManager','Admin'] }]

@@ -8,8 +8,9 @@ sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "sap/m/MessageToast",
     "sap/m/MessageBox",
-    "nhvr/bridgemanagement/util/AlvToolbarMixin"
-], function (Controller, JSONModel, MessageToast, MessageBox, AlvToolbarMixin) {
+    "nhvr/bridgemanagement/util/AlvToolbarMixin",
+    "nhvr/bridgemanagement/util/LookupService"
+], function (Controller, JSONModel, MessageToast, MessageBox, AlvToolbarMixin, LookupService) {
     "use strict";
 
     const BASE = "/bridge-management";
@@ -25,6 +26,13 @@ sap.ui.define([
 
             const router = this.getOwnerComponent().getRouter();
             router.getRoute("PermitRegisterReport").attachPatternMatched(this._onRouteMatched, this);
+
+            // Filter dropdowns sourced from Lookup table
+            var self = this;
+            LookupService.load().then(function () {
+                LookupService.populateSelect(self.byId("filterStatus"), "PERMIT_STATUS", "All Statuses");
+                LookupService.populateSelect(self.byId("filterType"),   "PERMIT_TYPE",   "All Types");
+            });
         },
 
         _onRouteMatched: function () {
@@ -78,16 +86,16 @@ sap.ui.define([
         },
 
         _applyFilters: function () {
-            const statusKey = this.byId("filterStatus")   ? this.byId("filterStatus").getSelectedKey()   : "ALL";
-            const typeKey   = this.byId("filterType")     ? this.byId("filterType").getSelectedKey()     : "ALL";
+            const statusKey = this.byId("filterStatus")   ? this.byId("filterStatus").getSelectedKey()   : "";
+            const typeKey   = this.byId("filterType")     ? this.byId("filterType").getSelectedKey()     : "";
             const dateFrom  = this.byId("filterDateFrom") ? this.byId("filterDateFrom").getValue()       : "";
             const dateTo    = this.byId("filterDateTo")   ? this.byId("filterDateTo").getValue()         : "";
             const search    = this.byId("searchField")    ? this.byId("searchField").getValue().toLowerCase() : "";
 
             let data = this._allPermits;
 
-            if (statusKey !== "ALL") data = data.filter(function (p) { return p.status === statusKey; });
-            if (typeKey   !== "ALL") data = data.filter(function (p) { return p.permitType === typeKey; });
+            if (statusKey !== "") data = data.filter(function (p) { return p.status === statusKey; });
+            if (typeKey   !== "") data = data.filter(function (p) { return p.permitType === typeKey; });
 
             if (dateFrom) {
                 const from = new Date(dateFrom.split("/").reverse().join("-"));
@@ -196,7 +204,7 @@ sap.ui.define([
             ids.forEach(function (id) {
                 const ctrl = this.byId(id);
                 if (!ctrl) return;
-                if (ctrl.setSelectedKey)  ctrl.setSelectedKey("ALL");
+                if (ctrl.setSelectedKey)  ctrl.setSelectedKey("");
                 if (ctrl.setValue)        ctrl.setValue("");
             }.bind(this));
             this._applyFilters();

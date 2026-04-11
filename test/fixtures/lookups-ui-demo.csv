@@ -1,0 +1,17 @@
+category,code,description,displayOrder,isActive
+STRUCTURE_TYPE,ARCH,Arch bridge,10,true
+STRUCTURE_TYPE,BEAM,Beam / girder bridge,20,true
+STRUCTURE_TYPE,SUSPENSION,Suspension bridge,30,true
+STRUCTURE_TYPE,CABLE_STAYED,Cable-stayed bridge,40,true
+STRUCTURE_TYPE,TRUSS,Truss bridge,50,true
+STRUCTURE_TYPE,SLAB,Slab bridge,60,true
+STRUCTURE_TYPE,BOX_GIRDER,Box-girder bridge,70,true
+STRUCTURE_TYPE,LEGACY_TIMBER,Legacy timber — out of standard,99,false
+MATERIAL,CONCRETE,Reinforced concrete,10,true
+MATERIAL,STEEL,Structural steel,20,true
+MATERIAL,COMPOSITE,Steel-concrete composite,30,true
+MATERIAL,TIMBER,Timber,40,true
+MATERIAL,STONE,Stone masonry,50,true
+,MISSING_CATEGORY,Should fail UI validation — no category,10,true
+MATERIAL,,Should fail UI validation — no code,20,true
+TEST_CATEGORY,BAD_ORDER,Should fail UI validation — non-numeric order,abc,true

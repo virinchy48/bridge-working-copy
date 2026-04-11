@@ -320,50 +320,7 @@ module.exports = function registerIntegrationHandlers(srv) {
         }
     });
 
-    // ============================================================
-    // S/4HANA — Create Maintenance Order from InspectionOrder
-    // ============================================================
-    srv.on('createS4MaintenanceOrder', 'Bridges', async (req) => {
-        const bridgeId = req.params[0]?.ID || req.params[0];
-        const { inspectionOrderId } = req.data;
-        try {
-            const [bridge, cfg, mapping] = await Promise.all([
-                loadBridge(db, bridgeId),
-                loadConfig(db, 'S4HANA'),
-                getOrCreateMapping(db, bridgeId)
-            ]);
-            if (!bridge) return req.error(404, 'Bridge not found');
-
-            const inspOrder = inspectionOrderId
-                ? await db.run(SELECT.one.from('nhvr.InspectionOrder').where({ ID: inspectionOrderId }))
-                : null;
-
-            const orderData = inspOrder || {
-                orderNumber      : req.data.orderNumber || `NHVR-${bridge.bridgeId}-${Date.now()}`,
-                plannedDate      : req.data.plannedDate || new Date().toISOString().slice(0, 10),
-                inspector        : req.data.inspector  || '',
-                _equipmentNumber : mapping?.equipmentNumber || ''
-            };
-            if (mapping?.equipmentNumber) orderData._equipmentNumber = mapping.equipmentNumber;
-
-            const result = await s4.createMaintenanceOrder(cfg, orderData, bridge);
-
-            await writeLog(db, {
-                systemCode   : 'S4HANA',
-                operationType: 'CREATE_ORDER',
-                bridgeId,
-                responsePayload: result
-            });
-
-            return {
-                success    : true,
-                orderNumber: result.orderNumber,
-                message    : `PM Order ${result.orderNumber} created in S/4HANA`
-            };
-        } catch (e) {
-            return req.error(500, `Create maintenance order failed: ${e.message}`);
-        }
-    });
+    // createS4MaintenanceOrder removed in cut-down BIS variant.
 
     // ============================================================
     // BANC — Export bridges to BANC CSV package

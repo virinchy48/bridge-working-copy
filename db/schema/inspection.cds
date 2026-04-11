@@ -1,7 +1,12 @@
 // ============================================================
 // INSPECTION & DEFECT MANAGEMENT
-// InspectionOrder, MeasurementDocument, BridgeDefect, WorkOrder,
-// DefectClassification, BridgeInspection, InspectionRecord, BridgeEventLog
+// InspectionRecord (legacy), BridgeDefect, DefectClassification,
+// BridgeInspection (BHI), BridgeEventLog
+//
+// Note: InspectionOrder, MeasurementDocument, and WorkOrder were
+// removed in the cut-down BIS variant — defects can be raised
+// directly against a bridge without an inspection-order parent,
+// and remediation tracking lives in external systems (e.g. SAP PM).
 // ============================================================
 
 namespace nhvr;
@@ -9,12 +14,9 @@ namespace nhvr;
 using { cuid, managed } from '@sap/cds/common';
 using { nhvr.Bridge } from './core';
 using {
-    nhvr.InspectionOrderType, nhvr.InspectionOrderStatus,
-    nhvr.AccessMethod, nhvr.RatingMethod, nhvr.MaintenanceUrgency,
-    nhvr.ElementGroup, nhvr.MeasurementType,
+    nhvr.ElementGroup,
     nhvr.DefectCategory, nhvr.DefectSeverity, nhvr.DefectExtent,
-    nhvr.StructuralRisk, nhvr.DefectPriority, nhvr.DefectStatus,
-    nhvr.WorkOrderPriority, nhvr.WorkOrderStatus
+    nhvr.StructuralRisk, nhvr.DefectPriority, nhvr.DefectStatus
 } from './types';
 
 // ─────────────────────────────────────────────────────────────
@@ -37,104 +39,9 @@ entity InspectionRecord : cuid, managed {
 }
 
 // ─────────────────────────────────────────────────────────────
-// INSPECTION ORDER — AS 5100.7 / AustRoads BIMM
-// ─────────────────────────────────────────────────────────────
-entity InspectionOrder : cuid, managed {
-    bridge                  : Association to Bridge @mandatory;
-    orderNumber             : String(50)  @mandatory @assert.unique;
-    inspectionType          : InspectionOrderType  default 'ROUTINE';
-    status                  : InspectionOrderStatus default 'PLANNED';
-    plannedDate             : Date @mandatory;
-    startedAt               : DateTime;
-    completedAt             : DateTime;
-    inspector               : String(200);
-    inspectorOrg            : String(200);
-    accessMethod            : AccessMethod;
-    ratingMethod            : RatingMethod;
-    // Results (populated on completion)
-    overallConditionRating  : Integer;          // 1-10 AS 5100.7
-    structuralAdequacy      : String(20);       // ADEQUATE, MARGINAL, INADEQUATE
-    maintenanceUrgency      : MaintenanceUrgency;
-    scourAssessment         : String(1000);
-    recommendations         : LargeString;
-    reportRef               : String(500);
-    nextInspectionDue       : Date;
-    notes                   : LargeString;
-    // Navigation associations (top-level accessible entity sets)
-    measurementDocuments    : Association to many MeasurementDocument on measurementDocuments.inspectionOrder = $self;
-    defects                 : Association to many BridgeDefect on defects.inspectionOrder = $self;
-}
-
-// ── BIMM / AS 5100.7 extend ─────────────────────────────────
-extend InspectionOrder with {
-    inspectionStandard       : String(50);   // AUSTROADS_BIMM|AS5100_7|TFNSW_BIM|VICROADS_BIS|TMR_QLD|MRWA|CUSTOM
-    inspectionFirm           : String(200);
-    workOrderRef             : String(100);
-    trafficControl           : Boolean default false;
-    laneClosureRequired      : Boolean default false;
-    previousConditionRating  : Integer;
-    nhvrImpact               : Boolean default false;
-    restrictionChangeRequired: Boolean default false;
-    nextInspectionType       : String(50);
-    defectsFound             : Integer default 0;
-    criticalDefects          : Integer default 0;
-    scourCheck               : Boolean default false;
-    scourFinding             : String(50);   // NO_ISSUE|MINOR_MONITORING|SCOUR_DETECTED|CRITICAL_SCOUR
-    certifiedBy              : String(200);
-    certificationRef         : String(200);
-    reportURL                : String(1000);
-    reportSubmittedDate      : Date;
-    actualStartDate          : Date;
-    actualEndDate            : Date;
-}
-
-// ── Review workflow extend ───────────────────────────────────
-extend InspectionOrder with {
-    reviewedBy       : String(100);
-    reviewedAt       : Timestamp;
-    reviewNotes      : String(1000);
-    reviewDecision   : String(20);  // APPROVED | REJECTED | NEEDS_REVISION
-}
-
-// ─────────────────────────────────────────────────────────────
-// MEASUREMENT DOCUMENT — element-level condition measurements
-// ─────────────────────────────────────────────────────────────
-entity MeasurementDocument : cuid, managed {
-    inspectionOrder : Association to InspectionOrder @mandatory;
-    bridge          : Association to Bridge @mandatory;
-    elementGroup    : ElementGroup @mandatory;
-    elementName     : String(200) @mandatory;
-    elementRef      : String(100);
-    measurementType : MeasurementType @mandatory;
-    measuredValue   : Decimal(12,4);
-    unit            : String(50);
-    conditionRating : Integer;      // 1-10 element-level rating
-    notes           : String(1000);
-    measurementDate : Date;
-    measuredBy      : String(200);
-}
-
-// ── BIMM v3 extend ──────────────────────────────────────────
-extend MeasurementDocument with {
-    mdNumber            : String(50)    @title: 'Measurement Document No.';
-    componentTOC        : String(20)    @title: 'Component TOC';
-    componentRef        : String(100)   @title: 'Component Reference / Span No.';
-    conditionState      : Integer       @title: 'Condition State (1-5)';
-    defectCode          : String(20)    @title: 'Defect Code (Austroads BIMM)';
-    defectDescription   : String(500)   @title: 'Defect Description';
-    defectExtent        : Decimal(10,2) @title: 'Defect Extent';
-    extentUnit          : String(20)    @title: 'Extent Unit';
-    severity            : String(20)    @title: 'Severity';
-    photoRef            : String(500)   @title: 'Photo Reference(s)';
-    raiseDefectFlag     : Boolean       @title: 'Raise Defect from this Measurement';
-    linkedDefectId      : String(30)    @title: 'Linked BridgeDefect ID';
-}
-
-// ─────────────────────────────────────────────────────────────
 // BRIDGE DEFECT
 // ─────────────────────────────────────────────────────────────
 entity BridgeDefect : cuid, managed {
-    inspectionOrder   : Association to InspectionOrder;
     bridge            : Association to Bridge @mandatory;
     defectNumber      : String(50);
     elementGroup      : ElementGroup;
@@ -173,7 +80,6 @@ extend BridgeDefect with {
     repairUrgency                : String(50);
     targetRepairDate             : Date;
     estimatedCost                : Decimal(12,2);
-    workOrderRef                 : String(100);
     contractorAssigned           : String(200);
     actualRepairDate             : Date;
     photoRefs                    : String(2000);
@@ -194,24 +100,9 @@ entity BridgeEventLog : cuid {
     performedBy      : String(100);
     approvalRef      : String(200);
     gazetteRef       : String(200);
-    relatedEntityType: String(50);              // Bridge | Restriction | InspectionOrder | BridgeDefect
+    relatedEntityType: String(50);              // Bridge | Restriction | BridgeDefect
     relatedEntityId  : String(100);
     timestamp        : DateTime @cds.on.insert: $now;
-}
-
-// ─────────────────────────────────────────────────────────────
-// WORK ORDER — remediation linked to defects
-// ─────────────────────────────────────────────────────────────
-entity WorkOrder : cuid, managed {
-    defect        : Association to BridgeDefect;
-    bridge        : Association to Bridge @mandatory;
-    woNumber      : String(20) @mandatory;
-    priority      : WorkOrderPriority default 'MEDIUM';
-    status        : WorkOrderStatus default 'CREATED';
-    plannedDate   : Date;
-    assignedTo    : String(100);
-    estimatedCost : Decimal(12,2);
-    notes         : String(500);
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -257,7 +148,6 @@ entity BridgeInspection : cuid {
     followUpPriority       : String(10);
     estimatedRepairCost    : Decimal(12,2);
     sapNotificationNo      : String(30);
-    sapWorkOrderNo         : String(30);
     nextInspectionDue      : Date;
     reportGenerated        : Boolean default false;
     reportURL              : String(500);

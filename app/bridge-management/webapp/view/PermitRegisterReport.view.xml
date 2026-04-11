@@ -47,25 +47,13 @@
                 <HBox wrap="Wrap" class="sapUiSmallMarginBeginEnd sapUiSmallMarginTopBottom" alignItems="Center">
                     <VBox class="sapUiSmallMarginEnd">
                         <Label text="Status" design="Bold"/>
-                        <Select id="filterStatus" change="onFilterChange" width="160px">
-                            <core:Item key="ALL" text="All Statuses"/>
-                            <core:Item key="APPROVED" text="Approved"/>
-                            <core:Item key="PENDING" text="Pending"/>
-                            <core:Item key="UNDER_ASSESSMENT" text="Under Assessment"/>
-                            <core:Item key="REJECTED" text="Rejected"/>
-                            <core:Item key="EXPIRED" text="Expired"/>
-                            <core:Item key="REVOKED" text="Revoked"/>
-                        </Select>
+                        <!-- Items populated at runtime from Lookup table (PERMIT_STATUS) -->
+                        <Select id="filterStatus" change="onFilterChange" width="160px"/>
                     </VBox>
                     <VBox class="sapUiSmallMarginEnd">
                         <Label text="Permit Type" design="Bold"/>
-                        <Select id="filterType" change="onFilterChange" width="160px">
-                            <core:Item key="ALL" text="All Types"/>
-                            <core:Item key="OVERSIZE" text="Oversize"/>
-                            <core:Item key="OVERMASS" text="Overmass"/>
-                            <core:Item key="PILOT" text="Pilot Required"/>
-                            <core:Item key="ROUTE" text="Route Permit"/>
-                        </Select>
+                        <!-- Items populated at runtime from Lookup table (PERMIT_TYPE) -->
+                        <Select id="filterType" change="onFilterChange" width="160px"/>
                     </VBox>
                     <VBox class="sapUiSmallMarginEnd">
                         <Label text="Issued From" design="Bold"/>

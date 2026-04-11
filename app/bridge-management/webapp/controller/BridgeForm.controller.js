@@ -47,12 +47,39 @@ sap.ui.define([
             const router = this.getOwnerComponent().getRouter();
             router.getRoute("BridgeNew").attachPatternMatched(this._onNew, this);
             router.getRoute("BridgeEdit").attachPatternMatched(this._onEdit, this);
-            // Load geographic reference data from OData
+            // Warm the geographic reference cache from OData. Each route
+            // match below re-runs _refreshLookupDropdowns() which re-reads
+            // the latest cache so newly uploaded lookup rows show up even
+            // if the controller was instantiated before the upload.
             ReferenceData.load();
+            LookupService.load();
+        },
 
-            LookupService.load().then(function () {
-                LookupService.populateFormSelect(this.byId("fAssetClass"), "ASSET_CLASS");
-                LookupService.populateFormSelect(this.byId("fState"), "STATE");
+        /**
+         * Re-populate every lookup-driven dropdown from the live LookupService
+         * cache. Called on each route match (not just onInit) so that a Mass
+         * Upload of Lookup Values — which calls LookupService.reload() on
+         * success — is reflected the next time the form is shown, without a
+         * full page reload.
+         *
+         * Single source of truth is the Lookup table. Previously these were
+         * hardcoded in BridgeForm.view.xml, which caused:
+         *   1) Stale values (e.g. HEIGHT_RESTRICTED) being offered by the UI
+         *      but rejected by the server's enum guard in
+         *      srv/handlers/bridges.js → "Save failed: Invalid postingStatus".
+         *   2) Admin lookup uploads having no effect on the form, defeating
+         *      the whole point of an admin-configurable catalogue.
+         */
+        _refreshLookupDropdowns: function () {
+            return LookupService.load().then(function () {
+                LookupService.populateFormSelect(this.byId("fAssetClass"),       "ASSET_CLASS");
+                LookupService.populateFormSelect(this.byId("fState"),            "STATE");
+                LookupService.populateFormSelect(this.byId("fPostingStatus"),    "POSTING_STATUS");
+                LookupService.populateFormSelect(this.byId("fScourRisk"),        "SCOUR_RISK", "— Unknown —");
+                LookupService.populateFormSelect(this.byId("fStructureType"),    "STRUCTURE_TYPE");
+                LookupService.populateFormSelect(this.byId("fDesignLoad"),       "DESIGN_LOAD");
+                LookupService.populateFormSelect(this.byId("fNhvrApprovalClass"),"NHVR_APPROVAL_CLASS", "— Not Assessed —");
+                LookupService.populateFormSelect(this.byId("fExtSystem"),        "EXTERNAL_SYSTEM_TYPE", "— None —");
             }.bind(this));
         },
 
@@ -109,27 +136,31 @@ sap.ui.define([
             this._bridgeUUID = null;
             this._dynAttrValues = {};
             this._dynAttrIds    = {};
-            this._resetForm();
-            this.byId("formTitle").setText("Add Bridge");
-            this.byId("breadcrumbForm").setText("New Bridge");
-            this.byId("fBridgeId").setEditable(true);
-            this.byId("formErrorStrip").setVisible(false);
-            this._loadAndRenderDynAttrs(null);
-            this._applyBridgeFieldRBAC();
+            this._refreshLookupDropdowns().then(function () {
+                this._resetForm();
+                this.byId("formTitle").setText("Add Bridge");
+                this.byId("breadcrumbForm").setText("New Bridge");
+                this.byId("fBridgeId").setEditable(true);
+                this.byId("formErrorStrip").setVisible(false);
+                this._loadAndRenderDynAttrs(null);
+                this._applyBridgeFieldRBAC();
+            }.bind(this));
         },
 
         _onEdit: function (e) {
             const bid = decodeURIComponent(e.getParameter("arguments").bridgeId || "");
             this._editMode = true;
             this._bridgeId = bid;
-            this._resetForm();
-            this.byId("formTitle").setText("Edit Bridge");
-            this.byId("breadcrumbForm").setText(bid);
-            this.byId("fBridgeId").setEditable(false);
-            this.byId("fBridgeId").setValue(bid);
-            this.byId("formErrorStrip").setVisible(false);
-            this._loadBridge(bid);
-            this._applyBridgeFieldRBAC();
+            this._refreshLookupDropdowns().then(function () {
+                this._resetForm();
+                this.byId("formTitle").setText("Edit Bridge");
+                this.byId("breadcrumbForm").setText(bid);
+                this.byId("fBridgeId").setEditable(false);
+                this.byId("fBridgeId").setValue(bid);
+                this.byId("formErrorStrip").setVisible(false);
+                this._loadBridge(bid);
+                this._applyBridgeFieldRBAC();
+            }.bind(this));
         },
 
         _loadBridge: function (bridgeId) {
@@ -282,7 +313,37 @@ sap.ui.define([
             if (!sel) return;
             while (sel.getItems().length > 0) sel.removeItem(0);
             sel.addItem(new sap.ui.core.Item({ key: "", text: "— Select Region —" }));
-            ReferenceData.getRegions(state).forEach(function (region) {
+            if (!state) { sel.setSelectedKey(""); return; }
+
+            // Union two sources so both historical and admin-configured
+            // regions surface:
+            //   1) Distinct regions already stored on Bridge rows for this
+            //      state (preserves real-world data).
+            //   2) REGION lookup entries whose code is prefixed with the
+            //      selected state, e.g. "NSW:HUNTER" / "NSW:SIDD". This is
+            //      the admin-configurable catalogue and is the primary way
+            //      to add a new region without editing an existing bridge.
+            const seen = Object.create(null);
+            const regions = [];
+            const addRegion = function (label) {
+                if (!label) return;
+                const key = String(label).trim();
+                if (!key || seen[key]) return;
+                seen[key] = true;
+                regions.push(key);
+            };
+
+            (ReferenceData.getRegions(state) || []).forEach(addRegion);
+            LookupService.getItems("REGION")
+                .filter(function (e) { return e.key && e.key.indexOf(state + ":") === 0; })
+                .forEach(function (e) {
+                    // Match REGION rows like "NSW:HUNTER"; prefer the
+                    // description, fall back to the suffix after the colon.
+                    addRegion(e.text || e.key.split(":")[1]);
+                });
+
+            regions.sort();
+            regions.forEach(function (region) {
                 sel.addItem(new sap.ui.core.Item({ key: region, text: region }));
             });
             sel.setSelectedKey("");
@@ -608,13 +669,21 @@ sap.ui.define([
             const container = this.byId("dynAttrContainer");
             if (!container) return {};
             const vals = {};
-            const hbox = container.getItems()[0];
+            // The container's first child may be a placeholder <Text> (loaded
+            // from the XML before _renderDynAttrs runs) if attribute defs
+            // failed to load or the user clicked Save before they finished
+            // loading. Find the first child that actually exposes getItems()
+            // (i.e. the dynamic-attribute HBox) instead of blindly indexing.
+            const items = container.getItems ? container.getItems() : [];
+            const hbox  = items.find(it => it && typeof it.getItems === "function");
             if (!hbox) return vals;
 
             hbox.getItems().forEach(vbox => {
+                if (!vbox || typeof vbox.getItems !== "function") return;
                 const controls = vbox.getItems();
                 if (controls.length < 2) return;
                 const ctrl     = controls[1];
+                if (!ctrl || typeof ctrl.data !== "function") return;
                 const attrName = ctrl.data("attrName");
                 if (!attrName) return;
 

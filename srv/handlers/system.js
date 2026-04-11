@@ -3,7 +3,7 @@ const cds = require('@sap/cds');
 const crypto = require('crypto');
 const LOG = cds.log('nhvr-system');
 
-const LITE_HIDDEN_FEATURES = ['defects','inspections','inspectionOrders','workOrders','permits','routeAssessment'];
+const LITE_HIDDEN_FEATURES = ['defects','inspections','permits','routeAssessment'];
 
 module.exports = function registerSystemHandlers(srv) {
 
@@ -165,10 +165,10 @@ module.exports = function registerSystemHandlers(srv) {
     });
 
     // Capability gate removed — all feature groups are now always available.
+    // InspectionOrders, MeasurementDocuments, WorkOrders entries removed in
+    // cut-down BIS variant (entities no longer exist).
     const ENTITY_CAPABILITY_MAP = {
         // INSPECTION group
-        'InspectionOrders'        : 'INSPECTIONS',
-        'MeasurementDocuments'    : 'INSPECTIONS',
         'InspectionRecords'       : 'INSPECTIONS',
         'SensorDevices'           : 'INSPECTIONS',
         'SensorReadings'          : 'INSPECTIONS',
@@ -200,9 +200,6 @@ module.exports = function registerSystemHandlers(srv) {
 
         // VEHICLE_COMBINATIONS group
         'VehicleTypes'            : 'VEHICLE_COMBINATIONS',
-
-        // WORK_ORDERS group
-        'WorkOrders'              : 'WORK_ORDERS',
 
         // INTEGRATION group
         'IntegrationConfigs'      : 'INTEGRATION_HUB',

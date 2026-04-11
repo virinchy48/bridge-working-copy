@@ -64,7 +64,6 @@ entity BridgeInvestmentPlan : cuid, managed {
     netPresentValue             : Decimal(14,2) @title: 'NPV ($)';
     programmeStatus             : ProgrammeStatus;
     fundingSource               : String(200)   @title: 'Funding Source';
-    workOrderRef                : String(100)   @title: 'SAP PM Work Order Ref';
     actualCost                  : Decimal(14,2) @title: 'Actual Cost ($)';
     completionDate              : Date;
     notes                       : LargeString;

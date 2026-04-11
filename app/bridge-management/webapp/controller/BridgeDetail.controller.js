@@ -75,14 +75,21 @@ sap.ui.define([
                 LookupService.populateFormSelect(this.byId("rdPriority"),      "DEFECT_PRIORITY");
                 LookupService.populateFormSelect(this.byId("rdElementGroup"),  "ELEMENT_GROUP");
                 LookupService.populateFormSelect(this.byId("erSystemType"),    "EXTERNAL_SYSTEM_TYPE");
-                LookupService.populateFormSelect(this.byId("bdRestType"),      "RESTRICTION_TYPE");
-                LookupService.populateFormSelect(this.byId("bdRestStatus"),    "RESTRICTION_STATUS");
-                LookupService.populateFormSelect(this.byId("editRestType"),    "RESTRICTION_TYPE");
-                LookupService.populateFormSelect(this.byId("editRestStatus"),  "RESTRICTION_STATUS");
-                LookupService.populateFormSelect(this.byId("rcCondition"),     "CONDITION");
-                LookupService.populateFormSelect(this.byId("rcAdequacy"),      "STRUCTURAL_ADEQUACY");
-                LookupService.populateFormSelect(this.byId("invType"),         "INTERVENTION_TYPE");
-                LookupService.populateFormSelect(this.byId("invStatus"),       "PROGRAMME_STATUS");
+                LookupService.populateFormSelect(this.byId("bdRestType"),        "RESTRICTION_TYPE");
+                LookupService.populateFormSelect(this.byId("bdRestStatus"),      "RESTRICTION_STATUS");
+                LookupService.populateFormSelect(this.byId("bdRestUnit"),        "MEASUREMENT_UNIT");
+                LookupService.populateFormSelect(this.byId("bdRestDirection"),   "RESTRICTION_DIRECTION");
+                LookupService.populateFormSelect(this.byId("editRestType"),      "RESTRICTION_TYPE");
+                LookupService.populateFormSelect(this.byId("editRestStatus"),    "RESTRICTION_STATUS");
+                LookupService.populateFormSelect(this.byId("editRestUnit"),      "MEASUREMENT_UNIT");
+                LookupService.populateFormSelect(this.byId("editRestDirection"), "RESTRICTION_DIRECTION");
+                LookupService.populateFormSelect(this.byId("rcCondition"),       "CONDITION");
+                LookupService.populateFormSelect(this.byId("rcAdequacy"),        "STRUCTURAL_ADEQUACY");
+                LookupService.populateFormSelect(this.byId("invType"),           "INTERVENTION_TYPE");
+                LookupService.populateFormSelect(this.byId("invStatus"),         "PROGRAMME_STATUS");
+                LookupService.populateFormSelect(this.byId("nhvrEditApprovalClass"), "VEHICLE_CLASS", "— Not Set —");
+                LookupService.populateFormSelect(this.byId("inspDlgType"),       "INSPECTION_TYPE");
+                LookupService.populateFormSelect(this.byId("inspDlgAdequacy"),   "STRUCTURAL_ADEQUACY");
             }.bind(this));
         },
 
@@ -1302,13 +1309,12 @@ sap.ui.define([
             this.byId("vehicleAccessDialog").close();
         },
 
-        // ── Load Inspection Orders ────────────────────────────
-        _loadInspectionOrders: function (bridgeUUID) {
-            const h = { Accept: "application/json" };
-            fetch(`${BASE}/InspectionOrders?$filter=bridge_ID eq ${bridgeUUID}&$orderby=plannedDate desc`, { headers: h })
-                .then(r => r.json())
-                .then(j => this._model.setProperty("/inspectionOrders", j.value || []))
-                .catch(() => this._model.setProperty("/inspectionOrders", []));
+        // ── Load Inspection Orders (no-op in cut-down BIS variant) ──────────
+        // The InspectionOrders entity was removed from the service layer.
+        // Keep the function so existing call sites don't NPE; just set an
+        // empty array on the model.
+        _loadInspectionOrders: function (/* bridgeUUID */) {
+            this._model.setProperty("/inspectionOrders", []);
         },
 
         // ── Load Defects ──────────────────────────────────────

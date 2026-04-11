@@ -5,8 +5,9 @@ sap.ui.define([
   "sap/m/MessageBox",
   "nhvr/bridgemanagement/model/CapabilityManager",
   "nhvr/bridgemanagement/model/RoleManager",
-  "nhvr/bridgemanagement/util/DraftManager"
-], function (Controller, JSONModel, MessageToast, MessageBox, CapabilityManager, RoleManager, DraftManager) {
+  "nhvr/bridgemanagement/util/DraftManager",
+  "nhvr/bridgemanagement/util/LookupService"
+], function (Controller, JSONModel, MessageToast, MessageBox, CapabilityManager, RoleManager, DraftManager, LookupService) {
   "use strict";
 
   return Controller.extend("nhvr.bridgemanagement.controller.InspectionCreate", {
@@ -36,6 +37,18 @@ sap.ui.define([
       var oRouter = this.getOwnerComponent().getRouter();
       oRouter.getRoute("InspectionCreate").attachPatternMatched(this._onRouteMatched, this);
       oRouter.getRoute("InspectionCreateNew").attachPatternMatched(this._onRouteMatchedNew, this);
+
+      // Single source of truth — populate all enum dropdowns from the
+      // Lookup table so admin uploads (Mass Upload → Lookup Values) flow
+      // through to this form without code changes.
+      var self = this;
+      LookupService.load().then(function () {
+        LookupService.populateFormSelect(self.byId("selInspType"), "INSPECTION_TYPE");
+        LookupService.populateFormSelect(self.byId("selStandard"), "INSPECTION_STANDARD");
+        LookupService.populateFormSelect(self.byId("selAccess"),   "ACCESS_METHOD");
+        LookupService.populateFormSelect(self.byId("selDefect"),   "DEFECT_CLASSIFICATION");
+        LookupService.populateFormSelect(self.byId("selSeverity"), "DEFECT_SEVERITY");
+      });
     },
 
     _onRouteMatched: function (oEvent) {

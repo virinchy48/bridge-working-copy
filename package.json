@@ -13,7 +13,7 @@
         "deploy:hana": "cds deploy --profile local-hana,production --to hana",
         "test": "jest --testPathPattern=test/ --forceExit --passWithNoTests",
         "test:unit": "jest --testPathPattern=test/unit --forceExit --passWithNoTests",
-        "test:integration": "jest --testPathPattern=test/integration --forceExit --passWithNoTests",
+        "test:integration": "node scripts/run-with-node.js 20 node ./node_modules/.bin/jest --testPathPattern=test/integration --forceExit --passWithNoTests",
         "test:reports": "jest --testPathPattern=test/reports --forceExit --passWithNoTests",
         "test:security": "jest --testPathPattern=test/security --forceExit --passWithNoTests",
         "test:performance": "jest --testPathPattern='test/(perf|performance)' --forceExit --passWithNoTests",
@@ -41,7 +41,8 @@
         "@sap/xssec": "^4.0.0",
         "express": "^4.21.0",
         "hdb": "^2.0.0",
-        "passport": "^0.7.0"
+        "passport": "^0.7.0",
+        "xlsx": "^0.18.5"
     },
     "devDependencies": {
         "@cap-js/cds-test": "^0.4.1",

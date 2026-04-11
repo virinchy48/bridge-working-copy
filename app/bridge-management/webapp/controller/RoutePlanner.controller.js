@@ -11,8 +11,9 @@ sap.ui.define([
     "sap/m/MessageBox",
     "sap/m/SuggestionItem",
     "nhvr/bridgemanagement/util/UserAnalytics",
-    "nhvr/bridgemanagement/model/CapabilityManager"
-], function (Controller, JSONModel, MessageToast, MessageBox, SuggestionItem, UserAnalytics, CapabilityManager) {
+    "nhvr/bridgemanagement/model/CapabilityManager",
+    "nhvr/bridgemanagement/util/LookupService"
+], function (Controller, JSONModel, MessageToast, MessageBox, SuggestionItem, UserAnalytics, CapabilityManager, LookupService) {
     "use strict";
 
     // ── Constants ──────────────────────────────────────────────
@@ -45,6 +46,12 @@ sap.ui.define([
             this.getView().setModel(new JSONModel({ routes: [] }), "rpRoutes");
             // Bridge assessment results model
             this.getView().setModel(new JSONModel({ bridges: [] }), "rpBridges");
+
+            // Vehicle Class dropdown sourced from Lookup table
+            var self = this;
+            LookupService.load().then(function () {
+                LookupService.populateFormSelect(self.byId("rpVehicleClass"), "VEHICLE_CLASS");
+            });
 
             // Internal state
             this._originCoord        = null;   // [lon, lat]

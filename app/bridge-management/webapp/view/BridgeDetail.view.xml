@@ -106,10 +106,7 @@
                                 <Button text="Check Vehicle Access" icon="sap-icon://truck"
                                     press="onCheckVehicleAccess" type="Emphasized"/>
                                 <ToolbarSeparator/>
-                                <!-- Inspection &amp; Defect actions (write-protected) -->
-                                <Button id="btnNewInspOrder" text="Inspection Order" icon="sap-icon://factory"
-                                    press="onCreateInspectionOrder" type="Default"
-                                    tooltip="Create a new AS 5100 inspection order for this bridge"/>
+                                <!-- Defect actions (write-protected). Inspection Order button removed in cut-down BIS variant. -->
                                 <Button id="btnRaiseDefect" text="Raise Defect" icon="sap-icon://alert"
                                     press="onRaiseDefect" type="Attention"
                                     tooltip="Log a structural defect on this bridge"/>
@@ -886,67 +883,7 @@
                         </VBox>
                     </IconTabFilter>
 
-                    <!-- ── TAB 5: Inspection Orders ──────────── -->
-                    <IconTabFilter key="inspectionOrders" text="Insp. Orders" icon="sap-icon://factory" iconColor="Positive">
-                        <VBox class="sapUiSmallMarginBeginEnd sapUiSmallMarginTop">
-                            <HBox justifyContent="SpaceBetween" alignItems="Center" class="sapUiSmallMarginBottom">
-                                <HBox alignItems="Center">
-                                    <Title text="Inspection Orders — AS 5100.7 / AustRoads BIMM" level="H3" class="sapUiTinyMarginEnd"/>
-                                    <Button icon="sap-icon://hint" type="Transparent"
-                                        press="onInfoPressInspectionOrders" tooltip="About inspection orders"/>
-                                </HBox>
-                                <Button text="New Order" icon="sap-icon://add" press="onCreateInspectionOrder"
-                                    type="Emphasized" class="nhvrBtn"/>
-                            </HBox>
-                            <Table id="inspOrderTable"
-                                items="{detail>/inspectionOrders}"
-                                noDataText="No inspection orders found"
-                                fixedLayout="false"
-                                growing="true" growingThreshold="50"
-                                alternateRowColors="true">
-                                <columns>
-                                    <Column width="130px"><Text text="Order No."/></Column>
-                                    <Column width="100px"><Text text="Type"/></Column>
-                                    <Column width="110px" hAlign="Center"><Text text="Status"/></Column>
-                                    <Column width="100px"><Text text="Planned Date"/></Column>
-                                    <Column width="130px"><Text text="Inspector"/></Column>
-                                    <Column width="80px" hAlign="Center"><Text text="Rating"/></Column>
-                                    <Column width="130px" hAlign="Center"><Text text="Struct. Adequacy"/></Column>
-                                    <Column width="100px"><Text text="Next Due"/></Column>
-                                    <Column width="120px" hAlign="Center"><Text text="Actions"/></Column>
-                                </columns>
-                                <items>
-                                    <ColumnListItem
-                                        highlight="{= ${detail>status} === 'IN_PROGRESS' ? 'Information' : ${detail>status} === 'COMPLETED' ? 'Success' : 'None'}"
-                                        press="onOpenInspectionOrder" type="Navigation">
-                                        <cells>
-                                            <ObjectIdentifier title="{detail>orderNumber}"/>
-                                            <ObjectStatus text="{detail>inspectionType}"
-                                                state="{= ${detail>inspectionType} === 'PRINCIPAL' ? 'Warning' : ${detail>inspectionType} === 'UNDERWATER' ? 'Error' : 'None'}"/>
-                                            <ObjectStatus text="{detail>status}"
-                                                state="{= ${detail>status} === 'COMPLETED' ? 'Success' : ${detail>status} === 'IN_PROGRESS' ? 'Warning' : 'None'}"/>
-                                            <Text text="{detail>plannedDate}"/>
-                                            <Text text="{detail>inspector}"/>
-                                            <ObjectStatus
-                                                text="{detail>overallConditionRating}"
-                                                state="{= ${detail>overallConditionRating} >= 7 ? 'Success' : ${detail>overallConditionRating} >= 5 ? 'Warning' : ${detail>overallConditionRating} > 0 ? 'Error' : 'None'}"/>
-                                            <ObjectStatus text="{detail>structuralAdequacy}"
-                                                state="{= ${detail>structuralAdequacy} === 'ADEQUATE' ? 'Success' : ${detail>structuralAdequacy} === 'MARGINAL' ? 'Warning' : ${detail>structuralAdequacy} === 'INADEQUATE' ? 'Error' : 'None'}"/>
-                                            <Text text="{detail>nextInspectionDue}"/>
-                                            <HBox>
-                                                <Button icon="sap-icon://play" tooltip="Start Inspection"
-                                                    press="onStartInspection" type="Transparent"
-                                                    visible="{= ${detail>status} === 'PLANNED'}"/>
-                                                <Button icon="sap-icon://complete" tooltip="Complete Inspection"
-                                                    press="onCompleteInspection" type="Transparent"
-                                                    visible="{= ${detail>status} === 'IN_PROGRESS'}"/>
-                                            </HBox>
-                                        </cells>
-                                    </ColumnListItem>
-                                </items>
-                            </Table>
-                        </VBox>
-                    </IconTabFilter>
+                    <!-- TAB 5 (Inspection Orders) removed in cut-down BIS variant. -->
 
                     <!-- ── TAB 3: Inspection History ─────────── -->
                     <IconTabFilter key="inspections" text="Inspections" icon="sap-icon://inspection" iconColor="Critical">
@@ -1238,7 +1175,6 @@
                                         <Column><Text text="BCR"/></Column>
                                         <Column><Text text="Status"/></Column>
                                         <Column><Text text="Funding Source"/></Column>
-                                        <Column><Text text="Work Order Ref"/></Column>
                                     </columns>
                                     <items>
                                         <ColumnListItem>
@@ -1251,7 +1187,6 @@
                                                 <ObjectStatus text="{investmentPlans>programmeStatus}"
                                                     state="{= ${investmentPlans>programmeStatus} === 'APPROVED' ? 'Success' : ${investmentPlans>programmeStatus} === 'IN_PROGRESS' ? 'Warning' : 'None' }"/>
                                                 <Text text="{investmentPlans>fundingSource}"/>
-                                                <Text text="{investmentPlans>workOrderRef}"/>
                                             </cells>
                                         </ColumnListItem>
                                     </items>
@@ -1787,78 +1722,8 @@
         </buttons>
     </Dialog>
 
-    <!-- ── Create Inspection Order Dialog ───────────────── -->
-    <Dialog id="createInspOrderDialog" title="Create Inspection Order" contentWidth="500px"
-        draggable="true" resizable="true" verticalScrolling="false">
-        <content>
-            <VBox class="sapUiSmallMarginBeginEnd sapUiSmallMarginTop">
-                <Label text="Order Number" required="true" class="sapUiTinyMarginBottom" labelFor="ioOrderNumber"/>
-                <Input id="ioOrderNumber" placeholder="e.g. INS-2024-015" width="100%" class="sapUiSmallMarginBottom"/>
-
-                <Label text="Inspection Type" class="sapUiTinyMarginBottom" labelFor="ioType"/>
-                <Select id="ioType" width="100%" class="sapUiSmallMarginBottom"/>
-
-                <Label text="Planned Date" required="true" class="sapUiTinyMarginBottom" labelFor="ioPlannedDate"/>
-                <DatePicker id="ioPlannedDate" width="100%" displayFormat="dd/MM/yyyy" valueFormat="yyyy-MM-dd"
-                    class="sapUiSmallMarginBottom"/>
-
-                <Label text="Inspector" class="sapUiTinyMarginBottom" labelFor="ioInspector"/>
-                <Input id="ioInspector" placeholder="Inspector name" width="100%" class="sapUiSmallMarginBottom"/>
-
-                <Label text="Inspector Organisation" class="sapUiTinyMarginBottom" labelFor="ioInspectorOrg"/>
-                <Input id="ioInspectorOrg" placeholder="Company / Authority" width="100%" class="sapUiSmallMarginBottom"/>
-
-                <Label text="Access Method" class="sapUiTinyMarginBottom" labelFor="ioAccessMethod"/>
-                <Select id="ioAccessMethod" width="100%" class="sapUiSmallMarginBottom"/>
-
-                <Label text="Rating Method" class="sapUiTinyMarginBottom" labelFor="ioRatingMethod"/>
-                <Select id="ioRatingMethod" width="100%" class="sapUiSmallMarginBottom"/>
-
-                <Label text="Notes" class="sapUiTinyMarginBottom" labelFor="ioNotes"/>
-                <TextArea id="ioNotes" rows="2" width="100%" class="sapUiSmallMarginBottom"/>
-            </VBox>
-        </content>
-        <buttons>
-            <Button text="Create Order" type="Emphasized" press="onSaveInspectionOrder" icon="sap-icon://factory"/>
-            <Button text="Cancel" press="onCancelInspectionOrder" type="Transparent"/>
-        </buttons>
-    </Dialog>
-
-    <!-- ── Complete Inspection Dialog ────────────────────── -->
-    <Dialog id="completeInspDialog" title="Complete Inspection" contentWidth="520px"
-        draggable="true" resizable="true" verticalScrolling="false">
-        <content>
-            <VBox class="sapUiSmallMarginBeginEnd sapUiSmallMarginTop">
-                <Label text="Overall Condition Rating (1–10)" required="true" class="sapUiTinyMarginBottom"/>
-                <Slider id="ciRating" min="1" max="10" step="1" value="7" enableTickmarks="true"
-                    width="100%" class="sapUiSmallMarginBottom"/>
-                <Text id="ciRatingLabel" text="Rating: 7 / 10" class="sapUiSmallMarginBottom"/>
-
-                <Label text="Structural Adequacy" class="sapUiTinyMarginBottom" labelFor="ciAdequacy"/>
-                <Select id="ciAdequacy" width="100%" class="sapUiSmallMarginBottom"/>
-
-                <Label text="Maintenance Urgency" class="sapUiTinyMarginBottom" labelFor="ciUrgency"/>
-                <Select id="ciUrgency" width="100%" class="sapUiSmallMarginBottom"/>
-
-                <Label text="Report Reference" class="sapUiTinyMarginBottom" labelFor="ciReportRef"/>
-                <Input id="ciReportRef" placeholder="Report No. or URL" width="100%" class="sapUiSmallMarginBottom"/>
-
-                <Label text="Next Inspection Due" class="sapUiTinyMarginBottom" labelFor="ciNextDue"/>
-                <DatePicker id="ciNextDue" width="100%" displayFormat="dd/MM/yyyy" valueFormat="yyyy-MM-dd"
-                    class="sapUiSmallMarginBottom"/>
-
-                <Label text="Recommendations" class="sapUiTinyMarginBottom" labelFor="ciRecommendations"/>
-                <TextArea id="ciRecommendations" rows="3" width="100%" class="sapUiSmallMarginBottom"/>
-
-                <Label text="Notes" class="sapUiTinyMarginBottom" labelFor="ciNotes"/>
-                <TextArea id="ciNotes" rows="2" width="100%" class="sapUiSmallMarginBottom"/>
-            </VBox>
-        </content>
-        <buttons>
-            <Button text="Complete Inspection" type="Emphasized" press="onSaveCompleteInspection" icon="sap-icon://complete"/>
-            <Button text="Cancel" press="onCancelCompleteInspection" type="Transparent"/>
-        </buttons>
-    </Dialog>
+    <!-- Create Inspection Order Dialog and Complete Inspection Dialog
+         removed in cut-down BIS variant. -->
 
     <!-- ── Raise Defect Dialog ────────────────────────────── -->
     <Dialog id="raiseDefectDialog" title="Raise Defect" contentWidth="520px"
@@ -1979,13 +1844,8 @@
                     <VBox width="40%">
                         <Label text="Unit" required="true" class="sapUiTinyMarginBottom"
                             tooltip="Unit of measure: m = metres, t = tonnes, km/h = speed."/>
-                        <Select id="bdRestUnit" width="100%">
-                            <core:Item key="m"    text="m  (metres)"/>
-                            <core:Item key="t"    text="t  (tonnes)"/>
-                            <core:Item key="km/h" text="km/h"/>
-                            <core:Item key="kph"  text="kph"/>
-                            <core:Item key="km"   text="km"/>
-                        </Select>
+                        <!-- Items populated at runtime from Lookup table (MEASUREMENT_UNIT) -->
+                        <Select id="bdRestUnit" width="100%"/>
                     </VBox>
                 </HBox>
 
@@ -2016,11 +1876,8 @@
                 <VBox id="bdRestDirectionBox" class="sapUiSmallMarginBottom">
                     <Label text="Direction Applied" class="sapUiTinyMarginBottom"
                         tooltip="BOTH = applies in both directions. INCREASING/DECREASING = chainage direction."/>
-                    <Select id="bdRestDirection" width="100%">
-                        <core:Item key="BOTH"       text="Both Directions"/>
-                        <core:Item key="INCREASING" text="Increasing (towards higher chainage)"/>
-                        <core:Item key="DECREASING" text="Decreasing (towards lower chainage)"/>
-                    </Select>
+                    <!-- Items populated at runtime from Lookup table (RESTRICTION_DIRECTION) -->
+                    <Select id="bdRestDirection" width="100%"/>
                 </VBox>
 
                 <VBox id="bdRestGazetteBox" class="sapUiSmallMarginBottom">
@@ -2184,12 +2041,8 @@
                 <Input id="editRestValue" type="Number" placeholder="e.g. 4.5" width="100%" class="sapUiSmallMarginBottom"/>
 
                 <Label text="Unit" required="true" class="sapUiTinyMarginBottom" labelFor="editRestUnit"/>
-                <Select id="editRestUnit" width="100%" class="sapUiSmallMarginBottom">
-                    <core:Item key="m"   text="metres (m)"/>
-                    <core:Item key="t"   text="tonnes (t)"/>
-                    <core:Item key="kph" text="km/h (kph)"/>
-                    <core:Item key="km"  text="kilometres (km)"/>
-                </Select>
+                <!-- Items populated at runtime from Lookup table (MEASUREMENT_UNIT) -->
+                <Select id="editRestUnit" width="100%" class="sapUiSmallMarginBottom"/>
 
                 <Label text="Status" class="sapUiTinyMarginBottom" labelFor="editRestStatus"/>
                 <Select id="editRestStatus" width="100%" class="sapUiSmallMarginBottom"/>
@@ -2203,11 +2056,8 @@
                     class="sapUiSmallMarginBottom"/>
 
                 <Label text="Direction Applied" class="sapUiTinyMarginBottom" labelFor="editRestDirection"/>
-                <Select id="editRestDirection" width="100%" class="sapUiSmallMarginBottom">
-                    <core:Item key="BOTH"       text="Both Directions"/>
-                    <core:Item key="INCREASING" text="Increasing"/>
-                    <core:Item key="DECREASING" text="Decreasing"/>
-                </Select>
+                <!-- Items populated at runtime from Lookup table (RESTRICTION_DIRECTION) -->
+                <Select id="editRestDirection" width="100%" class="sapUiSmallMarginBottom"/>
 
                 <Label text="Gazette Reference" class="sapUiTinyMarginBottom" labelFor="editRestGazette"/>
                 <Input id="editRestGazette" placeholder="e.g. NSW Gaz 2024-01" width="100%" class="sapUiSmallMarginBottom"/>
@@ -2338,8 +2188,6 @@
                 <Select id="invStatus" width="100%"/>
                 <Label text="Funding Source" class="sapUiTinyMarginTop" labelFor="invFundingSource"/>
                 <Input id="invFundingSource" placeholder="e.g. State Capital Works 2026/27" width="100%"/>
-                <Label text="Work Order Ref" class="sapUiTinyMarginTop" labelFor="invWorkOrderRef"/>
-                <Input id="invWorkOrderRef" placeholder="e.g. WO-2026-0042" width="100%"/>
                 <Label text="Notes" class="sapUiTinyMarginTop" labelFor="invNotes"/>
                 <TextArea id="invNotes" rows="3" width="100%" placeholder="Optional notes"/>
             </VBox>
@@ -2360,17 +2208,8 @@
                 <Label text="NHVR Route Assessed" class="sapUiTinyMarginTop" labelFor="nhvrEditAssessed"/>
                 <CheckBox id="nhvrEditAssessed" text="Yes — NHVR Assessed"/>
                 <Label text="Route Approval Class" class="sapUiTinyMarginTop" labelFor="nhvrEditApprovalClass"/>
-                <Select id="nhvrEditApprovalClass" width="100%">
-                    <core:Item key=""           text="— Not Set —"/>
-                    <core:Item key="A_DOUBLE"   text="A Double"/>
-                    <core:Item key="B_DOUBLE"   text="B Double"/>
-                    <core:Item key="B_TRAIN"    text="B Train"/>
-                    <core:Item key="ROAD_TRAIN" text="Road Train"/>
-                    <core:Item key="PBS_1"      text="PBS Level 1"/>
-                    <core:Item key="PBS_2"      text="PBS Level 2"/>
-                    <core:Item key="PBS_3"      text="PBS Level 3"/>
-                    <core:Item key="PBS_4"      text="PBS Level 4"/>
-                </Select>
+                <!-- Items populated at runtime from Lookup table (VEHICLE_CLASS) -->
+                <Select id="nhvrEditApprovalClass" width="100%"/>
                 <Label text="PBS Level Approved" class="sapUiTinyMarginTop" labelFor="nhvrEditPbsLevel"/>
                 <Input id="nhvrEditPbsLevel" placeholder="e.g. 2" width="100%"/>
                 <Label text="Gazette Reference" class="sapUiTinyMarginTop" labelFor="nhvrEditGazetteRef"/>
@@ -2438,12 +2277,8 @@
                     </VBox>
                     <VBox class="sapUiSmallMarginEnd">
                         <Label text="Inspection Type" required="true" class="sapUiTinyMarginBottom" labelFor="inspDlgType"/>
-                        <Select id="inspDlgType" width="160px">
-                            <core:Item key="ROUTINE"   text="Routine"/>
-                            <core:Item key="PRINCIPAL" text="Principal (Level 2)"/>
-                            <core:Item key="SPECIAL"   text="Special / Detailed"/>
-                            <core:Item key="DRIVE_BY"  text="Drive-By"/>
-                        </Select>
+                        <!-- Items populated at runtime from Lookup table (INSPECTION_TYPE) -->
+                        <Select id="inspDlgType" width="160px"/>
                     </VBox>
                     <VBox>
                         <Label text="Inspector Name / Reg. No." required="true" class="sapUiTinyMarginBottom" labelFor="inspDlgInspector"/>
@@ -2469,11 +2304,8 @@
                     </VBox>
                     <VBox class="sapUiSmallMarginEnd">
                         <Label text="Structural Adequacy" class="sapUiTinyMarginBottom" labelFor="inspDlgAdequacy"/>
-                        <Select id="inspDlgAdequacy" width="160px">
-                            <core:Item key="ADEQUATE"    text="Adequate"/>
-                            <core:Item key="MARGINAL"    text="Marginal"/>
-                            <core:Item key="INADEQUATE"  text="Inadequate"/>
-                        </Select>
+                        <!-- Items populated at runtime from Lookup table (STRUCTURAL_ADEQUACY) -->
+                        <Select id="inspDlgAdequacy" width="160px"/>
                     </VBox>
                     <VBox alignItems="Center" justifyContent="End">
                         <CheckBox id="inspDlgMaintReq" text="Maintenance Required"/>

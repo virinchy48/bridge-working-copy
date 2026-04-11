@@ -1,7 +1,7 @@
 // ============================================================
 // NHVR Mass Upload Controller — Universal CSV Import
 // Supports: Bridges, Restrictions, Routes, VehicleClasses,
-//           InspectionOrders, BridgeDefects, Lookups
+//           BridgeDefects, Lookups
 // ============================================================
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
@@ -10,8 +10,10 @@ sap.ui.define([
     "sap/m/MessageBox",
     "nhvr/bridgemanagement/util/HelpAssistantMixin",
     "nhvr/bridgemanagement/model/CapabilityManager",
-    "nhvr/bridgemanagement/util/UserAnalytics"
-], function (Controller, JSONModel, MessageToast, MessageBox, HelpAssistantMixin, CapabilityManager, UserAnalytics) {
+    "nhvr/bridgemanagement/util/UserAnalytics",
+    "nhvr/bridgemanagement/util/LookupService",
+    "nhvr/bridgemanagement/util/ReferenceData"
+], function (Controller, JSONModel, MessageToast, MessageBox, HelpAssistantMixin, CapabilityManager, UserAnalytics, LookupService, ReferenceData) {
     "use strict";
 
     const BASE = "/bridge-management";
@@ -154,41 +156,7 @@ sap.ui.define([
             }
         },
 
-        inspectionOrders: {
-            label:       "Inspection Orders",
-            action:      "massUploadInspectionOrders",
-            description: "Upload inspection work orders. Existing orders are matched by orderNumber and updated.",
-            hint:        "Required: bridgeId, orderNumber, plannedDate. Optional: inspectionType (ROUTINE|SPECIAL|PRINCIPAL|UNDERWATER|POST_EVENT|LOAD), inspector, inspectorOrg.",
-            headers: [
-                "bridgeId","orderNumber","inspectionType","status","plannedDate",
-                "inspector","inspectorOrg","accessMethod","ratingMethod",
-                "overallConditionRating","structuralAdequacy","maintenanceUrgency",
-                "reportRef","nextInspectionDue","notes"
-            ],
-            sample: "NSW-B-00123,INS-2024-00123,ROUTINE,PLANNED,2024-09-15,J.Smith,NSW Roads,WALK,VISUAL,,,,,2030-09-15,Annual routine inspection",
-            previewCols: [
-                { field: "bridgeId",      header: "Bridge ID" },
-                { field: "orderNumber",   header: "Order Number" },
-                { field: "inspectionType",header: "Type" },
-                { field: "status",        header: "Status" },
-                { field: "plannedDate",   header: "Planned Date" }
-            ],
-            validate: function (row, errors) {
-                if (!row.bridgeId)    errors.push("bridgeId required");
-                if (!row.orderNumber) errors.push("orderNumber required");
-                if (!row.plannedDate) errors.push("plannedDate required");
-                const validTypes = ["ROUTINE","SPECIAL","PRINCIPAL","UNDERWATER","POST_EVENT","LOAD"];
-                if (row.inspectionType && !validTypes.includes(row.inspectionType.toUpperCase()))
-                    errors.push(`inspectionType must be: ${validTypes.join("|")}`);
-                const validStatus = ["PLANNED","IN_PROGRESS","COMPLETED","CANCELLED"];
-                if (row.status && !validStatus.includes(row.status.toUpperCase()))
-                    errors.push(`status must be: ${validStatus.join("|")}`);
-                if (row.overallConditionRating) {
-                    const r = parseInt(row.overallConditionRating);
-                    if (isNaN(r) || r < 1 || r > 10) errors.push("overallConditionRating must be 1-10");
-                }
-            }
-        },
+        // inspectionOrders upload type removed in cut-down BIS variant.
 
         bridgeDefects: {
             label:       "Bridge Defects",
@@ -255,7 +223,8 @@ sap.ui.define([
 
         onInit: function () {
             UserAnalytics.trackView("MassUpload");
-            this._model = new JSONModel({ rows: [] });
+            this._model = new JSONModel({ rows: [], rowResults: [] });
+            this._allRowResults = [];
             this.getView().setModel(this._model, "upload");
             window.__uploadViewId = this.getView().getId();
             // Apply initial entity config
@@ -298,19 +267,45 @@ sap.ui.define([
         },
 
         // ── Drag & Drop / Browse ───────────────────────────────────
-        onDropZoneRendered: function () {
+        // Attach the change-listener to the hidden <input type="file">. This is
+        // idempotent: it can be called from afterRendering callbacks of either
+        // the drop-zone or the file-input holder, and from onBrowseFile as a
+        // last-resort fallback. Without this fallback, a race between the two
+        // <core:HTML> controls' afterRendering events could leave the listener
+        // unattached, breaking the entire Browse File flow silently.
+        _wireFileInput: function () {
             const fileInput = document.getElementById("nhvrFileInput");
-            if (fileInput && !fileInput._wired) {
-                fileInput._wired = true;
-                fileInput.addEventListener("change", (e) => {
-                    if (e.target.files && e.target.files[0]) this._processFile(e.target.files[0]);
-                });
-            }
+            if (!fileInput) return false;
+            if (fileInput._wired) return true;
+            fileInput._wired = true;
+            fileInput.addEventListener("change", (e) => {
+                if (e.target.files && e.target.files[0]) {
+                    this._processFile(e.target.files[0]);
+                    // Reset value so the same file can be re-selected after a fix
+                    e.target.value = "";
+                }
+            });
+            return true;
+        },
+
+        onDropZoneRendered: function () {
+            this._wireFileInput();
+        },
+
+        onFileInputRendered: function () {
+            this._wireFileInput();
         },
 
         onBrowseFile: function () {
+            // Belt-and-braces: wire the listener immediately before opening the
+            // OS file picker, in case neither afterRendering callback ran first.
+            this._wireFileInput();
             const fi = document.getElementById("nhvrFileInput");
-            if (fi) fi.click();
+            if (fi) {
+                fi.click();
+            } else {
+                MessageToast.show("File picker is not ready yet — please try again");
+            }
         },
 
         onFileDrop: function (e) {
@@ -320,9 +315,11 @@ sap.ui.define([
         },
 
         _processFile: function (file) {
-            // Extension check
-            if (!file.name.toLowerCase().endsWith(".csv")) {
-                MessageToast.show("Please upload a .csv file");
+            const lower = file.name.toLowerCase();
+            const isCsv  = lower.endsWith(".csv");
+            const isXlsx = lower.endsWith(".xlsx") || lower.endsWith(".xls");
+            if (!isCsv && !isXlsx) {
+                MessageToast.show("Please upload a .csv or .xlsx file");
                 return;
             }
             // File size check (10 MB limit)
@@ -330,15 +327,48 @@ sap.ui.define([
                 MessageBox.error("File exceeds maximum size of 10 MB. Please split into smaller files.");
                 return;
             }
-            // MIME type check
-            if (file.type && file.type !== "text/csv" && file.type !== "application/vnd.ms-excel" && file.type !== "text/plain") {
-                MessageBox.error("Invalid file type (" + escapeHtml(file.type) + "). Please upload a CSV file.");
+            this._setText("selectedFileName", file.name);
+            this._uploadedFileName = file.name;
+            this._uploadedIsXlsx   = isXlsx;
+
+            if (isXlsx) {
+                // Xlsx is parsed server-side. Keep the raw bytes as base64 so
+                // _doUpload can POST them to the massUploadLookups action.
+                // We still build a preview client-side using a minimal xlsx
+                // decoder so the user can see rows before submitting. Since
+                // we don't want to bundle xlsx.js in the UI, we fall back to
+                // a simple "X rows in workbook" preview for xlsx files and
+                // let the server produce authoritative row results.
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    // Convert ArrayBuffer → base64 without blowing the stack on
+                    // large files.
+                    const bytes = new Uint8Array(e.target.result);
+                    let bin = "";
+                    for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+                    this._rawFileBase64 = btoa(bin);
+                    this._rawCSV = null;
+                    this._parsedRows = [{
+                        rowNum: 1,
+                        _c1: "— xlsx —",
+                        _c2: `${file.name}`,
+                        _c3: `${Math.round(file.size / 1024)} KB`,
+                        _c4: "(server will validate row-by-row)",
+                        _c5: "",
+                        hasError: false,
+                        error: ""
+                    }];
+                    this._showPreview();
+                };
+                reader.readAsArrayBuffer(file);
                 return;
             }
-            this._setText("selectedFileName", file.name);
+
+            // CSV path (existing behaviour)
             const reader = new FileReader();
             reader.onload = (e) => {
                 this._rawCSV = e.target.result;
+                this._rawFileBase64 = null;
                 // Validate CSV headers match expected template
                 if (!this._validateCsvHeaders(e.target.result)) {
                     return;
@@ -460,7 +490,18 @@ sap.ui.define([
         },
 
         // ── Template Download ──────────────────────────────────────
+        // For most entity types we generate a 1-row CSV stub from
+        // ENTITY_CONFIG. For LOOKUPS specifically we serve a pre-built
+        // .xlsx that contains every active lookup row in the database,
+        // grouped by category, with column comments and a "Categories"
+        // summary sheet. This gives admins a true working starter file
+        // they can edit in Excel and re-upload — instead of an empty
+        // template they have to populate from scratch.
         onDownloadTemplate: function () {
+            if (this._uploadType === "lookups") {
+                this._downloadLookupsXlsxTemplate();
+                return;
+            }
             const cfg      = ENTITY_CONFIG[this._uploadType];
             const filename = `${this._uploadType}_template.csv`;
             const content  = [cfg.headers.join(","), cfg.sample].join("\n");
@@ -470,6 +511,31 @@ sap.ui.define([
             a.href = url; a.download = filename; a.click();
             URL.revokeObjectURL(url);
             MessageToast.show(`Template downloaded: ${filename}`);
+        },
+
+        _downloadLookupsXlsxTemplate: function () {
+            // Pre-built xlsx is generated by scripts/generate-lookups-template.py
+            // and served by the CDS static-asset middleware.
+            const url = "resources/templates/lookups-template.xlsx";
+            fetch(url, { credentials: "same-origin" })
+                .then(r => {
+                    if (!r.ok) throw new Error("HTTP " + r.status);
+                    return r.blob();
+                })
+                .then(blob => {
+                    const link = document.createElement("a");
+                    link.href = URL.createObjectURL(blob);
+                    link.download = "lookups-template.xlsx";
+                    link.click();
+                    URL.revokeObjectURL(link.href);
+                    MessageToast.show("Lookups Excel template downloaded — edit in Excel and re-upload via the same screen");
+                })
+                .catch(err => {
+                    MessageBox.error(
+                        "Couldn't download the lookups template (" + err.message + ").\n\n" +
+                        "Run scripts/generate-lookups-template.py to (re)build it from the current Lookup table."
+                    );
+                });
         },
 
         // ── Submit Upload ──────────────────────────────────────────
@@ -510,21 +576,63 @@ sap.ui.define([
             if (busy) busy.setVisible(true);
             if (btn)  btn.setEnabled(false);
 
-            const action    = ENTITY_CONFIG[this._uploadType].action;
-            const BATCH_SIZE = 200;
-            const headers    = { Accept: "application/json", "Content-Type": "application/json" };
+            const action  = ENTITY_CONFIG[this._uploadType].action;
+            const headers = { Accept: "application/json", "Content-Type": "application/json" };
 
+            // ── xlsx path — send the raw workbook as base64, server parses it.
+            // The client-side preview is a single placeholder row; the server
+            // returns authoritative per-row results.
+            if (this._uploadedIsXlsx && this._rawFileBase64) {
+                fetch(`${BASE}/${action}`, {
+                    method: "POST",
+                    headers,
+                    body: JSON.stringify({
+                        csvData   : "",
+                        fileBase64: this._rawFileBase64,
+                        fileName  : this._uploadedFileName || "upload.xlsx"
+                    })
+                })
+                .then(r => r.json())
+                .then(j => {
+                    if (busy) busy.setVisible(false);
+                    if (btn)  btn.setEnabled(true);
+                    this._showUploadResult({
+                        successCount: j.successCount || 0,
+                        updatedCount: j.updatedCount || 0,
+                        failureCount: j.failureCount || 0,
+                        totalRecords: j.totalRecords || 0,
+                        errors      : j.errors || "",
+                        rowResults  : j.rowResults || "[]",
+                        status      : (j.failureCount || 0) === 0 ? "SUCCESS" : "PARTIAL_SUCCESS"
+                    }, j.totalRecords || 0);
+                })
+                .catch(err => {
+                    if (busy) busy.setVisible(false);
+                    if (btn)  btn.setEnabled(true);
+                    MessageBox.error("Upload failed: " + err.message);
+                    console.error(err);
+                });
+                return;
+            }
+
+            // ── CSV path — batched for very large files (>200 rows per batch)
+            const BATCH_SIZE = 200;
             const batches = [];
             for (let i = 0; i < rows.length; i += BATCH_SIZE) {
                 batches.push(rows.slice(i, i + BATCH_SIZE));
             }
 
-            const totals = { successCount: 0, updatedCount: 0, failureCount: 0, totalRecords: 0, errors: "" };
+            const totals = {
+                successCount: 0, updatedCount: 0, failureCount: 0,
+                totalRecords: 0, errors: "", rowResults: "[]"
+            };
+            const allRowResults = [];
 
             const sendBatch = (idx) => {
                 if (idx >= batches.length) {
                     if (busy) busy.setVisible(false);
                     if (btn)  btn.setEnabled(true);
+                    totals.rowResults = JSON.stringify(allRowResults);
                     this._showUploadResult(totals, rows.length);
                     return;
                 }
@@ -532,7 +640,7 @@ sap.ui.define([
                 fetch(`${BASE}/${action}`, {
                     method: "POST",
                     headers,
-                    body: JSON.stringify({ csvData })
+                    body: JSON.stringify({ csvData, fileBase64: "", fileName: "" })
                 })
                 .then(r => r.json())
                 .then(j => {
@@ -541,13 +649,19 @@ sap.ui.define([
                     totals.failureCount += j.failureCount || 0;
                     totals.totalRecords += j.totalRecords || 0;
                     if (j.errors) totals.errors += (totals.errors ? "\n" : "") + escapeHtml(j.errors);
+                    if (j.rowResults) {
+                        try {
+                            const parsed = JSON.parse(j.rowResults);
+                            if (Array.isArray(parsed)) parsed.forEach(r => allRowResults.push(r));
+                        } catch (e) { /* ignore */ }
+                    }
                     totals.status = totals.failureCount === 0 ? "SUCCESS" : "PARTIAL_SUCCESS";
                     sendBatch(idx + 1);
                 })
                 .catch(err => {
                     if (busy) busy.setVisible(false);
                     if (btn)  btn.setEnabled(true);
-                    MessageToast.show("Upload failed — check console for details");
+                    MessageBox.error("Upload failed: " + err.message);
                     console.error(err);
                 });
             };
@@ -563,6 +677,20 @@ sap.ui.define([
             const errors    = j.errors || "";
             const timestamp = new Date().toLocaleString("en-AU");
             const typeLabel = ENTITY_CONFIG[this._uploadType].label;
+
+            // ── Cache invalidation ─────────────────────────────────────
+            // LookupService and ReferenceData memoise their load promise
+            // for the session, so without this step the values just created
+            // server-side are invisible to every other screen until the user
+            // does a full page reload. Drop the affected cache so the next
+            // consumer (e.g. BridgeForm state → region cascade) refetches.
+            if (created + updated > 0) {
+                if (this._uploadType === "lookups") {
+                    LookupService.reload();
+                } else if (this._uploadType === "bridges") {
+                    ReferenceData.reload();
+                }
+            }
 
             const result = this.byId("uploadResult");
             if (result) {
@@ -585,9 +713,45 @@ sap.ui.define([
                 const errorsEl = this.byId("resultErrors");
                 if (errorsEl) {
                     errorsEl.setVisible(!!(errors && errors.trim()));
-                    errorsEl.setText(errors ? `Errors:\n${escapeHtml(errors)}` : "");
+                    // resultErrors is a sap.m.TextArea — its API is setValue(),
+                    // not setText().
+                    const text = errors ? `Errors:\n${escapeHtml(errors)}` : "";
+                    if (typeof errorsEl.setValue === "function") {
+                        errorsEl.setValue(text);
+                    } else if (typeof errorsEl.setText === "function") {
+                        errorsEl.setText(text);
+                    }
                 }
             }
+
+            // ── Populate the row-by-row results table ────────────────
+            // The server returns a `rowResults` JSON string with one entry per
+            // processed row: { row, category, code, status, message }.
+            // Stored on the upload model so the <Table> binding in the view
+            // (items="{upload>/rowResults}") renders it automatically.
+            let rowResults = [];
+            if (j.rowResults) {
+                try {
+                    const parsed = typeof j.rowResults === "string"
+                        ? JSON.parse(j.rowResults)
+                        : j.rowResults;
+                    if (Array.isArray(parsed)) rowResults = parsed;
+                } catch (e) { /* ignore malformed payload */ }
+            }
+            this._allRowResults = rowResults;
+            this._model.setProperty("/rowResults", rowResults);
+            // Reset the filter to "ALL" whenever a new upload lands
+            const filter = this.byId("rowResultsFilter");
+            if (filter && filter.setSelectedKey) filter.setSelectedKey("ALL");
+        },
+
+        onRowResultsFilter: function (e) {
+            const key = e && e.getParameter && e.getParameter("item")
+                ? e.getParameter("item").getKey()
+                : "ALL";
+            const all = this._allRowResults || [];
+            const filtered = (key === "ALL") ? all : all.filter(r => r.status === key);
+            this._model.setProperty("/rowResults", filtered);
         },
 
         onClearUpload: function () {

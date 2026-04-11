@@ -200,10 +200,14 @@
                             <ToolbarSpacer/>
                             <Label text="Role:" design="Bold" class="sapUiTinyMarginEnd"/>
                             <Select id="roleConfigSelector" change="onRoleConfigSelect" width="200px">
+                                <!-- Role keys must match the 3 roles defined in
+                                     util/model/RoleManager.js (ADMIN, BRIDGE_MANAGER,
+                                     READ_ONLY), which in turn map to the XSUAA scopes
+                                     in xs-security.json. Adding values here that
+                                     RoleManager does not know about produces
+                                     RoleConfigs rows that no runtime path ever reads. -->
                                 <core:Item key="ADMIN"          text="🔑 Administrator"/>
                                 <core:Item key="BRIDGE_MANAGER" text="🏗 Bridge Manager"/>
-                                <core:Item key="INSPECTOR"      text="🔍 Inspector"/>
-                                <core:Item key="OPERATOR"       text="🚛 Operator"/>
                                 <core:Item key="READ_ONLY"      text="👁 Read Only"/>
                             </Select>
                             <Button text="Save Changes" icon="sap-icon://save" type="Emphasized"
@@ -301,8 +305,6 @@
                             <Select id="sectionTileRoleSelector" change="onSectionTileRoleSelect" width="200px">
                                 <core:Item key="ADMIN"          text="Administrator"/>
                                 <core:Item key="BRIDGE_MANAGER" text="Bridge Manager"/>
-                                <core:Item key="INSPECTOR"      text="Inspector"/>
-                                <core:Item key="OPERATOR"       text="Operator"/>
                                 <core:Item key="READ_ONLY"      text="Read Only"/>
                             </Select>
                             <Button text="Save Changes" icon="sap-icon://save" type="Emphasized"

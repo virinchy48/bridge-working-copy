@@ -338,14 +338,8 @@
                                     <fl:title><core:Title text="Permit Decision"/></fl:title>
 
                                     <Label text="Decision *" required="true"/>
-                                    <Select id="permitDecision" width="100%">
-                                        <items>
-                                            <core:Item key="APPROVED" text="Approve"/>
-                                            <core:Item key="APPROVED_WITH_CONDITIONS" text="Approve with Conditions"/>
-                                            <core:Item key="DENIED" text="Deny"/>
-                                            <core:Item key="PENDING" text="Pending (save for review)"/>
-                                        </items>
-                                    </Select>
+                                    <!-- Items populated at runtime from Lookup table (PERMIT_DECISION) -->
+                                    <Select id="permitDecision" width="100%"/>
 
                                     <Label text="Assessed By"/>
                                     <Input id="permitAssessedBy" placeholder="e.g. J. Smith CPEng NER-00412"/>

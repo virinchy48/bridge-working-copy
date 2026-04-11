@@ -60,8 +60,10 @@ sap.ui.define([
             LookupService.load().then(function () {
                 LookupService.populateSelect(this.byId("filterStatus"), "RESTRICTION_STATUS", "All Statuses");
                 LookupService.populateSelect(this.byId("filterType"),   "RESTRICTION_TYPE",   "All Types");
-                LookupService.populateFormSelect(this.byId("glEditRestType"),   "RESTRICTION_TYPE");
-                LookupService.populateFormSelect(this.byId("glEditRestStatus"), "RESTRICTION_STATUS");
+                LookupService.populateFormSelect(this.byId("glEditRestType"),      "RESTRICTION_TYPE");
+                LookupService.populateFormSelect(this.byId("glEditRestStatus"),    "RESTRICTION_STATUS");
+                LookupService.populateFormSelect(this.byId("glEditRestUnit"),      "MEASUREMENT_UNIT");
+                LookupService.populateFormSelect(this.byId("glEditRestDirection"), "RESTRICTION_DIRECTION");
             }.bind(this));
         },
 
@@ -229,7 +231,7 @@ sap.ui.define([
 
         _onRouteMatched: function (e) {
             const query = (e.getParameter("arguments") || {})["?query"] || {};
-            if (query.status && query.status !== "ALL") {
+            if (query.status && query.status !== "") {
                 const fs = this.byId("filterStatus");
                 if (fs) fs.setSelectedKey(query.status);
             }
@@ -265,7 +267,7 @@ sap.ui.define([
             } catch (_) { /* ignore localStorage errors */ }
 
             // Restore saved filter state if no query params drove the navigation
-            var hasQueryParams = (query.status && query.status !== "ALL") || query.permitRequired;
+            var hasQueryParams = (query.status && query.status !== "") || query.permitRequired;
             if (!hasQueryParams && !this._mapFilterIds) {
                 this._restoreFilterState();
             }
@@ -434,10 +436,10 @@ sap.ui.define([
 
         _applyFiltersAndSort: function () {
             const searchText = (this.byId("searchField") ? this.byId("searchField").getValue() : "").toLowerCase();
-            const selectedStatus = this.byId("filterStatus") ? this.byId("filterStatus").getSelectedKey() : "ALL";
-            const selectedType   = this.byId("filterType")   ? this.byId("filterType").getSelectedKey()   : "ALL";
-            const selectedPermit = this.byId("filterPermit") ? this.byId("filterPermit").getSelectedKey() : "ALL";
-            const selectedTemporary = this.byId("filterTemporary") ? this.byId("filterTemporary").getSelectedKey() : "ALL";
+            const selectedStatus = this.byId("filterStatus") ? this.byId("filterStatus").getSelectedKey() : "";
+            const selectedType   = this.byId("filterType")   ? this.byId("filterType").getSelectedKey()   : "";
+            const selectedPermit = this.byId("filterPermit") ? this.byId("filterPermit").getSelectedKey() : "";
+            const selectedTemporary = this.byId("filterTemporary") ? this.byId("filterTemporary").getSelectedKey() : "";
 
             let filteredRestrictions = this._allRestrictions;
 
@@ -460,8 +462,8 @@ sap.ui.define([
                     String(restriction.value     || "").includes(searchText)
                 );
             }
-            if (selectedStatus !== "ALL") filteredRestrictions = filteredRestrictions.filter(restriction => restriction.status === selectedStatus);
-            if (selectedType   !== "ALL") filteredRestrictions = filteredRestrictions.filter(restriction => restriction.restrictionType === selectedType);
+            if (selectedStatus !== "") filteredRestrictions = filteredRestrictions.filter(restriction => restriction.status === selectedStatus);
+            if (selectedType   !== "") filteredRestrictions = filteredRestrictions.filter(restriction => restriction.restrictionType === selectedType);
             if (selectedPermit === "YES") filteredRestrictions = filteredRestrictions.filter(restriction =>  restriction.permitRequired);
             if (selectedPermit === "NO")  filteredRestrictions = filteredRestrictions.filter(restriction => !restriction.permitRequired);
 
@@ -524,10 +526,10 @@ sap.ui.define([
 
         onClearFilters: function () {
             this.byId("searchField")   && this.byId("searchField").setValue("");
-            this.byId("filterStatus")  && this.byId("filterStatus").setSelectedKey("ALL");
-            this.byId("filterType")    && this.byId("filterType").setSelectedKey("ALL");
-            this.byId("filterPermit")  && this.byId("filterPermit").setSelectedKey("ALL");
-            this.byId("filterTemporary") && this.byId("filterTemporary").setSelectedKey("ALL");
+            this.byId("filterStatus")  && this.byId("filterStatus").setSelectedKey("");
+            this.byId("filterType")    && this.byId("filterType").setSelectedKey("");
+            this.byId("filterPermit")  && this.byId("filterPermit").setSelectedKey("");
+            this.byId("filterTemporary") && this.byId("filterTemporary").setSelectedKey("");
             this._applyFilters();
         },
 
@@ -562,10 +564,10 @@ sap.ui.define([
                 permit:    self.byId("filterPermit")   ? self.byId("filterPermit").getSelectedKey()     : "",
                 temporary: self.byId("filterTemporary")? self.byId("filterTemporary").getSelectedKey()  : ""
             };
-            var hasAny = current.search || (current.status && current.status !== "ALL") ||
-                         (current.type && current.type !== "ALL") ||
-                         (current.permit && current.permit !== "ALL") ||
-                         (current.temporary && current.temporary !== "ALL");
+            var hasAny = current.search || (current.status && current.status !== "") ||
+                         (current.type && current.type !== "") ||
+                         (current.permit && current.permit !== "") ||
+                         (current.temporary && current.temporary !== "");
             if (!hasAny) {
                 MessageToast.show("Nothing to save — set at least one filter first.");
                 return;
@@ -1275,10 +1277,10 @@ sap.ui.define([
         _captureVariantState: function () {
             return {
                 search    : this.byId("searchField")      ? this.byId("searchField").getValue()          : "",
-                status    : this.byId("filterStatus")      ? this.byId("filterStatus").getSelectedKey()   : "ALL",
-                type      : this.byId("filterType")        ? this.byId("filterType").getSelectedKey()     : "ALL",
-                permit    : this.byId("filterPermit")       ? this.byId("filterPermit").getSelectedKey()    : "ALL",
-                temporary : this.byId("filterTemporary")   ? this.byId("filterTemporary").getSelectedKey(): "ALL",
+                status    : this.byId("filterStatus")      ? this.byId("filterStatus").getSelectedKey()   : "",
+                type      : this.byId("filterType")        ? this.byId("filterType").getSelectedKey()     : "",
+                permit    : this.byId("filterPermit")       ? this.byId("filterPermit").getSelectedKey()    : "",
+                temporary : this.byId("filterTemporary")   ? this.byId("filterTemporary").getSelectedKey(): "",
                 sortField : this._sortField,
                 sortDesc  : this._sortDesc,
                 columns   : this._getVisibleColumnKeys()

@@ -185,20 +185,11 @@
                     </FlexBox>
                 </VBox>
 
-                <!-- ── Section: Inspection & Defects (Inspector role) ─ -->
+                <!-- ── Section: Defects (Inspector role) ─ -->
+                <!-- Inspection Orders / Inspection Dashboard tile removed in cut-down BIS variant. -->
                 <VBox id="sectionInspection" class="nhvrDashSection sapUiMediumMarginTop" visible="false">
-                    <Title text="Inspection &amp; Defects" level="H3" class="nhvrDashSectionTitle"/>
+                    <Title text="Defects" level="H3" class="nhvrDashSectionTitle"/>
                     <FlexBox wrap="Wrap" justifyContent="Start" alignItems="Start" class="sapUiTinyMarginTop">
-
-                        <GenericTile id="inspectionsTileMain" class="nhvrLaunchTile sapUiTinyMargin"
-                            header="Inspections"
-                            subheader="Orders &amp; Due Dates"
-                            press="onNavToInspections"
-                            frameType="OneByOne">
-                            <TileContent>
-                                <ImageContent src="sap-icon://factory"/>
-                            </TileContent>
-                        </GenericTile>
 
                         <GenericTile id="defectsTileMain" class="nhvrLaunchTile sapUiTinyMargin"
                             header="Defect Register"

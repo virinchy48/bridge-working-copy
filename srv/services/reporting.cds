@@ -114,16 +114,7 @@ action massUploadVehicleClasses(csvData: LargeString) returns {
     errors       : LargeString;
 };
 
-// ── Mass Upload — Inspection Orders ───────────────────────
-@restrict: [{ to: ['BridgeManager','Admin'] }]
-action massUploadInspectionOrders(csvData: LargeString) returns {
-    status       : String;
-    totalRecords : Integer;
-    successCount : Integer;
-    updatedCount : Integer;
-    failureCount : Integer;
-    errors       : LargeString;
-};
+// massUploadInspectionOrders action removed in cut-down BIS variant.
 
 // ── Mass Upload — Bridge Defects ──────────────────────────
 @restrict: [{ to: ['BridgeManager','Admin'] }]
@@ -137,14 +128,24 @@ action massUploadBridgeDefects(csvData: LargeString) returns {
 };
 
 // ── Mass Upload — Lookups ─────────────────────────────────
+// Accepts either `csvData` (plain CSV string) OR `fileBase64`
+// (an xlsx file encoded as base64). When `fileBase64` is set, the
+// server decodes the workbook, converts the first sheet to CSV,
+// and runs the same row-by-row pipeline. Allows admins to upload
+// either the downloaded xlsx template directly or a CSV export.
 @restrict: [{ to: ['BridgeManager','Admin'] }]
-action massUploadLookups(csvData: LargeString) returns {
+action massUploadLookups(
+    csvData    : LargeString,
+    fileBase64 : LargeString,
+    fileName   : String
+) returns {
     status       : String;
     totalRecords : Integer;
     successCount : Integer;
     updatedCount : Integer;
     failureCount : Integer;
     errors       : LargeString;
+    rowResults   : LargeString;
 };
 
 // ── System Info (mode detection for demo/training) ────────
@@ -215,30 +216,11 @@ function getDashboardKPIs(jurisdiction: String) returns LargeString;
 function getConditionTrend(periods: Integer, jurisdiction: String) returns LargeString;
 
 // ── v2 Actions ────────────────────────────────────────────
-
-@restrict: [{ to: 'authenticated-user' }]
-action createInspectionOrder(
-    bridge_ID         : UUID,
-    orderNumber       : String,
-    inspectionType    : String,
-    plannedDate       : Date,
-    inspector         : String,
-    assignedInspector : String,
-    inspectorOrg      : String,
-    accessMethod      : String,
-    ratingMethod      : String,
-    priority          : String,
-    notes             : String
-) returns {
-    status  : String;
-    message : String;
-    ID      : UUID;
-};
+// createInspectionOrder removed in cut-down BIS variant.
 
 @restrict: [{ to: 'authenticated-user' }]
 action raiseDefect(
     bridge_ID          : UUID,
-    inspectionOrder_ID : UUID,
     defectCategory     : String,
     severity           : String,
     extent             : String,

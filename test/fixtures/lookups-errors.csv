@@ -1,0 +1,6 @@
+category,code,description,displayOrder,isActive
+CONDITION,EXCELLENT,Updated description to verify update path,11,true
+,MISSING_CATEGORY,Should fail — no category,10,true
+CONDITION,,Should fail — no code,10,true
+NEW_CATEGORY_TEST,NEW_CODE_1,New category + new code,10,true
+CONDITION,EXCELLENT,"Duplicate row with comma, in description",12,true

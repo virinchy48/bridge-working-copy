@@ -114,6 +114,19 @@ sap.ui.define([], function () {
          */
         isLoaded: function () {
             return _states.length > 0;
+        },
+
+        /**
+         * Force a fresh fetch, discarding the memoised promise and cache.
+         * Call this after admin actions that mutate the Bridge table (e.g. a
+         * successful Mass Upload of Bridges) so that state/region dropdowns
+         * reflect the new rows without a full page reload.
+         */
+        reload: function () {
+            _regionsMap  = {};
+            _states      = [];
+            _loadPromise = null;
+            return ReferenceData.load();
         }
     };
 

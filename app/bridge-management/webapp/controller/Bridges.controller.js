@@ -524,17 +524,17 @@ sap.ui.define([
                     // so count is always accurate, AND set dropdown for UI consistency.
                     const filterParts = [];
 
-                    if (query.postingStatus && query.postingStatus !== "ALL") {
+                    if (query.postingStatus) {
                         filterParts.push(`postingStatus eq '${query.postingStatus}'`);
                         const fp = this.byId("filterPosting");
                         if (fp) fp.setSelectedKey(query.postingStatus);
                     }
-                    if (query.condition && query.condition !== "ALL") {
+                    if (query.condition) {
                         filterParts.push(`condition eq '${query.condition}'`);
                         const fc = this.byId("filterCondition");
                         if (fc) fc.setSelectedKey(query.condition);
                     }
-                    if (query.scourRisk && query.scourRisk !== "ALL") {
+                    if (query.scourRisk) {
                         filterParts.push(`scourRisk eq '${query.scourRisk}'`);
                         const fs = this.byId("filterScour");
                         if (fs) fs.setSelectedKey(query.scourRisk);
@@ -745,13 +745,13 @@ sap.ui.define([
         _applyFiltersAndSort: function () {
             let data = this._allBridges || [];
             const search  = this.byId("searchField")    ? this.byId("searchField").getValue().toLowerCase() : "";
-            const state   = this.byId("filterState")    ? this.byId("filterState").getSelectedKey()         : "ALL";
-            const cond    = this.byId("filterCondition") ? this.byId("filterCondition").getSelectedKey()    : "ALL";
-            const posting = this.byId("filterPosting")  ? this.byId("filterPosting").getSelectedKey()       : "ALL";
-            const scour   = this.byId("filterScour")    ? this.byId("filterScour").getSelectedKey()         : "ALL";
+            const state   = this.byId("filterState")    ? this.byId("filterState").getSelectedKey()         : "";
+            const cond    = this.byId("filterCondition") ? this.byId("filterCondition").getSelectedKey()    : "";
+            const posting = this.byId("filterPosting")  ? this.byId("filterPosting").getSelectedKey()       : "";
+            const scour   = this.byId("filterScour")    ? this.byId("filterScour").getSelectedKey()         : "";
             const nhvr     = this.byId("filterNhvr")      ? this.byId("filterNhvr").getSelectedKey()      : "ALL";
             const freight  = this.byId("filterFreight")  ? this.byId("filterFreight").getSelectedKey()   : "ALL";
-            const riskBand = this.byId("filterRiskBand") ? this.byId("filterRiskBand").getSelectedKey()  : "ALL";
+            const riskBand = this.byId("filterRiskBand") ? this.byId("filterRiskBand").getSelectedKey()  : "";
 
             if (search) data = data.filter(b =>
                 (b.bridgeId  || "").toLowerCase().includes(search) ||
@@ -759,15 +759,15 @@ sap.ui.define([
                 (b.routeCode || "").toLowerCase().includes(search) ||
                 (b.lga       || "").toLowerCase().includes(search)
             );
-            if (state   !== "ALL") data = data.filter(b => b.state === state);
-            if (cond    !== "ALL") data = data.filter(b => (b.condition || "").toUpperCase() === cond);
-            if (posting !== "ALL") data = data.filter(b => b.postingStatus === posting);
-            if (scour   !== "ALL") data = data.filter(b => b.scourRisk === scour);
+            if (state)   data = data.filter(b => b.state === state);
+            if (cond)    data = data.filter(b => (b.condition || "").toUpperCase() === cond);
+            if (posting) data = data.filter(b => b.postingStatus === posting);
+            if (scour)   data = data.filter(b => b.scourRisk === scour);
             if (nhvr    === "YES") data = data.filter(b => b.nhvrRouteAssessed);
             if (nhvr    === "NO")  data = data.filter(b => !b.nhvrRouteAssessed);
             if (freight === "YES") data = data.filter(b => b.freightRoute);
             if (freight === "NO")  data = data.filter(b => !b.freightRoute);
-            if (riskBand !== "ALL") data = data.filter(b => (b.currentRiskBand || "") === riskBand);
+            if (riskBand) data = data.filter(b => (b.currentRiskBand || "") === riskBand);
 
             // Apply multi-value dashboard filter (RESTRICTED, HIGH_RISK sentinels)
             if (this._dashboardFilter) data = data.filter(this._dashboardFilter);
