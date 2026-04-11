@@ -10,12 +10,13 @@ sap.ui.define([
     "nhvr/bridgemanagement/util/ExcelExport",
     "nhvr/bridgemanagement/config/RestrictionAttributes",
     "nhvr/bridgemanagement/util/CsvExport",
+    "nhvr/bridgemanagement/util/TablePersonalisation",
     "nhvr/bridgemanagement/util/AlvToolbarMixin",
     "nhvr/bridgemanagement/model/RoleManager",
     "nhvr/bridgemanagement/util/AuthFetch",
     "nhvr/bridgemanagement/util/UserAnalytics",
     "nhvr/bridgemanagement/util/LookupService"
-], function (Controller, JSONModel, MessageToast, MessageBox, Item, ExcelExport, RestrictionAttrs, CsvExport, AlvToolbarMixin, RoleManager, AuthFetch, UserAnalytics, LookupService) {
+], function (Controller, JSONModel, MessageToast, MessageBox, Item, ExcelExport, RestrictionAttrs, CsvExport, TablePersonalisation, AlvToolbarMixin, RoleManager, AuthFetch, UserAnalytics, LookupService) {
     "use strict";
 
     const BASE = "/bridge-management";
@@ -510,6 +511,7 @@ sap.ui.define([
 
             const tableTitle = this.byId("tableTitle");
             if (tableTitle) tableTitle.setText("Restrictions (" + filteredRestrictions.length + ")");
+            this._alvUpdateCount(this._allRestrictions.length, filteredRestrictions.length);
 
             // Persist filter state to sessionStorage
             this._saveFilterState();
@@ -877,34 +879,30 @@ sap.ui.define([
         },
 
         // ── Column Chooser (dynamic, registry-driven) ─────────
-        onColumnChooser: function () {
-            this._buildColumnCheckboxes();
+        onOpenTableSettings: function () {
+            var list = this.byId("columnPickerList");
+            var search = this.byId("colPickerSearch");
+            var sectionSelect = this.byId("colSectionSelect");
+            var savedKeys = this._getVisibleColumnKeys();
+            this._colSectionFilter = null;
+
+            if (search) search.setValue("");
+            if (sectionSelect) {
+                sectionSelect.destroyItems();
+                sectionSelect.addItem(new Item({ key: "", text: "All categories" }));
+                TablePersonalisation.getSections(RestrictionAttrs.RESTRICTION_ATTRIBUTES).forEach(function (section) {
+                    sectionSelect.addItem(new Item({ key: section.key, text: section.text }));
+                });
+                sectionSelect.setSelectedKey("");
+            }
+
+            TablePersonalisation.buildGroupedList(list, RestrictionAttrs.RESTRICTION_ATTRIBUTES, savedKeys);
+            TablePersonalisation.updateGroupHeaders(list);
+            TablePersonalisation.updateStats(this.byId("colPickerStats"), list);
             this.byId("columnChooserDialog").open();
         },
 
-        _buildColumnCheckboxes: function (searchTerm) {
-            var container = this.byId("colCheckboxContainer");
-            if (!container) return;
-            container.destroyItems();
-
-            var savedKeys = this._getVisibleColumnKeys();
-            var term = (searchTerm || "").toLowerCase();
-            var count = 0;
-
-            RestrictionAttrs.RESTRICTION_ATTRIBUTES.forEach(function (attr) {
-                if (term && attr.label.toLowerCase().indexOf(term) === -1) return;
-                var cb = new sap.m.CheckBox({
-                    text: attr.label + (attr.section ? " (" + attr.sectionLabel + ")" : ""),
-                    selected: savedKeys.indexOf(attr.key) !== -1
-                });
-                cb.data("attrKey", attr.key);
-                container.addItem(cb);
-                if (cb.getSelected()) count++;
-            });
-
-            var countText = this.byId("colCountText");
-            if (countText) countText.setText(count + " of " + RestrictionAttrs.RESTRICTION_ATTRIBUTES.length + " shown");
-        },
+        onColumnChooser: function () { this.onOpenTableSettings(); },
 
         _getVisibleColumnKeys: function () {
             try {
@@ -915,7 +913,28 @@ sap.ui.define([
         },
 
         onColumnSearch: function (oEvent) {
-            this._buildColumnCheckboxes(oEvent.getParameter("newValue"));
+            var query = oEvent.getParameter("newValue") || "";
+            var list = this.byId("columnPickerList");
+            var selectedKeys = TablePersonalisation.getSelectedKeys(list);
+            TablePersonalisation.buildGroupedList(list, RestrictionAttrs.RESTRICTION_ATTRIBUTES, selectedKeys, query, this._colSectionFilter || null);
+            TablePersonalisation.updateGroupHeaders(list);
+            TablePersonalisation.updateStats(this.byId("colPickerStats"), list);
+        },
+
+        onColPickerSelectionChange: function () {
+            var list = this.byId("columnPickerList");
+            TablePersonalisation.updateGroupHeaders(list);
+            TablePersonalisation.updateStats(this.byId("colPickerStats"), list);
+        },
+
+        onColSectionFilter: function (oEvent) {
+            this._colSectionFilter = oEvent.getParameter("selectedItem").getKey() || null;
+            var list = this.byId("columnPickerList");
+            var selectedKeys = TablePersonalisation.getSelectedKeys(list);
+            var search = this.byId("colPickerSearch") ? this.byId("colPickerSearch").getValue() : "";
+            TablePersonalisation.buildGroupedList(list, RestrictionAttrs.RESTRICTION_ATTRIBUTES, selectedKeys, search, this._colSectionFilter);
+            TablePersonalisation.updateGroupHeaders(list);
+            TablePersonalisation.updateStats(this.byId("colPickerStats"), list);
         },
 
         onColPresetEssential: function () {
@@ -927,31 +946,36 @@ sap.ui.define([
         onColPresetAll: function () {
             this._applyColumnPreset(RestrictionAttrs.RESTRICTION_ATTRIBUTES.map(function (a) { return a.key; }));
         },
-        onColShowAll: function () { this.onColPresetAll(); },
-        onColHideAll: function () { this._applyColumnPreset([]); },
+        onColShowAll: function () {
+            var list = this.byId("columnPickerList");
+            TablePersonalisation.setAllSelected(list, true);
+            TablePersonalisation.updateGroupHeaders(list);
+            TablePersonalisation.updateStats(this.byId("colPickerStats"), list);
+        },
+        onColHideAll: function () {
+            var list = this.byId("columnPickerList");
+            TablePersonalisation.setAllSelected(list, false);
+            TablePersonalisation.updateGroupHeaders(list);
+            TablePersonalisation.updateStats(this.byId("colPickerStats"), list);
+        },
 
         _applyColumnPreset: function (keys) {
-            var container = this.byId("colCheckboxContainer");
-            if (!container) return;
-            var count = 0;
-            container.getItems().forEach(function (cb) {
-                var k = cb.data("attrKey");
-                var sel = keys.indexOf(k) !== -1;
-                cb.setSelected(sel);
-                if (sel) count++;
-            });
-            var countText = this.byId("colCountText");
-            if (countText) countText.setText(count + " of " + RestrictionAttrs.RESTRICTION_ATTRIBUTES.length + " shown");
+            var list = this.byId("columnPickerList");
+            TablePersonalisation.buildGroupedList(
+                list,
+                RestrictionAttrs.RESTRICTION_ATTRIBUTES,
+                keys,
+                this.byId("colPickerSearch") ? this.byId("colPickerSearch").getValue() : "",
+                this._colSectionFilter || null
+            );
+            TablePersonalisation.updateGroupHeaders(list);
+            TablePersonalisation.updateStats(this.byId("colPickerStats"), list);
         },
 
         onApplyColumns: function () {
-            var container = this.byId("colCheckboxContainer");
-            if (!container) { this.byId("columnChooserDialog").close(); return; }
-
-            var selectedKeys = [];
-            container.getItems().forEach(function (cb) {
-                if (cb.getSelected()) selectedKeys.push(cb.data("attrKey"));
-            });
+            var list = this.byId("columnPickerList");
+            if (!list) { this.byId("columnChooserDialog").close(); return; }
+            var selectedKeys = TablePersonalisation.getSelectedKeys(list);
 
             localStorage.setItem("nhvr_restriction_columns", JSON.stringify(selectedKeys));
             this._restColumnsBuilt = false;
@@ -959,6 +983,10 @@ sap.ui.define([
             this._applyFiltersAndSort();
             this.byId("columnChooserDialog").close();
             MessageToast.show(selectedKeys.length + " columns selected");
+        },
+
+        onRestrictionColumnSort: function () {
+            // Built-in sap.ui.table.Table sorting handles column-header sorting.
         },
 
         onCloseColumnChooser: function () {

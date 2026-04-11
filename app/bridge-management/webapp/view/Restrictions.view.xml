@@ -98,6 +98,16 @@
         <f:content>
             <VBox class="nhvrApp">
 
+                <!-- ── Variant Management Bar ──────────────────── -->
+                <HBox alignItems="Center" class="sapUiSmallMarginBeginEnd sapUiTinyMarginTop">
+                    <Label text="View:" design="Bold" class="sapUiTinyMarginEnd"/>
+                    <VariantManagement id="restVariantMgmt"
+                        save="onVariantSave"
+                        select="onVariantSelect"
+                        manage="onVariantManage"
+                        class="sapUiTinyMarginEnd"/>
+                </HBox>
+
                 <!-- ── Map-polygon filter banner (v4.7.6) ─────────────── -->
                 <MessageStrip id="mapFilterBanner"
                     text=""
@@ -155,22 +165,17 @@
                 <t:Table id="restrictionTable"
                     rows="{restrictions>/items}"
                     visibleRowCountMode="Auto"
-                    minAutoRowCount="8"
+                    minAutoRowCount="10"
                     selectionMode="None"
                     alternateRowColors="true"
                     enableColumnReordering="true"
                     enableColumnFreeze="true"
+                    columnSelect="onRestrictionColumnSort"
                     rowHeight="40"
-                    class="sapUiSmallMarginBeginEnd">
+                    class="nhvrGridTable sapUiSmallMarginBeginEnd">
 
                     <t:extension>
                         <OverflowToolbar>
-                            <VariantManagement id="restVariantMgmt"
-                                save="onVariantSave"
-                                select="onVariantSelect"
-                                manage="onVariantManage"
-                                showSetAsDefault="true"/>
-                            <ToolbarSeparator/>
                             <Text id="alvRecordCount" text="" class="nhvrSubText"/>
                             <ToolbarSeparator/>
                             <Title id="tableTitle" text="Restrictions" level="H3"/>
@@ -179,8 +184,8 @@
                                 visible="{ui>/canAddRestriction}"/>
                             <Button icon="sap-icon://sort" text="Sort"
                                 press="onAlvSort" type="Transparent" tooltip="Sort options"/>
-                            <Button icon="sap-icon://table-column" text="Columns"
-                                press="onColumnChooser" type="Transparent" tooltip="Show/hide columns"/>
+                            <Button id="btnTableSettings" icon="sap-icon://action-settings" text="Columns"
+                                press="onOpenTableSettings" type="Transparent" tooltip="Personalise columns and sort order"/>
                             <ToolbarSeparator/>
                             <Button id="btnExportRestrictions" icon="sap-icon://excel-attachment"
                                 text="Excel" press="onAlvExportExcel"
@@ -371,29 +376,55 @@
     </ViewSettingsDialog>
 
     <!-- ── Column Chooser (dynamic, registry-driven) ─────────── -->
-    <Dialog id="columnChooserDialog" title="Show / Hide Columns" contentWidth="400px">
+    <Dialog id="columnChooserDialog" title="Choose Your Columns"
+        contentWidth="560px" contentHeight="82vh"
+        verticalScrolling="false" draggable="true" resizable="true">
         <content>
-            <VBox class="sapUiSmallMarginBeginEnd sapUiSmallMarginTop">
-                <SearchField id="colSearchField" placeholder="Search columns…"
-                    liveChange="onColumnSearch" width="100%"
-                    class="sapUiSmallMarginBottom"/>
-                <HBox class="sapUiSmallMarginBottom">
-                    <Button text="Essential" press="onColPresetEssential" type="Ghost" class="sapUiTinyMarginEnd"/>
-                    <Button text="Compliance" press="onColPresetCompliance" type="Ghost" class="sapUiTinyMarginEnd"/>
-                    <Button text="All" press="onColPresetAll" type="Ghost" class="sapUiTinyMarginEnd"/>
+            <MessageStrip
+                text="Tick the columns you want to see in the Restrictions list. Your selection is remembered between sessions."
+                type="Information" showIcon="true" showCloseButton="false"
+                class="sapUiSmallMarginBeginEnd sapUiSmallMarginTop sapUiTinyMarginBottom"/>
+
+            <VBox class="sapUiSmallMarginBeginEnd sapUiTinyMarginBottom">
+                <Label text="Quick presets — click to apply instantly:" design="Bold"
+                    class="sapUiTinyMarginBottom"/>
+                <HBox wrap="Wrap">
+                    <Button text="Essential" press="onColPresetEssential" type="Ghost"
+                        class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                    <Button text="Compliance View" press="onColPresetCompliance" type="Ghost"
+                        class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                    <Button text="All Columns" press="onColPresetAll" type="Ghost"
+                        class="sapUiTinyMarginBottom"/>
                 </HBox>
-                <HBox class="sapUiSmallMarginBottom">
-                    <Button text="Show All" press="onColShowAll" type="Transparent" class="sapUiTinyMarginEnd"/>
-                    <Button text="Hide All" press="onColHideAll" type="Transparent"/>
-                    <ToolbarSpacer/>
-                    <Text id="colCountText" text="" class="nhvrSubText"/>
-                </HBox>
-                <VBox id="colCheckboxContainer"/>
             </VBox>
+
+            <HBox alignItems="Center" wrap="Wrap"
+                class="sapUiSmallMarginBeginEnd sapUiTinyMarginTop sapUiTinyMarginBottom">
+                <SearchField id="colPickerSearch" placeholder="Find a column… e.g. permit, gazette, date"
+                    liveChange="onColumnSearch" width="210px" class="sapUiTinyMarginEnd"/>
+                <Label text="Category:" class="sapUiTinyMarginEnd" labelFor="colSectionSelect"/>
+                <Select id="colSectionSelect" width="200px" change="onColSectionFilter"
+                    class="sapUiTinyMarginEnd"
+                    tooltip="Show columns from one category only"/>
+                <Button text="Show All" press="onColShowAll" type="Ghost"
+                    class="sapUiTinyMarginEnd"/>
+                <Button text="Hide All" press="onColHideAll" type="Ghost"/>
+            </HBox>
+
+            <HBox alignItems="Center" class="sapUiSmallMarginBeginEnd sapUiTinyMarginBottom">
+                <Text id="colPickerStats" text="— columns selected" class="nhvrSubText"/>
+                <ToolbarSpacer/>
+                <Text text="Actions stay visible as the last column." class="nhvrSubText"/>
+            </HBox>
+
+            <ScrollContainer height="calc(82vh - 260px)" vertical="true" horizontal="false">
+                <List id="columnPickerList" mode="MultiSelect" includeItemInSelection="true"
+                    selectionChange="onColPickerSelectionChange"/>
+            </ScrollContainer>
         </content>
         <buttons>
             <Button text="Apply" type="Emphasized" press="onApplyColumns"/>
-            <Button text="Close" press="onCloseColumnChooser" type="Transparent"/>
+            <Button text="Cancel" press="onCloseColumnChooser" type="Transparent"/>
         </buttons>
     </Dialog>
 
