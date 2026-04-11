@@ -95,7 +95,7 @@ module.exports = function registerCommonHelpers(srv) {
     async function logAudit(action, entity, entityId, entityName, description, changes, req, options = {}) {
         try {
             const db = await cds.connect.to('db');
-            const knownRoles = ['Admin', 'BridgeManager', 'Viewer', 'Uploader', 'Executive', 'Inspector', 'Operator'];
+            const knownRoles = ['Admin', 'BridgeManager', 'Viewer'];
             const userRole = knownRoles.find(roleName => req && req.user && req.user.is(roleName)) || 'Unknown';
             await db.run(INSERT.into('nhvr.AuditLog').entries({
                 timestamp  : new Date().toISOString(),

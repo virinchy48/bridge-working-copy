@@ -35,112 +35,112 @@ extend service BridgeManagementService {
         dropped  : Integer;
     };
 
-    // ── Config (read: all, write: Admin/TechAdmin) ───────────────
+    // ── Config (read: all, write: BridgeManager/Admin) ───────────────
     @restrict: [
         { grant: ['READ'],                    to: 'authenticated-user' },
-        { grant: ['CREATE','UPDATE','DELETE'], to: ['Admin'] }
+        { grant: ['CREATE','UPDATE','DELETE'], to: ['BridgeManager','Admin'] }
     ]
     entity AnalyticsConfigs as projection on nhvr.AnalyticsConfig;
 
-    // ── Raw data (Admin + Executive, read-only) ──────────────────
+    // ── Raw data (BridgeManager + Admin, read-only) ──────────────────
     @readonly
-    @restrict: [{ grant: ['READ'], to: ['Admin','Executive'] }]
+    @restrict: [{ grant: ['READ'], to: ['BridgeManager','Admin'] }]
     entity AnalyticsEvents as projection on nhvr.AnalyticsEvent;
 
     @readonly
-    @restrict: [{ grant: ['READ'], to: ['Admin','Executive'] }]
+    @restrict: [{ grant: ['READ'], to: ['BridgeManager','Admin'] }]
     entity AnalyticsSessions as projection on nhvr.AnalyticsSession;
 
-    // ── Aggregates (Admin + Executive, read-only) ────────────────
+    // ── Aggregates (BridgeManager + Admin, read-only) ────────────────
     @readonly
-    @restrict: [{ grant: ['READ'], to: ['Admin','Executive'] }]
+    @restrict: [{ grant: ['READ'], to: ['BridgeManager','Admin'] }]
     entity AnalyticsDailyAggs as projection on nhvr.AnalyticsDailyAgg;
 
     @readonly
-    @restrict: [{ grant: ['READ'], to: ['Admin','Executive'] }]
+    @restrict: [{ grant: ['READ'], to: ['BridgeManager','Admin'] }]
     entity AnalyticsWeeklyAggs as projection on nhvr.AnalyticsWeeklyAgg;
 
     @readonly
-    @restrict: [{ grant: ['READ'], to: ['Admin','Executive'] }]
+    @restrict: [{ grant: ['READ'], to: ['BridgeManager','Admin'] }]
     entity AnalyticsMonthlyAggs as projection on nhvr.AnalyticsMonthlyAgg;
 
-    // ── Reporting Functions (Admin + Executive) ──────────────────
-    @restrict: [{ to: ['Admin','Executive'] }]
+    // ── Reporting Functions (BridgeManager + Admin) ──────────────────
+    @restrict: [{ to: ['BridgeManager','Admin'] }]
     function getAnalyticsSummary(
         fromDate    : Date,
         toDate      : Date,
         granularity : String(10)    // 'daily', 'weekly', 'monthly'
     ) returns LargeString;          // JSON payload
 
-    @restrict: [{ to: ['Admin','Executive'] }]
+    @restrict: [{ to: ['BridgeManager','Admin'] }]
     function getFeatureAdoption(
         fromDate : Date,
         toDate   : Date
     ) returns LargeString;
 
-    @restrict: [{ to: ['Admin','Executive'] }]
+    @restrict: [{ to: ['BridgeManager','Admin'] }]
     function getUnderusedFeatures(
         fromDate  : Date,
         toDate    : Date,
         threshold : Integer         // min events to be "used"
     ) returns LargeString;
 
-    @restrict: [{ to: ['Admin','Executive'] }]
+    @restrict: [{ to: ['BridgeManager','Admin'] }]
     function getWorkflowFunnels(
         fromDate     : Date,
         toDate       : Date,
         workflowType : String(50)
     ) returns LargeString;
 
-    @restrict: [{ to: ['Admin','Executive'] }]
+    @restrict: [{ to: ['BridgeManager','Admin'] }]
     function getErrorTrends(
         fromDate : Date,
         toDate   : Date
     ) returns LargeString;
 
-    @restrict: [{ to: ['Admin','Executive'] }]
+    @restrict: [{ to: ['BridgeManager','Admin'] }]
     function getPerformanceHotspots(
         fromDate    : Date,
         toDate      : Date,
         thresholdMs : Integer       // flag routes slower than this
     ) returns LargeString;
 
-    // ── Cohort & Segmentation (Admin + Executive) ─────────────────
-    @restrict: [{ to: ['Admin','Executive'] }]
+    // ── Cohort & Segmentation (BridgeManager + Admin) ─────────────────
+    @restrict: [{ to: ['BridgeManager','Admin'] }]
     function getAnalyticsByRole(
         fromDate : Date,
         toDate   : Date
     ) returns LargeString;
 
-    @restrict: [{ to: ['Admin','Executive'] }]
+    @restrict: [{ to: ['BridgeManager','Admin'] }]
     function getAnalyticsByTenant(
         fromDate : Date,
         toDate   : Date
     ) returns LargeString;
 
-    // ── Export (Admin + Executive) ───────────────────────────────
-    @restrict: [{ to: ['Admin','Executive'] }]
+    // ── Export (BridgeManager + Admin) ───────────────────────────────
+    @restrict: [{ to: ['BridgeManager','Admin'] }]
     action exportAnalyticsCSV(
         fromDate   : Date,
         toDate     : Date,
         reportType : String(20)     // 'summary' | 'by_role' | 'by_tenant'
     ) returns LargeString;          // JSON: { csvData, rowCount, reportType, period }
 
-    // ── Scheduled Report Trigger (Admin + Executive) ────────────
-    @restrict: [{ to: ['Admin','Executive'] }]
+    // ── Scheduled Report Trigger (BridgeManager + Admin) ────────────
+    @restrict: [{ to: ['BridgeManager','Admin'] }]
     action executeAnalyticsReport(
         scheduleId : UUID
     ) returns LargeString;
 
     // ── Admin Actions ────────────────────────────────────────────
-    @restrict: [{ to: ['Admin'] }]
+    @restrict: [{ to: ['BridgeManager','Admin'] }]
     action runAnalyticsRollup() returns {
         dailyRows   : Integer;
         weeklyRows  : Integer;
         monthlyRows : Integer;
     };
 
-    @restrict: [{ to: ['Admin'] }]
+    @restrict: [{ to: ['BridgeManager','Admin'] }]
     action purgeAnalyticsData() returns {
         rawPurged      : Integer;
         dailyPurged    : Integer;

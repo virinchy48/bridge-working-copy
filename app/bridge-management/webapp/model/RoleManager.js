@@ -1,7 +1,7 @@
 // ============================================================
 // NHVR Role Manager — centralised role-based UI control
 // Singleton: loaded once at app start, applied across all views
-// v2: adds featureEnabled, field-level control, Inspector/Operator
+// v2: adds featureEnabled and field-level control
 // ============================================================
 sap.ui.define([
     "nhvr/bridgemanagement/config/RoleFallback"
@@ -9,32 +9,21 @@ sap.ui.define([
     "use strict";
 
     const STORAGE_KEY = "nhvr_active_role";
-    const ROLES = ["ADMIN","BRIDGE_MANAGER","INSPECTOR","OPERATOR","TECH_ADMIN","READ_ONLY"];
+    const ROLES = ["ADMIN","BRIDGE_MANAGER","READ_ONLY"];
     const ROLE_LABELS = {
         ADMIN         : "Administrator",
         BRIDGE_MANAGER: "Bridge Manager",
-        INSPECTOR     : "Inspector",
-        OPERATOR      : "Operator",
-        TECH_ADMIN    : "Tech Admin",
         READ_ONLY     : "Read Only"
     };
 
     // Map XSUAA scope names → internal role keys
     const XSUAA_ROLE_MAP = {
-        "Admin"          : "ADMIN",
-        "NHVR_Admin"     : "ADMIN",
-        "BridgeManager"  : "BRIDGE_MANAGER",
+        "Admin"             : "ADMIN",
+        "NHVR_Admin"        : "ADMIN",
+        "BridgeManager"     : "BRIDGE_MANAGER",
         "NHVR_BridgeManager": "BRIDGE_MANAGER",
-        "Inspector"      : "INSPECTOR",
-        "NHVR_Inspector" : "INSPECTOR",
-        "Operator"       : "OPERATOR",
-        "NHVR_Operator"  : "OPERATOR",
-        "TechAdmin"      : "TECH_ADMIN",
-        "NHVR_TechAdmin" : "TECH_ADMIN",
-        "Executive"      : "READ_ONLY",
-        "NHVR_Executive" : "READ_ONLY",
-        "Viewer"         : "READ_ONLY",
-        "NHVR_Viewer"    : "READ_ONLY"
+        "Viewer"            : "READ_ONLY",
+        "NHVR_Viewer"       : "READ_ONLY"
     };
 
     let _config    = {};    // { featureKey: { visible, editable, featureEnabled, fieldName, fieldVisible, fieldEditable } }
@@ -80,8 +69,6 @@ sap.ui.define([
                     let detected = sessionStorage.getItem(STORAGE_KEY) || "READ_ONLY";
                     if (xsuaaRoles.some(r => XSUAA_ROLE_MAP[r] === "ADMIN"))          detected = "ADMIN";
                     else if (xsuaaRoles.some(r => XSUAA_ROLE_MAP[r] === "BRIDGE_MANAGER")) detected = "BRIDGE_MANAGER";
-                    else if (xsuaaRoles.some(r => XSUAA_ROLE_MAP[r] === "INSPECTOR"))  detected = "INSPECTOR";
-                    else if (xsuaaRoles.some(r => XSUAA_ROLE_MAP[r] === "OPERATOR"))   detected = "OPERATOR";
                     _role = detected;
                     sessionStorage.setItem(STORAGE_KEY, _role);
                     return this._fetchConfig();
@@ -265,8 +252,6 @@ sap.ui.define([
             switch (_role) {
                 case "ADMIN":          return "ADMIN";
                 case "BRIDGE_MANAGER": return "ASSET_MANAGER";
-                case "INSPECTOR":      return "INSPECTOR";
-                case "OPERATOR":       return "COMPLIANCE_OFFICER";
                 case "READ_ONLY":
                 default:               return "VIEWER";
             }
@@ -280,20 +265,6 @@ sap.ui.define([
         getQuickAccessItems: function () {
             const profile = this.getNavProfile();
             switch (profile) {
-                case "INSPECTOR":
-                    return [
-                        { label: "My Inspections Today",    icon: "sap-icon://inspect",        route: "InspectionDashboard", params: { filter: "today" },    primary: true  },
-                        { label: "Raise Defect",            icon: "sap-icon://alert",           route: "DefectRegister",             params: { mode: "create" },     primary: true  },
-                        { label: "Overdue Inspections",     icon: "sap-icon://warning",         route: "InspectionDashboard", params: { filter: "overdue" },  primary: false },
-                        { label: "Open Defects",            icon: "sap-icon://work-history",    route: "DefectRegister",             params: { filter: "open" },     primary: false }
-                    ];
-                case "COMPLIANCE_OFFICER":
-                    return [
-                        { label: "Expiring This Week",      icon: "sap-icon://time-entry-request", route: "RestrictionsList", params: { filter: "expiring" },  primary: true  },
-                        { label: "Overdue Inspections",     icon: "sap-icon://warning",            route: "InspectionDashboard", params: { filter: "overdue" }, primary: true },
-                        { label: "Active Restrictions",     icon: "sap-icon://permission",         route: "RestrictionsList", params: { filter: "active" },   primary: false },
-                        { label: "Permit Register",         icon: "sap-icon://document-text",      route: "Permits",      params: {},                      primary: false }
-                    ];
                 case "ASSET_MANAGER":
                     return [
                         { label: "Priority Bridges",        icon: "sap-icon://notification-2",  route: "BridgesList",   params: { filter: "priority" }, primary: true  },
@@ -326,8 +297,6 @@ sap.ui.define([
          */
         getCommandPaletteActions: function () {
             const isMgr   = (_role === "ADMIN" || _role === "BRIDGE_MANAGER");
-            const isInsp  = isMgr || _role === "INSPECTOR";
-            const isOp    = isMgr || _role === "OPERATOR";
             const actions = [
                 // Navigation — always visible
                 { id: "nav-bridges",        label: "Go to Bridges",              category: "Navigation", icon: "sap-icon://map-2",           route: "BridgesList",            params: {} },
@@ -336,18 +305,6 @@ sap.ui.define([
                 { id: "nav-reports",        label: "Reports",                    category: "Navigation", icon: "sap-icon://bar-chart",        route: "Reports",            params: {} },
                 { id: "nav-exec-dash",      label: "Dashboard",                  category: "Navigation", icon: "sap-icon://da",               route: "Dashboard", params: {} }
             ];
-            if (isInsp) {
-                actions.push(
-                    { id: "nav-inspections",    label: "Inspection Dashboard",       category: "Navigation", icon: "sap-icon://inspect",          route: "InspectionDashboard", params: {} },
-                    { id: "nav-defects",        label: "Defect Register",            category: "Navigation", icon: "sap-icon://alert",            route: "DefectRegister",            params: {} },
-                    { id: "act-raise-defect",   label: "Raise New Defect",           category: "Actions",    icon: "sap-icon://add",              route: "DefectRegister",            params: { mode: "create" } }
-                );
-            }
-            if (isOp) {
-                actions.push(
-                    { id: "nav-permits",        label: "Permit Register",            category: "Navigation", icon: "sap-icon://document-text",    route: "Permits",            params: {} }
-                );
-            }
             if (isMgr) {
                 actions.push(
                     { id: "act-add-bridge",     label: "Add New Bridge",             category: "Actions",    icon: "sap-icon://add",              route: "BridgeNew",         params: { mode: "create" } },

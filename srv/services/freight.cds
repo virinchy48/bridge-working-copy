@@ -4,13 +4,13 @@ using BridgeManagementService from '../service';
 extend service BridgeManagementService with {
 
 // ── P03: Freight Route Corridor ───────────────────────────────
-@restrict: [{ to: ['Viewer','Inspector','Operator','BridgeManager','Admin'] }]
+@restrict: [{ to: ['Viewer','BridgeManager','Admin'] }]
 entity FreightRoutes as projection on nhvr.FreightRoute {
     key ID, routeCode, name, state, routeClass, corridorMaxMass, corridorMaxHeight,
         lastAssessedAt, status, createdAt, modifiedAt
 };
 
-@restrict: [{ to: ['Viewer','Inspector','Operator','BridgeManager','Admin'] }]
+@restrict: [{ to: ['Viewer','BridgeManager','Admin'] }]
 entity FreightRouteBridges as projection on nhvr.FreightRouteBridge {
     key ID,
     route.ID  as route_ID,
@@ -18,11 +18,11 @@ entity FreightRouteBridges as projection on nhvr.FreightRouteBridge {
     sequence, isCritical
 };
 
-@restrict: [{ to: ['BridgeManager','Admin','Operator'] }]
+@restrict: [{ to: ['BridgeManager','Admin'] }]
 action assessCorridor(routeId : UUID) returns { corridorMaxMass : Decimal; bridgeCount : Integer; criticalBridges : Integer; };
 
 // Full vehicle-aware freight route assessment — returns JSON string with per-bridge results
-@restrict: [{ to: ['BridgeManager','Admin','Operator'] }]
+@restrict: [{ to: ['BridgeManager','Admin'] }]
 action assessFreightRouteVehicle(
     routeId         : UUID,
     vehicleGVM_t    : Decimal,
@@ -35,7 +35,7 @@ action assessFreightRouteVehicle(
 ) returns LargeString;
 
 // Find alternative routes — internal + OSRM external — returns JSON string
-@restrict: [{ to: ['BridgeManager','Admin','Operator'] }]
+@restrict: [{ to: ['BridgeManager','Admin'] }]
 action findAlternativeRoutes(
     routeId         : UUID,
     vehicleGVM_t    : Decimal,
@@ -46,7 +46,7 @@ action findAlternativeRoutes(
 
 // Assess a custom geometry route (from Route Planner) for a given vehicle —
 // bridges discovered by spatial proximity to route coordinates
-@restrict: [{ to: ['BridgeManager','Admin','Operator'] }]
+@restrict: [{ to: ['BridgeManager','Admin'] }]
 action assessRouteGeometry(
     routeCoords     : LargeString,
     vehicleGVM_t    : Decimal,
@@ -73,7 +73,7 @@ action validateRoute(
     vehicleClass     : String
 ) returns LargeString;
 
-@restrict: [{ to: ['Admin'] }]
+@restrict: [{ to: ['BridgeManager','Admin'] }]
 entity RoutingEngineConfigs as projection on nhvr.RoutingEngineConfig;
 
 @restrict: [{ to: 'authenticated-user' }]

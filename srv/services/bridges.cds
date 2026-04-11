@@ -36,8 +36,8 @@ entity BridgeEventLog as projection on nhvr.BridgeEventLog {
 @cds.query.limit: { max: 5000, default: 200 }
 @restrict: [
     { grant: ['READ'],               to: 'authenticated-user' },
-    { grant: ['CREATE','UPDATE'],    to: ['BridgeManager','Admin','Uploader'] },
-    { grant: ['DELETE'],             to: ['Admin'] }
+    { grant: ['CREATE','UPDATE'],    to: ['BridgeManager','Admin'] },
+    { grant: ['DELETE'],             to: ['BridgeManager','Admin'] }
 ]
 entity Bridges as projection on nhvr.Bridge {
     *,
@@ -117,7 +117,7 @@ entity Routes as projection on nhvr.Route;
 
 @restrict: [
     { grant: ['READ'],                    to: 'authenticated-user' },
-    { grant: ['CREATE','UPDATE','DELETE'], to: ['Admin'] }
+    { grant: ['CREATE','UPDATE','DELETE'], to: ['BridgeManager','Admin'] }
 ]
 entity VehicleClasses as projection on nhvr.VehicleClass;
 
@@ -127,7 +127,7 @@ entity VehicleClasses as projection on nhvr.VehicleClass;
 @restrict: [
     { grant: ['READ'],            to: 'authenticated-user' },
     { grant: ['CREATE','UPDATE'], to: ['BridgeManager','Admin'] },
-    { grant: ['DELETE'],          to: ['Admin'] }
+    { grant: ['DELETE'],          to: ['BridgeManager','Admin'] }
 ]
 entity Restrictions as projection on nhvr.Restriction {
     *,
@@ -172,14 +172,14 @@ entity Restrictions as projection on nhvr.Restriction {
 
 @restrict: [
     { grant: ['READ'],                          to: 'authenticated-user' },
-    { grant: ['CREATE','UPDATE','DELETE'],       to: ['BridgeManager','Admin','Inspector','Operator'] }
+    { grant: ['CREATE','UPDATE','DELETE'],       to: ['BridgeManager','Admin'] }
 ]
 entity BridgeAttributes as projection on nhvr.BridgeAttribute;
 
 // ── Batch Import Actions ──
 // Upsert up to 500 bridge rows from CSV upload
 // Returns: { created, updated, failed, errors: [{row, field, message}] }
-@restrict: [{ to: ['BridgeManager','Admin','Uploader'] }]
+@restrict: [{ to: ['BridgeManager','Admin'] }]
 action importBridgesBatch(rows: array of {
     bridgeId             : String;
     name                 : String;
@@ -236,7 +236,7 @@ action importBridgesBatch(rows: array of {
 };
 
 // Upsert up to 500 restriction rows from CSV upload
-@restrict: [{ to: ['BridgeManager','Admin','Uploader'] }]
+@restrict: [{ to: ['BridgeManager','Admin'] }]
 action importRestrictionsBatch(rows: array of {
     bridge_bridgeId  : String;
     restrictionType  : String;

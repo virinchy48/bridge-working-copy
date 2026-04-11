@@ -198,7 +198,7 @@ module.exports = function registerAnalyticsIngestHandlers(srv, _helpers) {
         }
 
         // Determine role and tenant from JWT (server-authoritative)
-        const knownRoles = ['Admin', 'BridgeManager', 'Viewer', 'Uploader', 'Executive', 'Inspector', 'Operator'];
+        const knownRoles = ['Admin', 'BridgeManager', 'Viewer'];
         const userRole = knownRoles.find(roleName => req.user && req.user.is(roleName)) || 'Unknown';
         const tenantCode = (req.user && req.user.attr && req.user.attr.tenantCode) || 'DEFAULT';
         const environment = process.env.NODE_ENV || 'production';

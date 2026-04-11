@@ -13,8 +13,8 @@ entity BridgeHistory as projection on nhvr.BridgeConditionHistory {
 @cds.redirection.target: true
 @restrict: [
     { grant: ['READ'],                          to: 'authenticated-user' },
-    { grant: ['CREATE','UPDATE'],               to: ['BridgeManager','Admin','Inspector'] },
-    { grant: ['DELETE'],                        to: ['Admin'] }
+    { grant: ['CREATE','UPDATE'],               to: ['BridgeManager','Admin'] },
+    { grant: ['DELETE'],                        to: ['BridgeManager','Admin'] }
 ]
 entity InspectionRecords as projection on nhvr.InspectionRecord {
     *,
@@ -28,8 +28,8 @@ entity InspectionRecords as projection on nhvr.InspectionRecord {
 @cds.query.limit: { max: 2000, default: 100 }
 @restrict: [
     { grant: ['READ'],            to: 'authenticated-user' },
-    { grant: ['CREATE','UPDATE'], to: ['BridgeManager','Admin','Inspector'] },
-    { grant: ['DELETE'],          to: ['Admin'] }
+    { grant: ['CREATE','UPDATE'], to: ['BridgeManager','Admin'] },
+    { grant: ['DELETE'],          to: ['BridgeManager','Admin'] }
 ]
 entity InspectionOrders as projection on nhvr.InspectionOrder {
     *,
@@ -38,11 +38,11 @@ entity InspectionOrders as projection on nhvr.InspectionOrder {
     measurementDocuments: redirected to MeasurementDocuments,
     defects         : redirected to BridgeDefects
 } actions {
-    @restrict: [{ to: ['BridgeManager','Admin','Inspector'] }]
+    @restrict: [{ to: ['BridgeManager','Admin'] }]
     action startInspection() returns {
         status: String; message: String
     };
-    @restrict: [{ to: ['BridgeManager','Admin','Inspector'] }]
+    @restrict: [{ to: ['BridgeManager','Admin'] }]
     action completeInspection(
         overallConditionRating  : Integer,
         structuralAdequacy      : String,
@@ -57,7 +57,7 @@ entity InspectionOrders as projection on nhvr.InspectionOrder {
 };
 
 // ── Inspection Review / Approval (unbound — Phase 5.3) ────────
-@restrict: [{ to: ['BridgeManager', 'Admin'] }]
+@restrict: [{ to: ['BridgeManager','Admin'] }]
 action reviewInspection(
     inspectionOrderId : UUID,
     decision          : String,
@@ -71,8 +71,8 @@ action reviewInspection(
 @cds.redirection.target: true
 @restrict: [
     { grant: ['READ'],                          to: 'authenticated-user' },
-    { grant: ['CREATE','UPDATE'],               to: ['BridgeManager','Admin','Inspector'] },
-    { grant: ['DELETE'],                        to: ['Admin'] }
+    { grant: ['CREATE','UPDATE'],               to: ['BridgeManager','Admin'] },
+    { grant: ['DELETE'],                        to: ['BridgeManager','Admin'] }
 ]
 entity MeasurementDocuments as projection on nhvr.MeasurementDocument {
     *,
@@ -83,15 +83,15 @@ entity MeasurementDocuments as projection on nhvr.MeasurementDocument {
 @cds.redirection.target: true
 @restrict: [
     { grant: ['READ'],            to: 'authenticated-user' },
-    { grant: ['CREATE','UPDATE'], to: ['BridgeManager','Admin','Inspector'] },
-    { grant: ['DELETE'],          to: ['Admin'] }
+    { grant: ['CREATE','UPDATE'], to: ['BridgeManager','Admin'] },
+    { grant: ['DELETE'],          to: ['BridgeManager','Admin'] }
 ]
 entity BridgeDefects as projection on nhvr.BridgeDefect {
     *,
     bridge.bridgeId as bridgeId @readonly,
     bridge.name     as bridgeName @readonly
 } actions {
-    @restrict: [{ to: ['BridgeManager','Admin','Inspector'] }]
+    @restrict: [{ to: ['BridgeManager','Admin'] }]
     action closeDefect(
         closureNotes: String
     ) returns {
@@ -107,7 +107,7 @@ entity WorkOrders as projection on nhvr.WorkOrder {
     assignedTo, estimatedCost, notes, createdAt, modifiedAt
 };
 
-@restrict: [{ to: ['BridgeManager','Admin','Operator'] }]
+@restrict: [{ to: ['BridgeManager','Admin'] }]
 action createWorkOrder(defectId : UUID, priority : String, plannedDate : Date, assignedTo : String, notes : String) returns WorkOrders;
 
 entity DefectClassifications as projection on nhvr.DefectClassification {
@@ -117,7 +117,7 @@ entity DefectClassifications as projection on nhvr.DefectClassification {
     classifiedAt, classifiedBy, humanReviewed, humanCategory, humanNotes, createdAt
 };
 
-@restrict: [{ to: ['Inspector','BridgeManager','Admin'] }]
+@restrict: [{ to: ['BridgeManager','Admin'] }]
 action classifyDefect(defectId: UUID, photoUrl: String, notes: String) returns DefectClassifications;
 
 

@@ -51,7 +51,7 @@ module.exports = function registerInspectionHandlers(srv, helpers) {
 
     // ── createInspectionOrder ─────────────────────────────────────
     srv.on('createInspectionOrder', async (req) => {
-        if (!req.user.is('BridgeManager') && !req.user.is('Admin') && !req.user.is('Inspector'))
+        if (!req.user.is('BridgeManager') && !req.user.is('Admin'))
             return req.error(403, 'Insufficient privileges for this operation');
         const { bridge_ID, orderNumber, inspectionType, plannedDate, inspector,
                 inspectorOrg, accessMethod, ratingMethod, notes } = req.data;
@@ -172,7 +172,7 @@ module.exports = function registerInspectionHandlers(srv, helpers) {
 
     // ── raiseDefect ───────────────────────────────────────────────
     srv.on('raiseDefect', async (req) => {
-        if (!req.user.is('BridgeManager') && !req.user.is('Admin') && !req.user.is('Inspector'))
+        if (!req.user.is('BridgeManager') && !req.user.is('Admin'))
             return req.error(403, 'Insufficient privileges for this operation');
         const { bridge_ID, inspectionOrder_ID, defectCategory, severity, extent,
                 structuralRisk, priority, description, elementGroup, elementName, location } = req.data;
@@ -336,7 +336,7 @@ module.exports = function registerInspectionHandlers(srv, helpers) {
 
     // ── raiseDefectFromMeasurement ────────────────────────────────
     srv.on('raiseDefectFromMeasurement', async (req) => {
-        if (!req.user.is('Inspector') && !req.user.is('BridgeManager')) {
+        if (!req.user.is('BridgeManager') && !req.user.is('Admin')) {
             return req.reject(403, 'Insufficient permissions');
         }
         const { measurementDocId } = req.data;
@@ -398,7 +398,7 @@ module.exports = function registerInspectionHandlers(srv, helpers) {
 
     // ── ingestSensorReading ───────────────────────────────────────
     srv.on('ingestSensorReading', async (req) => {
-        if (!req.user.is('Inspector') && !req.user.is('Admin')) {
+        if (!req.user.is('BridgeManager') && !req.user.is('Admin')) {
             return req.reject(403, 'Insufficient permissions');
         }
         const db = await cds.connect.to('db');
@@ -487,7 +487,7 @@ module.exports = function registerInspectionHandlers(srv, helpers) {
 
     // ── classifyDefect (mock AI) ──────────────────────────────────
     srv.on('classifyDefect', async (req) => {
-        if (!req.user.is('Inspector') && !req.user.is('BridgeManager')) {
+        if (!req.user.is('BridgeManager') && !req.user.is('Admin')) {
             return req.reject(403, 'Insufficient permissions');
         }
         const db = await cds.connect.to('db');

@@ -72,8 +72,8 @@ function getAppConfig() returns {
     version      : String;
 };
 
-// ── Mass Upload Actions (BridgeManager + Admin + Uploader only) ──────
-@restrict: [{ to: ['BridgeManager','Admin','Uploader'] }]
+// ── Mass Upload Actions (BridgeManager + Admin only) ──────
+@restrict: [{ to: ['BridgeManager','Admin'] }]
 action massUploadBridges(csvData: LargeString) returns {
     status       : String;
     totalRecords : Integer;
@@ -83,7 +83,7 @@ action massUploadBridges(csvData: LargeString) returns {
     errors       : LargeString;
 };
 
-@restrict: [{ to: ['BridgeManager','Admin','Uploader'] }]
+@restrict: [{ to: ['BridgeManager','Admin'] }]
 action massUploadRestrictions(csvData: LargeString) returns {
     status      : String;
     totalRecords: Integer;
@@ -93,7 +93,7 @@ action massUploadRestrictions(csvData: LargeString) returns {
 };
 
 // ── Mass Upload — Routes ──────────────────────────────────
-@restrict: [{ to: ['BridgeManager','Admin','Uploader'] }]
+@restrict: [{ to: ['BridgeManager','Admin'] }]
 action massUploadRoutes(csvData: LargeString) returns {
     status       : String;
     totalRecords : Integer;
@@ -104,7 +104,7 @@ action massUploadRoutes(csvData: LargeString) returns {
 };
 
 // ── Mass Upload — Vehicle Classes ─────────────────────────
-@restrict: [{ to: ['BridgeManager','Admin','Uploader'] }]
+@restrict: [{ to: ['BridgeManager','Admin'] }]
 action massUploadVehicleClasses(csvData: LargeString) returns {
     status       : String;
     totalRecords : Integer;
@@ -115,7 +115,7 @@ action massUploadVehicleClasses(csvData: LargeString) returns {
 };
 
 // ── Mass Upload — Inspection Orders ───────────────────────
-@restrict: [{ to: ['BridgeManager','Admin','Inspector'] }]
+@restrict: [{ to: ['BridgeManager','Admin'] }]
 action massUploadInspectionOrders(csvData: LargeString) returns {
     status       : String;
     totalRecords : Integer;
@@ -126,7 +126,7 @@ action massUploadInspectionOrders(csvData: LargeString) returns {
 };
 
 // ── Mass Upload — Bridge Defects ──────────────────────────
-@restrict: [{ to: ['BridgeManager','Admin','Inspector'] }]
+@restrict: [{ to: ['BridgeManager','Admin'] }]
 action massUploadBridgeDefects(csvData: LargeString) returns {
     status       : String;
     totalRecords : Integer;
@@ -137,7 +137,7 @@ action massUploadBridgeDefects(csvData: LargeString) returns {
 };
 
 // ── Mass Upload — Lookups ─────────────────────────────────
-@restrict: [{ to: ['Admin'] }]
+@restrict: [{ to: ['BridgeManager','Admin'] }]
 action massUploadLookups(csvData: LargeString) returns {
     status       : String;
     totalRecords : Integer;
@@ -527,7 +527,7 @@ action reverseGeocode(
     lon : Decimal(9,6)
 ) returns LargeString;
 
-@restrict: [{ to: ['Viewer','Inspector','Operator','BridgeManager','Admin','Executive'] }]
+@restrict: [{ to: ['Viewer','BridgeManager','Admin'] }]
 function predictCondition(bridgeId: UUID, yearsAhead: Integer) returns array of {
     year           : Integer;
     predictedScore : Decimal;
@@ -536,32 +536,32 @@ function predictCondition(bridgeId: UUID, yearsAhead: Integer) returns array of 
 };
 
 
-@restrict: [{ to: ['Viewer','Inspector','Operator','BridgeManager','Admin','Executive'] }]
+@restrict: [{ to: ['Viewer','BridgeManager','Admin'] }]
 function getNetworkKPIs() returns {
     totalBridges: Integer; openBridges: Integer; restrictedBridges: Integer;
     closedBridges: Integer; avgConditionScore: Decimal; criticalCount: Integer;
     overdueInspections: Integer; activeRestrictions: Integer;
 };
 
-@restrict: [{ to: ['Viewer','Inspector','Operator','BridgeManager','Admin','Executive'] }]
+@restrict: [{ to: ['Viewer','BridgeManager','Admin'] }]
 function getInspectionComplianceKPIs() returns {
     totalDue: Integer; completedOnTime: Integer; overdue: Integer;
     complianceRate: Decimal; avgDaysSinceInspection: Integer;
 };
 
-@restrict: [{ to: ['Viewer','Inspector','Operator','BridgeManager','Admin','Executive'] }]
+@restrict: [{ to: ['Viewer','BridgeManager','Admin'] }]
 function getDefectKPIs() returns {
     totalOpen: Integer; criticalOpen: Integer; highOpen: Integer;
     avgDaysOpen: Integer; closedThisMonth: Integer;
 };
 
-@restrict: [{ to: ['Viewer','Inspector','Operator','BridgeManager','Admin','Executive'] }]
+@restrict: [{ to: ['Viewer','BridgeManager','Admin'] }]
 function getRestrictionKPIs() returns {
     totalActive: Integer; expiringIn30Days: Integer; temporaryActive: Integer;
     gazetteValid: Integer; gazetteInvalid: Integer;
 };
 
-@restrict: [{ to: ['Viewer','Inspector','Operator','BridgeManager','Admin','Executive'] }]
+@restrict: [{ to: ['Viewer','BridgeManager','Admin'] }]
 type TrendPoint { period: String; value: Decimal; }
 function getTrendData(metric: String, periods: Integer) returns array of TrendPoint;
 }

@@ -328,7 +328,7 @@
                                                     <cells>
                                                         <ObjectIdentifier title="NHVR_Admin"/>
                                                         <Text text="sg-nhvr-admin (or your IdP group name)"/>
-                                                        <Text text="Admin, BridgeManager, Viewer, Uploader, Executive"/>
+                                                        <Text text="Admin, BridgeManager, Viewer"/>
                                                         <Text text="System administrators"/>
                                                     </cells>
                                                 </ColumnListItem>
@@ -336,7 +336,7 @@
                                                     <cells>
                                                         <ObjectIdentifier title="NHVR_BridgeManager"/>
                                                         <Text text="sg-nhvr-bridge-managers"/>
-                                                        <Text text="BridgeManager, Viewer, Uploader, Executive"/>
+                                                        <Text text="BridgeManager, Viewer"/>
                                                         <Text text="Engineers / Planners"/>
                                                     </cells>
                                                 </ColumnListItem>

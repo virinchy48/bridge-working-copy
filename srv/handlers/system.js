@@ -32,7 +32,7 @@ module.exports = function registerSystemHandlers(srv) {
     srv.on('READ', 'RestrictionTypeConfigs', async (req, next) => next());
 
     srv.on('me', req => {
-        const knownRoles = ['Admin', 'BridgeManager', 'Viewer', 'Uploader', 'Executive', 'Inspector', 'Operator'];
+        const knownRoles = ['Admin', 'BridgeManager', 'Viewer'];
         const roles = knownRoles.filter(r => req.user.is(r));
         const appMode = process.env.NHVR_APP_MODE || 'full';
         return { id: req.user.id, roles, appMode };
@@ -176,8 +176,6 @@ module.exports = function registerSystemHandlers(srv) {
     function _resolveRole(req) {
         if (req.user.is('Admin'))         return 'ADMIN';
         if (req.user.is('BridgeManager')) return 'BRIDGE_MANAGER';
-        if (req.user.is('Inspector'))     return 'INSPECTOR';
-        if (req.user.is('Operator'))      return 'OPERATOR';
         return 'READ_ONLY';
     }
 

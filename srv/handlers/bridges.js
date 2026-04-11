@@ -250,7 +250,7 @@ module.exports = function registerBridgeHandlers(srv, helpers) {
     // ACTION: closeForTraffic
     // ─────────────────────────────────────────────────────────
     srv.on('closeForTraffic', 'Bridges', async (req) => {
-        if (!req.user.is('BridgeManager') && !req.user.is('Admin') && !req.user.is('Inspector')) {
+        if (!req.user.is('BridgeManager') && !req.user.is('Admin')) {
             return req.error(403, 'Insufficient privileges for this operation');
         }
         const _p = req.params[0]; const bridgeId = typeof _p === "object" ? (_p.ID || Object.values(_p)[0]) : _p;
@@ -266,7 +266,7 @@ module.exports = function registerBridgeHandlers(srv, helpers) {
     // ACTION: reopenForTraffic
     // ─────────────────────────────────────────────────────────
     srv.on('reopenForTraffic', 'Bridges', async (req) => {
-        if (!req.user.is('BridgeManager') && !req.user.is('Admin') && !req.user.is('Inspector')) {
+        if (!req.user.is('BridgeManager') && !req.user.is('Admin')) {
             return req.error(403, 'Insufficient privileges for this operation');
         }
         const _p = req.params[0]; const bridgeId = typeof _p === "object" ? (_p.ID || Object.values(_p)[0]) : _p;

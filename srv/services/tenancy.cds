@@ -6,7 +6,7 @@ extend service BridgeManagementService with {
 // ── Tenant CRUD (Admin only) ──────────────────────────────
 @restrict: [
     { grant: 'READ',                    to: 'authenticated-user' },
-    { grant: ['CREATE','UPDATE','DELETE'], to: ['Admin'] }
+    { grant: ['CREATE','UPDATE','DELETE'], to: ['BridgeManager','Admin'] }
 ]
 entity Tenants as projection on nhvr.Tenant {
     *,
@@ -17,7 +17,7 @@ entity Tenants as projection on nhvr.Tenant {
 // ── Tenant Features (licensed capabilities per tenant) ───
 @restrict: [
     { grant: 'READ',                    to: 'authenticated-user' },
-    { grant: ['CREATE','UPDATE','DELETE'], to: ['Admin'] }
+    { grant: ['CREATE','UPDATE','DELETE'], to: ['BridgeManager','Admin'] }
 ]
 entity TenantFeatures as projection on nhvr.TenantFeature {
     *,
@@ -30,7 +30,7 @@ entity TenantFeatures as projection on nhvr.TenantFeature {
 // ── Tenant Role Capabilities ─────────────────────────────
 @restrict: [
     { grant: 'READ',                    to: 'authenticated-user' },
-    { grant: ['CREATE','UPDATE','DELETE'], to: ['Admin'] }
+    { grant: ['CREATE','UPDATE','DELETE'], to: ['BridgeManager','Admin'] }
 ]
 entity TenantRoleCapabilities as projection on nhvr.TenantRoleCapability {
     *,
@@ -60,7 +60,7 @@ function getCapabilityProfile() returns array of {
 
 // ── assignTenantCapabilities ─────────────────────────────
 // Bulk-upserts TenantFeature + TenantRoleCapability rows.
-@restrict: [{ to: ['Admin'] }]
+@restrict: [{ to: ['BridgeManager','Admin'] }]
 action assignTenantCapabilities(
     tenantId     : UUID,
     capabilities : array of {

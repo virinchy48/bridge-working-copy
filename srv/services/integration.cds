@@ -10,7 +10,7 @@ entity SensorDevices as projection on nhvr.SensorDevice {
     lastReading, lastValue, unit, alertLevel, isActive, createdAt, modifiedAt
 };
 
-@restrict: [{ to: ['Viewer','Inspector','Operator','BridgeManager','Admin'] }]
+@restrict: [{ to: ['Viewer','BridgeManager','Admin'] }]
 entity SensorReadings as projection on nhvr.SensorReading {
     key ID,
     device.ID as device_ID,
@@ -18,14 +18,14 @@ entity SensorReadings as projection on nhvr.SensorReading {
     readingAt, value, unit, alertLevel, rawPayload
 };
 
-@restrict: [{ to: ['BridgeManager','Admin','Inspector','Operator'] }]
+@restrict: [{ to: ['BridgeManager','Admin'] }]
 action ingestSensorReading(deviceId: String, value: Decimal, unit: String, readingAt: DateTime, rawPayload: String) returns SensorReadings;
 
 // ── P14: AI Defect Classification ─────────────────────────────
 
 // ── Document Attachments ─────────────────────────────────────
-@restrict: [{ grant: ['READ'],             to: ['Viewer','Inspector','Operator','BridgeManager','Admin','Executive'] },
-            { grant: ['CREATE','UPDATE'],  to: ['BridgeManager','Admin','Inspector'] },
+@restrict: [{ grant: ['READ'],             to: ['Viewer','BridgeManager','Admin'] },
+            { grant: ['CREATE','UPDATE'],  to: ['BridgeManager','Admin'] },
             { grant: ['DELETE'],           to: ['Admin','BridgeManager'] }]
 entity DocumentAttachments as projection on nhvr.DocumentAttachment {
     key ID, bridge, documentType, title, description,
@@ -37,7 +37,7 @@ entity DocumentAttachments as projection on nhvr.DocumentAttachment {
 }
 
 // ── Integration Configs (Admin only) ─────────────────────────
-@restrict: [{ grant: ['READ','CREATE','UPDATE','DELETE'], to: ['Admin'] }]
+@restrict: [{ grant: ['READ','CREATE','UPDATE','DELETE'], to: ['BridgeManager','Admin'] }]
 entity IntegrationConfigs as projection on nhvr.IntegrationConfig {
     key ID, systemCode, systemName, description, baseUrl, authType,
         username, oauthClientId, oauthScope, oauthTokenEndpoint,
@@ -50,8 +50,8 @@ entity IntegrationConfigs as projection on nhvr.IntegrationConfig {
 }
 
 // ── Integration Logs (read-only, Admin/BridgeManager) ────────
-@restrict: [{ grant: ['READ'],   to: ['BridgeManager','Admin','Executive'] },
-            { grant: ['DELETE'], to: ['Admin'] }]
+@restrict: [{ grant: ['READ'],   to: ['BridgeManager','Admin'] },
+            { grant: ['DELETE'], to: ['BridgeManager','Admin'] }]
 entity IntegrationLogs as projection on nhvr.IntegrationLog {
     key ID, systemCode, operationType, entityType, entityId, externalId,
         status, recordsProcessed, recordsSuccess, recordsFailed,
@@ -60,7 +60,7 @@ entity IntegrationLogs as projection on nhvr.IntegrationLog {
 }
 
 // ── S/4HANA Equipment Mappings ───────────────────────────────
-@restrict: [{ grant: ['READ'],             to: ['Viewer','Inspector','Operator','BridgeManager','Admin','Executive'] },
+@restrict: [{ grant: ['READ'],             to: ['Viewer','BridgeManager','Admin'] },
             { grant: ['CREATE','UPDATE','DELETE'], to: ['Admin','BridgeManager'] }]
 entity S4EquipmentMappings as projection on nhvr.S4EquipmentMapping {
     key ID, bridge, equipmentNumber, functionalLocation, equipmentClass,
@@ -101,7 +101,7 @@ action syncBridgeFromS4(
 };
 
 // ── S/4HANA: Bulk sync all bridges (optionally filtered by state)
-@restrict: [{ to: ['Admin'] }]
+@restrict: [{ to: ['BridgeManager','Admin'] }]
 action syncAllBridgesToS4(
     state : String
 ) returns {
@@ -113,7 +113,7 @@ action syncAllBridgesToS4(
 };
 
 // ── S/4HANA: Defect → PM Maintenance Notification ────────────
-@restrict: [{ to: ['BridgeManager','Admin','Inspector'] }]
+@restrict: [{ to: ['BridgeManager','Admin'] }]
 action createS4MaintenanceNotification(
     defectId : UUID
 ) returns {
@@ -123,7 +123,7 @@ action createS4MaintenanceNotification(
 };
 
 // ── S/4HANA: InspectionOrder → PM Work Order ─────────────────
-@restrict: [{ to: ['BridgeManager','Admin','Inspector'] }]
+@restrict: [{ to: ['BridgeManager','Admin'] }]
 action createS4MaintenanceOrder(
     inspectionOrderId : UUID
 ) returns {
@@ -133,7 +133,7 @@ action createS4MaintenanceOrder(
 };
 
 // ── BANC: Generate BANC-format CSV export ────────────────────
-@restrict: [{ to: ['BridgeManager','Admin','Executive'] }]
+@restrict: [{ to: ['BridgeManager','Admin'] }]
 action exportToBANC(
     stateCode : String,
     fromDate  : Date,
@@ -147,7 +147,7 @@ action exportToBANC(
 };
 
 // ── BANC: Validate single bridge for BANC compliance ─────────
-@restrict: [{ to: ['BridgeManager','Admin','Inspector'] }]
+@restrict: [{ to: ['BridgeManager','Admin'] }]
 action validateBancRecord(
     bridgeId : UUID
 ) returns {
@@ -168,7 +168,7 @@ action syncBridgeToESRI(
 };
 
 // ── ESRI: Bulk sync bridges to ArcGIS ────────────────────────
-@restrict: [{ to: ['Admin'] }]
+@restrict: [{ to: ['BridgeManager','Admin'] }]
 action syncAllBridgesToESRI(
     state  : String,
     region : String
@@ -191,7 +191,7 @@ action testIntegrationConnection(
 };
 
 // ── General: Current status of all integration systems ───────
-@restrict: [{ to: ['Viewer','Inspector','Operator','BridgeManager','Admin','Executive'] }]
+@restrict: [{ to: ['Viewer','BridgeManager','Admin'] }]
 type IntegrationStatusItem {
     systemCode    : String; systemName : String;
     isActive      : Boolean; isConfigured : Boolean;

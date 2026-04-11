@@ -84,7 +84,7 @@ entity ScourAssessments as projection on nhvr.ScourAssessment {
     assessedBy, assessmentDate, mitigationStatus, notes, createdAt, modifiedAt
 };
 
-@restrict: [{ to: ['BridgeManager','Admin','Inspector'] }]
+@restrict: [{ to: ['BridgeManager','Admin'] }]
 action assessScourRisk(
     bridgeId        : UUID,
     floodFrequency  : Integer,
@@ -96,7 +96,7 @@ action assessScourRisk(
     assessedBy      : String
 ) returns ScourAssessments;
 
-@restrict: [{ to: ['Viewer','Inspector','Operator','BridgeManager','Admin'] }]
+@restrict: [{ to: ['Viewer','BridgeManager','Admin'] }]
 entity BridgeDeteriorationProfiles as projection on nhvr.BridgeDeteriorationProfile {
     key ID,
     bridge.ID as bridge_ID,
@@ -104,9 +104,9 @@ entity BridgeDeteriorationProfiles as projection on nhvr.BridgeDeteriorationProf
     annualDeclineRate, priorityScore, priorityBand, serviceLifeYears, computedAt
 };
 
-@restrict: [{ to: ['BridgeManager','Admin','Inspector'] }]
+@restrict: [{ to: ['BridgeManager','Admin'] }]
 action computeDeteriorationProfile(bridgeId: UUID) returns BridgeDeteriorationProfiles;
 
-@restrict: [{ to: ['Viewer','Inspector','Operator','BridgeManager','Admin'] }]
+@restrict: [{ to: ['Viewer','BridgeManager','Admin'] }]
 function getMaintenancePriorityList(state: String, priorityBand: String) returns array of BridgeDeteriorationProfiles;
 }

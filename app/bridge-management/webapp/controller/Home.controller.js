@@ -269,7 +269,7 @@ sap.ui.define([
                 if (tile) tile.setVisible(RoleManager.isVisible(tileConfig.key));
             });
 
-            // Inspector section — visible for Inspector, BridgeManager, Admin
+            // Inspection section — visible for BridgeManager and Admin
             const showInspection = RoleManager.isVisible("inspections") || RoleManager.isVisible("defects");
             const sectionInspection = this.byId("sectionInspection");
             if (sectionInspection) sectionInspection.setVisible(showInspection && !showAdmin);
@@ -360,9 +360,7 @@ sap.ui.define([
                 "NHVR Bridge Management is the National Heavy Vehicle Regulator's asset management system for 2,100+ bridges on the Australian road network.\n\n" +
                 "Roles:\n" +
                 "• Admin — full access including configuration\n" +
-                "• Bridge Manager — manage bridges, restrictions and inspections\n" +
-                "• Inspector — record inspection results and defects\n" +
-                "• Operator — manage permits and route assessments\n" +
+                "• Bridge Manager — full operational and administrative access\n" +
                 "• Read Only — view-only access\n\n" +
                 "KPI Tiles:\n" +
                 "• Total Bridges — count of all bridge assets in the registry\n" +

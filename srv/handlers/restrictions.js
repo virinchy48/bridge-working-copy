@@ -183,7 +183,7 @@ module.exports = function registerRestrictionHandlers(srv, helpers) {
     // ACTION: disableRestriction (on Restrictions entity)
     // ─────────────────────────────────────────────────────────
     srv.on('disableRestriction', 'Restrictions', async (req) => {
-        if (!req.user.is('BridgeManager') && !req.user.is('Admin') && !req.user.is('Inspector')) {
+        if (!req.user.is('BridgeManager') && !req.user.is('Admin')) {
             return req.error(403, 'Insufficient privileges for this operation');
         }
         const { reason } = req.data;
@@ -215,7 +215,7 @@ module.exports = function registerRestrictionHandlers(srv, helpers) {
     // ACTION: enableRestriction (on Restrictions entity)
     // ─────────────────────────────────────────────────────────
     srv.on('enableRestriction', 'Restrictions', async (req) => {
-        if (!req.user.is('BridgeManager') && !req.user.is('Admin') && !req.user.is('Inspector')) {
+        if (!req.user.is('BridgeManager') && !req.user.is('Admin')) {
             return req.error(403, 'Insufficient privileges for this operation');
         }
         const { reason } = req.data;

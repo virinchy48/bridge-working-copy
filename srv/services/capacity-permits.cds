@@ -57,7 +57,7 @@ entity LoadRatings as projection on nhvr.LoadRating {
 @cds.redirection.target: true
 @restrict: [
     { grant: ['READ'],                    to: 'authenticated-user' },
-    { grant: ['CREATE','UPDATE','DELETE'], to: ['Admin'] }
+    { grant: ['CREATE','UPDATE','DELETE'], to: ['BridgeManager','Admin'] }
 ]
 entity VehicleTypes as projection on nhvr.VehicleType;
 
@@ -241,7 +241,7 @@ entity BridgeRouteAssignments as projection on nhvr.BridgeRouteAssignment {
     sequenceNo, isLimiter, notes, createdAt
 };
 
-@restrict: [{ to: ['Viewer','Inspector','Operator','BridgeManager','Admin','Executive'] }]
+@restrict: [{ to: ['Viewer','BridgeManager','Admin'] }]
 action healthCheck() returns {
     status    : String;
     timestamp : String;
