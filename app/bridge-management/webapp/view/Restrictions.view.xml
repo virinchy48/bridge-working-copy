@@ -57,15 +57,15 @@
                     <VBox class="sapUiSmallMarginEnd">
                         <Label text="Permit" design="Bold"/>
                         <Select id="filterPermit" change="onFilterChange" width="150px">
-                            <core:Item key="ALL"   text="All"/>
-                            <core:Item key="YES"   text="Required"/>
-                            <core:Item key="NO"    text="Not Required"/>
+                            <core:Item key=""    text="All"/>
+                            <core:Item key="YES" text="Required"/>
+                            <core:Item key="NO"  text="Not Required"/>
                         </Select>
                     </VBox>
                     <VBox class="sapUiSmallMarginEnd">
                         <Label text="Temporary" design="Bold"/>
                         <Select id="filterTemporary" change="onFilterChange" width="150px">
-                            <core:Item key="ALL" text="All"/>
+                            <core:Item key=""    text="All"/>
                             <core:Item key="YES" text="Temporary Only"/>
                             <core:Item key="NO"  text="Permanent Only"/>
                         </Select>
@@ -280,12 +280,8 @@
                 <Input id="glEditRestValue" type="Number" placeholder="e.g. 4.5" width="100%" class="sapUiSmallMarginBottom"/>
 
                 <Label text="Unit" required="true" class="sapUiTinyMarginBottom"/>
-                <Select id="glEditRestUnit" width="100%" class="sapUiSmallMarginBottom">
-                    <core:Item key="t"    text="tonnes (t)"/>
-                    <core:Item key="kN"   text="kilonewtons (kN)"/>
-                    <core:Item key="m"    text="metres (m)"/>
-                    <core:Item key="km/h" text="km/h"/>
-                </Select>
+                <!-- Items populated at runtime from Lookup table (MEASUREMENT_UNIT) -->
+                <Select id="glEditRestUnit" width="100%" class="sapUiSmallMarginBottom"/>
 
                 <Label text="Vehicle Class" class="sapUiTinyMarginBottom"/>
                 <ComboBox id="glEditRestVehicleClass"
@@ -327,13 +323,8 @@
                 <Input id="glEditRestApprovedBy" placeholder="e.g. Chief Engineer, TfNSW" width="100%" class="sapUiSmallMarginBottom"/>
 
                 <Label text="Direction" class="sapUiTinyMarginBottom"/>
-                <Select id="glEditRestDirection" width="100%" class="sapUiSmallMarginBottom">
-                    <core:Item key="BOTH"        text="Both Directions"/>
-                    <core:Item key="NORTHBOUND"  text="Northbound"/>
-                    <core:Item key="SOUTHBOUND"  text="Southbound"/>
-                    <core:Item key="EASTBOUND"   text="Eastbound"/>
-                    <core:Item key="WESTBOUND"   text="Westbound"/>
-                </Select>
+                <!-- Items populated at runtime from Lookup table (RESTRICTION_DIRECTION) -->
+                <Select id="glEditRestDirection" width="100%" class="sapUiSmallMarginBottom"/>
 
                 <Label text="Enforcement Authority" class="sapUiTinyMarginBottom"/>
                 <Input id="glEditRestAuthority" placeholder="e.g. NSW RMS" width="100%" class="sapUiSmallMarginBottom"/>

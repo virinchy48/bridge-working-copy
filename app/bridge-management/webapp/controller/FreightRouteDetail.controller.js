@@ -13,8 +13,9 @@ sap.ui.define([
     "sap/m/BusyDialog",
     "nhvr/bridgemanagement/model/CapabilityManager",
     "nhvr/bridgemanagement/util/AuthFetch",
-    "nhvr/bridgemanagement/util/UserAnalytics"
-], function (Controller, JSONModel, MessageToast, MessageBox, BusyDialog, CapabilityManager, AuthFetch, UserAnalytics) {
+    "nhvr/bridgemanagement/util/UserAnalytics",
+    "nhvr/bridgemanagement/util/LookupService"
+], function (Controller, JSONModel, MessageToast, MessageBox, BusyDialog, CapabilityManager, AuthFetch, UserAnalytics, LookupService) {
     "use strict";
 
     const BASE = "/bridge-management";
@@ -40,6 +41,12 @@ sap.ui.define([
 
             const oRouter = this.getOwnerComponent().getRouter();
             oRouter.getRoute("FreightRouteDetail").attachPatternMatched(this._onRouteMatched, this);
+
+            // Vehicle Class dropdown sourced from Lookup table (VEHICLE_CLASS category)
+            var self = this;
+            LookupService.load().then(function () {
+                LookupService.populateFormSelect(self.byId("selVehicleClass"), "VEHICLE_CLASS");
+            });
         },
 
         _onRouteMatched: function (oEvent) {

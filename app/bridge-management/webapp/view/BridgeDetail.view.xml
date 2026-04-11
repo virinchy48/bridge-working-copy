@@ -1844,13 +1844,8 @@
                     <VBox width="40%">
                         <Label text="Unit" required="true" class="sapUiTinyMarginBottom"
                             tooltip="Unit of measure: m = metres, t = tonnes, km/h = speed."/>
-                        <Select id="bdRestUnit" width="100%">
-                            <core:Item key="m"    text="m  (metres)"/>
-                            <core:Item key="t"    text="t  (tonnes)"/>
-                            <core:Item key="km/h" text="km/h"/>
-                            <core:Item key="kph"  text="kph"/>
-                            <core:Item key="km"   text="km"/>
-                        </Select>
+                        <!-- Items populated at runtime from Lookup table (MEASUREMENT_UNIT) -->
+                        <Select id="bdRestUnit" width="100%"/>
                     </VBox>
                 </HBox>
 
@@ -1881,11 +1876,8 @@
                 <VBox id="bdRestDirectionBox" class="sapUiSmallMarginBottom">
                     <Label text="Direction Applied" class="sapUiTinyMarginBottom"
                         tooltip="BOTH = applies in both directions. INCREASING/DECREASING = chainage direction."/>
-                    <Select id="bdRestDirection" width="100%">
-                        <core:Item key="BOTH"       text="Both Directions"/>
-                        <core:Item key="INCREASING" text="Increasing (towards higher chainage)"/>
-                        <core:Item key="DECREASING" text="Decreasing (towards lower chainage)"/>
-                    </Select>
+                    <!-- Items populated at runtime from Lookup table (RESTRICTION_DIRECTION) -->
+                    <Select id="bdRestDirection" width="100%"/>
                 </VBox>
 
                 <VBox id="bdRestGazetteBox" class="sapUiSmallMarginBottom">
@@ -2049,12 +2041,8 @@
                 <Input id="editRestValue" type="Number" placeholder="e.g. 4.5" width="100%" class="sapUiSmallMarginBottom"/>
 
                 <Label text="Unit" required="true" class="sapUiTinyMarginBottom" labelFor="editRestUnit"/>
-                <Select id="editRestUnit" width="100%" class="sapUiSmallMarginBottom">
-                    <core:Item key="m"   text="metres (m)"/>
-                    <core:Item key="t"   text="tonnes (t)"/>
-                    <core:Item key="kph" text="km/h (kph)"/>
-                    <core:Item key="km"  text="kilometres (km)"/>
-                </Select>
+                <!-- Items populated at runtime from Lookup table (MEASUREMENT_UNIT) -->
+                <Select id="editRestUnit" width="100%" class="sapUiSmallMarginBottom"/>
 
                 <Label text="Status" class="sapUiTinyMarginBottom" labelFor="editRestStatus"/>
                 <Select id="editRestStatus" width="100%" class="sapUiSmallMarginBottom"/>
@@ -2068,11 +2056,8 @@
                     class="sapUiSmallMarginBottom"/>
 
                 <Label text="Direction Applied" class="sapUiTinyMarginBottom" labelFor="editRestDirection"/>
-                <Select id="editRestDirection" width="100%" class="sapUiSmallMarginBottom">
-                    <core:Item key="BOTH"       text="Both Directions"/>
-                    <core:Item key="INCREASING" text="Increasing"/>
-                    <core:Item key="DECREASING" text="Decreasing"/>
-                </Select>
+                <!-- Items populated at runtime from Lookup table (RESTRICTION_DIRECTION) -->
+                <Select id="editRestDirection" width="100%" class="sapUiSmallMarginBottom"/>
 
                 <Label text="Gazette Reference" class="sapUiTinyMarginBottom" labelFor="editRestGazette"/>
                 <Input id="editRestGazette" placeholder="e.g. NSW Gaz 2024-01" width="100%" class="sapUiSmallMarginBottom"/>
@@ -2223,17 +2208,8 @@
                 <Label text="NHVR Route Assessed" class="sapUiTinyMarginTop" labelFor="nhvrEditAssessed"/>
                 <CheckBox id="nhvrEditAssessed" text="Yes — NHVR Assessed"/>
                 <Label text="Route Approval Class" class="sapUiTinyMarginTop" labelFor="nhvrEditApprovalClass"/>
-                <Select id="nhvrEditApprovalClass" width="100%">
-                    <core:Item key=""           text="— Not Set —"/>
-                    <core:Item key="A_DOUBLE"   text="A Double"/>
-                    <core:Item key="B_DOUBLE"   text="B Double"/>
-                    <core:Item key="B_TRAIN"    text="B Train"/>
-                    <core:Item key="ROAD_TRAIN" text="Road Train"/>
-                    <core:Item key="PBS_1"      text="PBS Level 1"/>
-                    <core:Item key="PBS_2"      text="PBS Level 2"/>
-                    <core:Item key="PBS_3"      text="PBS Level 3"/>
-                    <core:Item key="PBS_4"      text="PBS Level 4"/>
-                </Select>
+                <!-- Items populated at runtime from Lookup table (VEHICLE_CLASS) -->
+                <Select id="nhvrEditApprovalClass" width="100%"/>
                 <Label text="PBS Level Approved" class="sapUiTinyMarginTop" labelFor="nhvrEditPbsLevel"/>
                 <Input id="nhvrEditPbsLevel" placeholder="e.g. 2" width="100%"/>
                 <Label text="Gazette Reference" class="sapUiTinyMarginTop" labelFor="nhvrEditGazetteRef"/>
@@ -2301,12 +2277,8 @@
                     </VBox>
                     <VBox class="sapUiSmallMarginEnd">
                         <Label text="Inspection Type" required="true" class="sapUiTinyMarginBottom" labelFor="inspDlgType"/>
-                        <Select id="inspDlgType" width="160px">
-                            <core:Item key="ROUTINE"   text="Routine"/>
-                            <core:Item key="PRINCIPAL" text="Principal (Level 2)"/>
-                            <core:Item key="SPECIAL"   text="Special / Detailed"/>
-                            <core:Item key="DRIVE_BY"  text="Drive-By"/>
-                        </Select>
+                        <!-- Items populated at runtime from Lookup table (INSPECTION_TYPE) -->
+                        <Select id="inspDlgType" width="160px"/>
                     </VBox>
                     <VBox>
                         <Label text="Inspector Name / Reg. No." required="true" class="sapUiTinyMarginBottom" labelFor="inspDlgInspector"/>
@@ -2332,11 +2304,8 @@
                     </VBox>
                     <VBox class="sapUiSmallMarginEnd">
                         <Label text="Structural Adequacy" class="sapUiTinyMarginBottom" labelFor="inspDlgAdequacy"/>
-                        <Select id="inspDlgAdequacy" width="160px">
-                            <core:Item key="ADEQUATE"    text="Adequate"/>
-                            <core:Item key="MARGINAL"    text="Marginal"/>
-                            <core:Item key="INADEQUATE"  text="Inadequate"/>
-                        </Select>
+                        <!-- Items populated at runtime from Lookup table (STRUCTURAL_ADEQUACY) -->
+                        <Select id="inspDlgAdequacy" width="160px"/>
                     </VBox>
                     <VBox alignItems="Center" justifyContent="End">
                         <CheckBox id="inspDlgMaintReq" text="Maintenance Required"/>

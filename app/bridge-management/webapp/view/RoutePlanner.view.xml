@@ -111,15 +111,8 @@
                                     <Label text="Speed (km/h)"/>
                                     <Input id="rpSpeed" value="80" width="110px" type="Number"/>
                                     <Label text="Vehicle Class"/>
-                                    <Select id="rpVehicleClass" width="150px">
-                                        <items>
-                                            <core:Item key="GENERAL"    text="General"/>
-                                            <core:Item key="B_DOUBLE"   text="B-Double"/>
-                                            <core:Item key="ROAD_TRAIN" text="Road Train"/>
-                                            <core:Item key="PBS"        text="PBS Vehicle"/>
-                                            <core:Item key="OVERSIZE"   text="Oversize"/>
-                                        </items>
-                                    </Select>
+                                    <!-- Items populated at runtime from Lookup table (VEHICLE_CLASS) -->
+                                    <Select id="rpVehicleClass" width="150px"/>
                                 </form:SimpleForm>
                             </content>
                         </Panel>

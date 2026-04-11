@@ -109,13 +109,8 @@
                             </VBox>
                             <VBox class="nhvrFraInputGroup">
                                 <Label text="Vehicle Class"/>
-                                <Select id="selVehicleClass" width="130px">
-                                    <core:Item key="GENERAL"    text="General Access"/>
-                                    <core:Item key="B_DOUBLE"   text="B-Double"/>
-                                    <core:Item key="ROAD_TRAIN" text="Road Train"/>
-                                    <core:Item key="HML"        text="HML"/>
-                                    <core:Item key="PBS"        text="PBS"/>
-                                </Select>
+                                <!-- Items populated at runtime from Lookup table (VEHICLE_CLASS) -->
+                                <Select id="selVehicleClass" width="130px"/>
                             </VBox>
                         </HBox>
                         <!-- Action buttons — always visible below vehicle inputs -->

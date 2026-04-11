@@ -302,7 +302,20 @@ sap.ui.define([
             if (!sel) return;
             while (sel.getItems().length > 0) sel.removeItem(0);
             sel.addItem(new sap.ui.core.Item({ key: "", text: "— Select Region —" }));
-            ReferenceData.getRegions(state).forEach(function (region) {
+
+            // Primary source: regions derived from existing Bridge rows
+            // (preserves real data when the DB is populated).
+            // Fallback: REGION lookup category entries whose code starts
+            // with the selected state, so a fresh empty DB still shows a
+            // useful list of admin-configurable regions.
+            let regions = ReferenceData.getRegions(state);
+            if (!regions || regions.length === 0) {
+                // Match REGION rows like "NSW:HUNTER", "VIC:GIPPSLAND"
+                regions = LookupService.getItems("REGION")
+                    .filter(function (e) { return e.key && e.key.indexOf(state + ":") === 0; })
+                    .map(function (e) { return e.text || e.key.split(":")[1]; });
+            }
+            regions.forEach(function (region) {
                 sel.addItem(new sap.ui.core.Item({ key: region, text: region }));
             });
             sel.setSelectedKey("");

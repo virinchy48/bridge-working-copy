@@ -75,14 +75,21 @@ sap.ui.define([
                 LookupService.populateFormSelect(this.byId("rdPriority"),      "DEFECT_PRIORITY");
                 LookupService.populateFormSelect(this.byId("rdElementGroup"),  "ELEMENT_GROUP");
                 LookupService.populateFormSelect(this.byId("erSystemType"),    "EXTERNAL_SYSTEM_TYPE");
-                LookupService.populateFormSelect(this.byId("bdRestType"),      "RESTRICTION_TYPE");
-                LookupService.populateFormSelect(this.byId("bdRestStatus"),    "RESTRICTION_STATUS");
-                LookupService.populateFormSelect(this.byId("editRestType"),    "RESTRICTION_TYPE");
-                LookupService.populateFormSelect(this.byId("editRestStatus"),  "RESTRICTION_STATUS");
-                LookupService.populateFormSelect(this.byId("rcCondition"),     "CONDITION");
-                LookupService.populateFormSelect(this.byId("rcAdequacy"),      "STRUCTURAL_ADEQUACY");
-                LookupService.populateFormSelect(this.byId("invType"),         "INTERVENTION_TYPE");
-                LookupService.populateFormSelect(this.byId("invStatus"),       "PROGRAMME_STATUS");
+                LookupService.populateFormSelect(this.byId("bdRestType"),        "RESTRICTION_TYPE");
+                LookupService.populateFormSelect(this.byId("bdRestStatus"),      "RESTRICTION_STATUS");
+                LookupService.populateFormSelect(this.byId("bdRestUnit"),        "MEASUREMENT_UNIT");
+                LookupService.populateFormSelect(this.byId("bdRestDirection"),   "RESTRICTION_DIRECTION");
+                LookupService.populateFormSelect(this.byId("editRestType"),      "RESTRICTION_TYPE");
+                LookupService.populateFormSelect(this.byId("editRestStatus"),    "RESTRICTION_STATUS");
+                LookupService.populateFormSelect(this.byId("editRestUnit"),      "MEASUREMENT_UNIT");
+                LookupService.populateFormSelect(this.byId("editRestDirection"), "RESTRICTION_DIRECTION");
+                LookupService.populateFormSelect(this.byId("rcCondition"),       "CONDITION");
+                LookupService.populateFormSelect(this.byId("rcAdequacy"),        "STRUCTURAL_ADEQUACY");
+                LookupService.populateFormSelect(this.byId("invType"),           "INTERVENTION_TYPE");
+                LookupService.populateFormSelect(this.byId("invStatus"),         "PROGRAMME_STATUS");
+                LookupService.populateFormSelect(this.byId("nhvrEditApprovalClass"), "VEHICLE_CLASS", "— Not Set —");
+                LookupService.populateFormSelect(this.byId("inspDlgType"),       "INSPECTION_TYPE");
+                LookupService.populateFormSelect(this.byId("inspDlgAdequacy"),   "STRUCTURAL_ADEQUACY");
             }.bind(this));
         },
 

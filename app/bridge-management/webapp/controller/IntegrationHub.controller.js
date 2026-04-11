@@ -118,6 +118,14 @@ sap.ui.define([
             });
             this.getView().setModel(this._oIntModel, 'integrationModel');
 
+            // Filter dropdowns + cross-launch target selector sourced from Lookup table
+            var self = this;
+            LookupService.load().then(function () {
+                LookupService.populateSelect(self.byId("logSystemFilter"),   "EXTERNAL_SYSTEM_TYPE", "All Systems");
+                LookupService.populateSelect(self.byId("logStatusFilter"),   "INTEGRATION_STATUS",   "All Status");
+                LookupService.populateFormSelect(self.byId("crossLaunchTestSystem"), "EXTERNAL_SYSTEM_TYPE");
+            });
+
             // Integration config form model (S/4HANA, BANC, ESRI settings)
             this._oCfgModel = new JSONModel({
                 s4  : { isActive: false, baseUrl: '', username: '', _password: '', s4Client: '100',

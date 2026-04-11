@@ -228,18 +228,9 @@
                 class="sapUiSmallMarginBegin sapUiSmallMarginEnd sapUiMediumMarginTop sapUiMediumMarginBottom">
                 <toolbar>
                     <OverflowToolbar>
-                        <Select id="logSystemFilter" change="onLogSystemFilter" width="130px">
-                            <core:Item key="ALL"    text="All Systems"/>
-                            <core:Item key="S4HANA" text="S/4HANA"/>
-                            <core:Item key="BANC"   text="BANC"/>
-                            <core:Item key="ESRI"   text="ESRI"/>
-                        </Select>
-                        <Select id="logStatusFilter" change="onLogStatusFilter" width="120px">
-                            <core:Item key="ALL"     text="All Status"/>
-                            <core:Item key="SUCCESS" text="Success"/>
-                            <core:Item key="ERROR"   text="Errors"/>
-                            <core:Item key="PARTIAL" text="Partial"/>
-                        </Select>
+                        <!-- Items populated at runtime from Lookup table (EXTERNAL_SYSTEM_TYPE / INTEGRATION_STATUS) -->
+                        <Select id="logSystemFilter" change="onLogSystemFilter" width="130px"/>
+                        <Select id="logStatusFilter" change="onLogStatusFilter" width="120px"/>
                         <ToolbarSpacer/>
                         <Button text="Clear Log" icon="sap-icon://delete"
                             press="onClearLog" type="Transparent"/>
@@ -558,11 +549,8 @@
                         </VBox>
                         <VBox class="sapUiSmallMarginEnd">
                             <Label text="Target System"/>
-                            <Select id="crossLaunchTestSystem" width="180px">
-                                <core:Item key="S4HANA" text="SAP S/4HANA"/>
-                                <core:Item key="BANC"   text="Austroads BANC"/>
-                                <core:Item key="ESRI"   text="ESRI ArcGIS"/>
-                            </Select>
+                            <!-- Items populated at runtime from Lookup table (EXTERNAL_SYSTEM_TYPE) -->
+                            <Select id="crossLaunchTestSystem" width="180px"/>
                         </VBox>
                         <Button text="Resolve &amp; Preview" icon="sap-icon://simulate"
                             type="Emphasized" press="onPreviewCrossLaunch"
