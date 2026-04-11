@@ -10,13 +10,15 @@ sap.ui.define([
 ], function (Controller, includeStylesheet, MessageBox) {
     "use strict";
 
-    var BASE = "/bridge-management";
-    var _IS_LOC = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-    var _AUTH_H = _IS_LOC ? { "Authorization": "Basic " + btoa("admin:admin") } : {};
-    function _credOpts() {
-        var opts = { headers: Object.assign({ Accept: "application/json" }, _AUTH_H) };
-        if (!_IS_LOC) opts.credentials = "include";
-        return opts;
+    var BASE_PATH = "/bridge-management";
+    var IS_LOCAL_HOST = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+    var LOCAL_AUTH_HEADERS = IS_LOCAL_HOST ? { "Authorization": "Basic " + btoa("admin:admin") } : {};
+
+    // Local CAP runs with mocked basic auth; deployed environments use session cookies.
+    function createFetchOptions() {
+        var requestOptions = { headers: Object.assign({ Accept: "application/json" }, LOCAL_AUTH_HEADERS) };
+        if (!IS_LOCAL_HOST) requestOptions.credentials = "include";
+        return requestOptions;
     }
 
     return Controller.extend("nhvr.bridgemanagement.controller.Dashboard", {
@@ -48,7 +50,7 @@ sap.ui.define([
 
         // ── DATA FETCH ───────────────────────────────────────
         _fetch: function (url) {
-            return fetch(BASE + url, _credOpts())
+            return fetch(BASE_PATH + url, createFetchOptions())
                 .then(function (r) { return r.json(); })
                 .then(function (j) { return j.value || []; })
                 .catch(function () { return []; });

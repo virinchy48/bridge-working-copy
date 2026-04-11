@@ -89,9 +89,6 @@ sap.ui.define([
             // Destroy existing columns and rebuild from registry
             oTable.destroyColumns();
 
-            var oTemplate = new sap.m.HBox();
-            var aCells = [];
-
             RestrictionAttrs.RESTRICTION_ATTRIBUTES.forEach(function (attr) {
                 var bVisible = savedKeys.indexOf(attr.key) !== -1;
                 var oCol = new sap.ui.table.Column({
@@ -219,47 +216,6 @@ sap.ui.define([
         onClearQuickFilter: function () {
             this._quickFilter = null;
             this._applyFiltersAndSort();
-        },
-
-        _applyFiltersAndSort: function () {
-            // Apply base filters first
-            this._applyFilters();
-
-            // Then apply quick filter on top of already-filtered set
-            if (!this._quickFilter) { return; }
-
-            var qf = this._quickFilter;
-            var data = this._model.getProperty("/items") || [];
-
-            if (qf.status) {
-                data = data.filter(function (r) { return qf.status.indexOf(r.status) !== -1; });
-            }
-            if (qf.isTemporary === true) {
-                data = data.filter(function (r) { return !!r.isTemporary; });
-            }
-            if (qf.permitRequired === true) {
-                data = data.filter(function (r) { return !!r.permitRequired; });
-            }
-            if (qf.isDisabled === true) {
-                data = data.filter(function (r) { return !!r.isDisabled; });
-            }
-            if (qf.gazetteRef_empty === true) {
-                data = data.filter(function (r) { return !r.gazetteRef || r.gazetteRef === ""; });
-            }
-            if (typeof qf.validToDate_lte === "number") {
-                var now = new Date();
-                var cutoff = new Date(now.getTime() + qf.validToDate_lte * 24 * 60 * 60 * 1000);
-                data = data.filter(function (r) {
-                    if (!r.validToDate || r.validToDate === "Ongoing" || r.validToDate === "\u2014") { return false; }
-                    var d = new Date(r.validToDate);
-                    return !isNaN(d.getTime()) && d >= now && d <= cutoff;
-                });
-            }
-
-            this._model.setProperty("/items", data);
-            var tableTitle = this.byId("tableTitle");
-            if (tableTitle) { tableTitle.setText("Restrictions (" + data.length + ") — Filtered"); }
-            MessageToast.show(data.length + " restriction" + (data.length !== 1 ? "s" : "") + " matched");
         },
 
         // ── CSV Export (new) ───────────────────────────────────
@@ -476,53 +432,84 @@ sap.ui.define([
         _applyFilters: function () { this._applyFiltersAndSort(); },
 
         _applyFiltersAndSort: function () {
-            const search = (this.byId("searchField") ? this.byId("searchField").getValue() : "").toLowerCase();
-            const status = this.byId("filterStatus") ? this.byId("filterStatus").getSelectedKey() : "ALL";
-            const type   = this.byId("filterType")   ? this.byId("filterType").getSelectedKey()   : "ALL";
-            const permit = this.byId("filterPermit")  ? this.byId("filterPermit").getSelectedKey()  : "ALL";
+            const searchText = (this.byId("searchField") ? this.byId("searchField").getValue() : "").toLowerCase();
+            const selectedStatus = this.byId("filterStatus") ? this.byId("filterStatus").getSelectedKey() : "ALL";
+            const selectedType   = this.byId("filterType")   ? this.byId("filterType").getSelectedKey()   : "ALL";
+            const selectedPermit = this.byId("filterPermit") ? this.byId("filterPermit").getSelectedKey() : "ALL";
+            const selectedTemporary = this.byId("filterTemporary") ? this.byId("filterTemporary").getSelectedKey() : "ALL";
 
-            let data = this._allRestrictions;
+            let filteredRestrictions = this._allRestrictions;
 
             // Map polygon filter (v4.7.6)
             if (this._mapFilterIds && this._mapFilterIds.size > 0) {
-                data = data.filter(r => r.bridge_ID && this._mapFilterIds.has(r.bridge_ID));
-            }
-
-            if (search) {
-                data = data.filter(r =>
-                    (r.nhvrRef         || "").toLowerCase().includes(search) ||
-                    (r.bridgeId        || "").toLowerCase().includes(search) ||
-                    (r.bridgeName      || "").toLowerCase().includes(search) ||
-                    (r.restrictionType || "").toLowerCase().includes(search) ||
-                    (r.routeCode       || "").toLowerCase().includes(search) ||
-                    (r.gazetteRef      || "").toLowerCase().includes(search) ||
-                    (r.notes           || "").toLowerCase().includes(search) ||
-                    String(r.value     || "").includes(search)
+                filteredRestrictions = filteredRestrictions.filter(restriction =>
+                    restriction.bridge_ID && this._mapFilterIds.has(restriction.bridge_ID)
                 );
             }
-            if (status !== "ALL") data = data.filter(r => r.status === status);
-            if (type   !== "ALL") data = data.filter(r => r.restrictionType === type);
-            if (permit === "YES") data = data.filter(r =>  r.permitRequired);
-            if (permit === "NO")  data = data.filter(r => !r.permitRequired);
 
-            const temporary = this.byId("filterTemporary") ? this.byId("filterTemporary").getSelectedKey() : "ALL";
-            if (temporary === "YES") data = data.filter(r =>  r.isTemporary);
-            if (temporary === "NO")  data = data.filter(r => !r.isTemporary);
+            if (searchText) {
+                filteredRestrictions = filteredRestrictions.filter(restriction =>
+                    (restriction.nhvrRef         || "").toLowerCase().includes(searchText) ||
+                    (restriction.bridgeId        || "").toLowerCase().includes(searchText) ||
+                    (restriction.bridgeName      || "").toLowerCase().includes(searchText) ||
+                    (restriction.restrictionType || "").toLowerCase().includes(searchText) ||
+                    (restriction.routeCode       || "").toLowerCase().includes(searchText) ||
+                    (restriction.gazetteRef      || "").toLowerCase().includes(searchText) ||
+                    (restriction.notes           || "").toLowerCase().includes(searchText) ||
+                    String(restriction.value     || "").includes(searchText)
+                );
+            }
+            if (selectedStatus !== "ALL") filteredRestrictions = filteredRestrictions.filter(restriction => restriction.status === selectedStatus);
+            if (selectedType   !== "ALL") filteredRestrictions = filteredRestrictions.filter(restriction => restriction.restrictionType === selectedType);
+            if (selectedPermit === "YES") filteredRestrictions = filteredRestrictions.filter(restriction =>  restriction.permitRequired);
+            if (selectedPermit === "NO")  filteredRestrictions = filteredRestrictions.filter(restriction => !restriction.permitRequired);
+
+            // Quick filters are applied on top of the explicit toolbar filters.
+            const quickFilter = this._quickFilter;
+            if (quickFilter) {
+                if (quickFilter.status) {
+                    filteredRestrictions = filteredRestrictions.filter(restriction => quickFilter.status.indexOf(restriction.status) !== -1);
+                }
+                if (quickFilter.isTemporary === true) {
+                    filteredRestrictions = filteredRestrictions.filter(restriction => !!restriction.isTemporary);
+                }
+                if (quickFilter.permitRequired === true) {
+                    filteredRestrictions = filteredRestrictions.filter(restriction => !!restriction.permitRequired);
+                }
+                if (quickFilter.isDisabled === true) {
+                    filteredRestrictions = filteredRestrictions.filter(restriction => !!restriction.isDisabled);
+                }
+                if (quickFilter.gazetteRef_empty === true) {
+                    filteredRestrictions = filteredRestrictions.filter(restriction => !restriction.gazetteRef || restriction.gazetteRef === "");
+                }
+                if (typeof quickFilter.validToDate_lte === "number") {
+                    const now = new Date();
+                    const cutoff = new Date(now.getTime() + quickFilter.validToDate_lte * 24 * 60 * 60 * 1000);
+                    filteredRestrictions = filteredRestrictions.filter(restriction => {
+                        if (!restriction.validToDate || restriction.validToDate === "Ongoing" || restriction.validToDate === "\u2014") return false;
+                        const validToDate = new Date(restriction.validToDate);
+                        return !isNaN(validToDate.getTime()) && validToDate >= now && validToDate <= cutoff;
+                    });
+                }
+            }
+
+            if (selectedTemporary === "YES") filteredRestrictions = filteredRestrictions.filter(restriction =>  restriction.isTemporary);
+            if (selectedTemporary === "NO")  filteredRestrictions = filteredRestrictions.filter(restriction => !restriction.isTemporary);
 
             // Apply persistent sort
             if (this._sortField) {
-                const field = this._sortField;
-                const desc  = this._sortDesc;
-                data = data.slice().sort(function (a, b) {
-                    var cmp = String(a[field] || "").localeCompare(String(b[field] || ""), undefined, { numeric: true });
-                    return desc ? -cmp : cmp;
+                const sortField = this._sortField;
+                const sortDescending = this._sortDesc;
+                filteredRestrictions = filteredRestrictions.slice().sort(function (left, right) {
+                    var comparison = String(left[sortField] || "").localeCompare(String(right[sortField] || ""), undefined, { numeric: true });
+                    return sortDescending ? -comparison : comparison;
                 });
             }
 
-            this._model.setProperty("/items", data);
+            this._model.setProperty("/items", filteredRestrictions);
 
             const tableTitle = this.byId("tableTitle");
-            if (tableTitle) tableTitle.setText("Restrictions (" + data.length + ")");
+            if (tableTitle) tableTitle.setText("Restrictions (" + filteredRestrictions.length + ")");
 
             // Persist filter state to sessionStorage
             this._saveFilterState();

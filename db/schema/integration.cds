@@ -1,6 +1,6 @@
 // ============================================================
 // INTEGRATION LAYER — external refs, documents, sensors, sync
-// S/4HANA, BANC, ESRI, BAMS, IoT
+// S/4HANA, BANC, ESRI, IoT
 // ============================================================
 
 namespace nhvr;
@@ -8,7 +8,7 @@ namespace nhvr;
 using { cuid, managed } from '@sap/cds/common';
 using { nhvr.Bridge } from './core';
 using {
-    nhvr.ExternalSystemType, nhvr.BamsSyncStatus,
+    nhvr.ExternalSystemType,
     nhvr.SensorType, nhvr.AlertLevel
 } from './types';
 
@@ -134,18 +134,6 @@ entity S4EquipmentMapping : cuid, managed {
     syncDirection       : String(10) default 'BOTH';
     lastCharSnapshot    : LargeString;
     conflictFields      : LargeString;
-}
-
-// ─────────────────────────────────────────────────────────────
-// BAMS SYNC — Bridge Asset Management System integration
-// ─────────────────────────────────────────────────────────────
-entity BamsSync : cuid, managed {
-    bridge         : Association to Bridge @mandatory;
-    lastSyncAt     : DateTime;
-    syncStatus     : BamsSyncStatus default 'NEVER';
-    syncMessage    : String(500);
-    externalBamsId : String(100);
-    dataVersion    : String(20);
 }
 
 // ─────────────────────────────────────────────────────────────

@@ -32,11 +32,6 @@
                         press="onSave" type="Emphasized"/>
                     <Button text="Cancel" icon="sap-icon://decline"
                         press="onCancel" type="Transparent"/>
-                    <Button id="btnSyncBams" text="Sync BAMS" icon="sap-icon://synchronize"
-                        press="onSyncBams" type="Transparent"
-                        tooltip="Synchronise this bridge record with the Bridge Asset Management System (BAMS) / BANC national register. Pushes current BMS data to the state road authority system and records the sync timestamp."/>
-                    <ObjectStatus id="bamsSyncStatus" text="BAMS: Never synced"
-                        state="None" class="sapUiSmallMarginEnd"/>
                     <Button icon="sap-icon://hint" type="Transparent" press="onInfoPressBridgeForm"
                         tooltip="Bridge form field guide"/>
                 </f:actions>

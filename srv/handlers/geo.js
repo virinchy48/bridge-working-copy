@@ -49,6 +49,7 @@ module.exports = function registerGeoHandlers(srv, helpers) {
             )) || `nhvr-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
     }
 
+
     // ─────────────────────────────────────────────────────────
     // GeoJSON endpoint — live data merged
     // GET /bridge-management/geojson
@@ -101,41 +102,6 @@ module.exports = function registerGeoHandlers(srv, helpers) {
             }
         });
     }
-
-    // ── syncWithBams ──────────────────────────────────────────
-    srv.on('syncWithBams', async (req) => {
-        const { bridgeId } = req.data;
-        const db = await cds.connect.to('db');
-        const bridge = await h.getBridge(bridgeId, db);
-        if (!bridge) return req.error(404, 'Bridge not found');
-        const existing = await db.run(SELECT.one.from('nhvr.BamsSync').where({ bridge_ID: bridgeId }));
-        const syncData = {
-            bridge_ID     : bridgeId,
-            lastSyncAt    : new Date().toISOString(),
-            syncStatus    : 'SYNCED',
-            syncMessage   : 'Mock sync completed successfully',
-            externalBamsId: 'BAMS-' + (bridge.bridgeId || bridgeId.slice(0, 8)),
-            dataVersion   : '1.0'
-        };
-        if (existing) {
-            await db.run(UPDATE('nhvr.BamsSync').set(syncData).where({ ID: existing.ID }));
-        } else {
-            syncData.ID = cds.utils.uuid();
-            await db.run(INSERT.into('nhvr.BamsSync').entries(syncData));
-        }
-        try {
-            await db.run(INSERT.into('nhvr.AuditLog').entries({
-                ID               : cds.utils.uuid(),
-                entityName       : 'BamsSync',
-                entityId         : bridgeId,
-                action           : 'SYNC',
-                changedBy        : req.user?.id || 'system',
-                changedAt        : new Date().toISOString(),
-                changeDescription: 'BAMS sync performed'
-            }));
-        } catch (e) { LOG.warn('[NHVR] AuditLog write failed for BAMS sync:', e.message); }
-        return { status: 'SYNCED', message: 'Bridge data synced with BAMS successfully' };
-    });
 
     // ── assessCorridor ────────────────────────────────────────
     srv.on('assessCorridor', async (req) => {

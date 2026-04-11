@@ -13,7 +13,7 @@
 //   capacity-permits.cds — Capacity, vehicles, permits, load ratings
 //   risk-investment.cds  — Risk, investment, deterioration, scour
 //   freight.cds          — Freight routes + routing engine
-//   integration.cds      — Documents, S/4HANA, BANC, ESRI, BAMS, IoT
+//   integration.cds      — Documents, S/4HANA, BANC, ESRI, IoT
 //   admin.cds            — Lookups, attributes, config, audit, notifications
 //   tenancy.cds          — Multi-tenant licensing
 //   reporting.cds        — Views, analytics, utility functions, proxies

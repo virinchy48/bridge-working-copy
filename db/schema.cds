@@ -15,7 +15,7 @@
 //   capacity-permits.cds — capacity, vehicles, permits, load ratings
 //   risk-investment.cds  — risk, investment, deterioration, scour
 //   freight.cds          — freight routes, bridge assignments
-//   integration.cds      — external refs, docs, sensors, BAMS, S/4
+//   integration.cds      — external refs, docs, sensors, S/4
 //   tenancy.cds          — multi-tenant licensing
 //   admin.cds            — config, audit, notifications, thresholds
 //

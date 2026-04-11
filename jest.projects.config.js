@@ -19,7 +19,6 @@
 const base = {
   testEnvironment: 'node',
   testTimeout: 30000,
-  globalSetup: '<rootDir>/test/root-global-setup.js',
 };
 
 module.exports = {

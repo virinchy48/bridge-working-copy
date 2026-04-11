@@ -2,8 +2,6 @@
 
 One controller per view. View files live in `../view/<Name>.view.xml`.
 
-> **Mirror sync reminder**: after editing any file in `app/bridge-management/webapp/`, both `app-router/resources/nhvr.bridgemanagement/` and `app-router/resources/webapp/` MUST stay in sync. Run `npm run sync-ui:all` after any UI edits.
-
 ## Controller → backend handler map
 
 | Controller | View | Primary entity | Backend handler |
@@ -56,4 +54,3 @@ One controller per view. View files live in `../view/<Name>.view.xml`.
 3. Add i18n keys to `webapp/i18n/i18n.properties`
 4. Add role entry to `RoleManager` fallback if access-gated
 5. Add row to the table above
-6. Mirror sync (automatic via hook, or `npm run sync-ui`)

@@ -3,18 +3,6 @@ using BridgeManagementService from '../service';
 
 extend service BridgeManagementService with {
 
-// ── P02: BAMS Sync ────────────────────────────────────────────
-@restrict: [{ to: ['Viewer','Inspector','Operator','BridgeManager','Admin'] }]
-entity BamsSyncs as projection on nhvr.BamsSync {
-    key ID,
-    bridge.ID as bridge_ID,
-    lastSyncAt, syncStatus, syncMessage, externalBamsId, dataVersion,
-    createdAt, modifiedAt
-};
-
-@restrict: [{ to: ['Admin'] }]
-action syncWithBams(bridgeId : UUID) returns { status : String; message : String; };
-
 entity SensorDevices as projection on nhvr.SensorDevice {
     key ID,
     bridge.ID as bridge_ID,

@@ -365,7 +365,6 @@ module.exports = function registerSystemHandlers(srv) {
         'IntegrationConfigs'      : 'INTEGRATION_HUB',
         'IntegrationLogs'         : 'INTEGRATION_HUB',
         'S4EquipmentMappings'     : 'INTEGRATION_HUB',
-        'BamsSyncs'               : 'INTEGRATION_HUB',
 
         // ANALYTICS group
         'BridgeDeteriorationProfiles' : 'BRIDGE_IQ',

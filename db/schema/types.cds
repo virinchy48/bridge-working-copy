@@ -227,14 +227,6 @@ type LoadRatingStatus : String enum {
     SUPERSEDED;     // Replaced by a newer rating assessment
 }
 
-// ── From original schema.cds lines 1357-1362 ─────────────
-type BamsSyncStatus : String enum {
-    SYNCED;   // Successfully synced
-    PENDING;  // Sync queued or in-progress
-    ERROR;    // Last sync failed
-    NEVER;    // Never been synced
-}
-
 // ── From original schema.cds lines 1376-1382 ─────────────
 type FreightRouteClass : String enum {
     PBS;

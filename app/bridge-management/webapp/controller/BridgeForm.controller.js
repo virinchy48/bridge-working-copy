@@ -142,7 +142,6 @@ sap.ui.define([
                     this._populateForm(b);
                     this._loadAndRenderDynAttrs(b.ID);
                     this._loadLoadRatings(b.ID);
-                    this._loadBamsStatus(b.ID);
                     this._loadScourRisk(b.ID);
                     this._loadSensorDevices(b.ID);
                     var scourPanel    = this.byId("scourRiskPanel");
@@ -697,49 +696,6 @@ sap.ui.define([
                 .catch(err => {
                     console.warn("[NHVR] Failed to load load ratings:", err);
                 });
-        },
-
-        // ── P02: BAMS Sync ────────────────────────────────────────────
-        _loadBamsStatus: function (bridgeUUID) {
-            if (!bridgeUUID) return;
-            const statusCtrl = this.byId("bamsSyncStatus");
-            if (!statusCtrl) return;
-            fetch(`${BASE}/BamsSyncs?$filter=bridge_ID eq ${bridgeUUID}&$top=1`, _credOpts())
-                .then(r => r.ok ? r.json() : { value: [] })
-                .then(j => {
-                    const rec = (j.value || [])[0];
-                    if (!rec) {
-                        statusCtrl.setText("BAMS: Never synced");
-                        statusCtrl.setState("None");
-                    } else {
-                        const stateMap = { SYNCED: "Success", PENDING: "Warning", ERROR: "Error", NEVER: "None" };
-                        const when = rec.lastSyncAt ? new Date(rec.lastSyncAt).toLocaleDateString("en-AU") : "";
-                        statusCtrl.setText("BAMS: " + rec.syncStatus + (when ? " (" + when + ")" : ""));
-                        statusCtrl.setState(stateMap[rec.syncStatus] || "None");
-                    }
-                })
-                .catch(() => {
-                    if (statusCtrl) { statusCtrl.setText("BAMS: Unknown"); statusCtrl.setState("None"); }
-                });
-        },
-
-        onSyncBams: function () {
-            const bridgeId = this._bridgeUUID;
-            if (!bridgeId) { sap.m.MessageToast.show("Save the bridge before syncing BAMS"); return; }
-            const btn = this.byId("btnSyncBams");
-            if (btn) btn.setEnabled(false);
-            fetch(`${BASE}/syncWithBams`, {
-                method : "POST",
-                headers: { "Content-Type": "application/json", Accept: "application/json" },
-                body   : JSON.stringify({ bridgeId })
-            })
-                .then(r => r.json())
-                .then(j => {
-                    sap.m.MessageToast.show(j.message || "BAMS sync complete");
-                    this._loadBamsStatus(bridgeId);
-                })
-                .catch(() => sap.m.MessageToast.show("BAMS sync failed — please try again"))
-                .finally(() => { if (btn) btn.setEnabled(true); });
         },
 
         onAddLoadRating: function () {

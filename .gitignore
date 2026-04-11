@@ -42,3 +42,6 @@ coverage/
 .claude/
 node_modules
 infra/smoke-tester/.local/
+
+# added by cds
+.cdsrc-private.json
