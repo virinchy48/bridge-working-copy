@@ -216,7 +216,9 @@ sap.ui.define([
         onNavToMap:          function () { this._navTo("MapView"); },
         onNavToMassUpload:   function () { this._navTo("MassUpload"); },
         onNavToAdmin:        function () { this._navTo("AdminConfig"); },
-        onNavToInspections:          function () { this._navTo("InspectionDashboard"); },
+        // InspectionDashboard removed in cut-down BIS variant. Keep stub so any
+        // stray tile press doesn't NPE — silently no-op instead.
+        onNavToInspections:          function () { /* removed */ },
         onNavToDefects:              function () { this._navTo("DefectRegister"); },
         onNavToMassEdit:             function () { this._navTo("MassEdit"); },
 
@@ -290,8 +292,6 @@ sap.ui.define([
                 { id: "tileDefectsMain",      capability: "DEFECTS" },
                 { id: "tileDefectsCard",      capability: "DEFECTS" },
                 { id: "defectsTileMain",      capability: "DEFECTS" },
-                // Work Orders
-                { id: "tileWorkOrdersMain",   capability: "WORK_ORDERS" },
                 // Admin section
                 { id: "tileMassUploadMain",   capability: "MASS_UPLOAD" },
                 { id: "tileMassEditMain",     capability: "MASS_EDIT" },
@@ -321,8 +321,7 @@ sap.ui.define([
                 'defects'          : [oView.byId('tileDefectsMain'), oView.byId('tileDefectsCard'), oView.byId('defectsTileMain')],
                 'inspections'      : [oView.byId('tileInspectionMain'), oView.byId('tileInspectionCard'), oView.byId('inspectionsTileMain')],
                 'permits'          : [oView.byId('tilePermitsMain')],
-                'routeAssessment'  : [oView.byId('tileRouteMain')],
-                'workOrders'       : [oView.byId('tileWorkOrdersMain')]
+                'routeAssessment'  : [oView.byId('tileRouteMain')]
             });
 
             // Update ShellBar subtitle to indicate mode

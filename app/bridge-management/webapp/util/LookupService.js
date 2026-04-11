@@ -73,8 +73,12 @@ sap.ui.define([], function () {
         populateSelect: function (oSelect, category, allText) {
             if (!oSelect) return;
             oSelect.removeAllItems();
+            // Use an EMPTY string key for the leading "All …" item.
+            // Controllers' filter builders use `if (val) parts.push(...)` —
+            // a non-empty key like "ALL" would be truthy and produce
+            // `status eq 'ALL'` queries that match zero rows.
             if (allText) {
-                oSelect.addItem(new sap.ui.core.Item({ key: "ALL", text: allText }));
+                oSelect.addItem(new sap.ui.core.Item({ key: "", text: allText }));
             }
             LookupService.getItems(category).forEach(function (e) {
                 oSelect.addItem(new sap.ui.core.Item({ key: e.key, text: e.text }));

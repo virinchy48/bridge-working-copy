@@ -22,8 +22,11 @@ sap.ui.define([
             this._allRoutes = [];
 
             LookupService.load().then(function () {
-                LookupService.populateSelect(this.byId("routeStateFilter"), "STATE", "All States");
-                LookupService.populateFormSelect(this.byId("fRouteState"), "STATE");
+                LookupService.populateSelect(this.byId("routeStateFilter"),    "STATE",        "All States");
+                LookupService.populateSelect(this.byId("routeClassFilter"),    "ROUTE_CLASS",  "All Classes");
+                LookupService.populateFormSelect(this.byId("fRouteState"),     "STATE");
+                LookupService.populateFormSelect(this.byId("fRouteClass"),     "ROUTE_CLASS");
+                LookupService.populateFormSelect(this.byId("fRouteStatus"),    "ROUTE_STATUS");
             }.bind(this));
         },
 

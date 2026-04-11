@@ -58,20 +58,21 @@ sap.ui.define([
 
         _load: function () {
             var that = this;
+            // InspectionOrders + WorkOrders fetches removed in cut-down BIS
+            // variant — those entities no longer exist on the server. The
+            // dashboard still computes condition / risk / restriction KPIs.
             Promise.all([
                 this._fetch("/Bridges?$top=5000&$select=ID,bridgeId,name,condition,conditionScore,currentRiskScore,currentRiskBand,postingStatus,scourRisk,bridgeHealthIndex,inspectionDate,state,latitude,longitude,yearBuilt,structureType,structuralDeficiencyFlag"),
                 this._fetch("/Restrictions?$count=true&$top=500&$filter=status eq 'ACTIVE'&$select=ID,bridgeName,bridgeId,restrictionType,value,unit,vehicleClassName,routeCode,validFromDate,validToDate"),
                 this._fetch("/VehiclePermits?$top=500&$select=permitId,permitStatus,permitType,applicantName,bridge_ID,assessedGVM_t"),
-                this._fetch("/BridgeRiskAssessments?$orderby=riskScore desc&$top=20&$select=bridge_ID,riskScore,riskBand,assessmentDate"),
-                this._fetch("/InspectionOrders?$filter=status ne 'COMPLETED' and status ne 'CANCELLED'&$orderby=plannedDate asc&$top=20&$select=orderNumber,plannedDate,inspector,bridge_ID,status,inspectionType"),
-                this._fetch("/WorkOrders?$filter=status ne 'COMPLETED'&$top=200&$select=woNumber,priority,status,estimatedCost,bridge_ID")
+                this._fetch("/BridgeRiskAssessments?$orderby=riskScore desc&$top=20&$select=bridge_ID,riskScore,riskBand,assessmentDate")
             ]).then(function (results) {
                 that._bridges = results[0];
                 that._restrictions = results[1];
                 that._permits = results[2];
                 that._riskAssessments = results[3];
-                that._inspectionOrders = results[4];
-                that._workOrders = results[5];
+                that._inspectionOrders = [];
+                that._workOrders = [];
                 that._renderAll();
             });
         },

@@ -167,33 +167,7 @@ sap.ui.define([
             }
         },
 
-        INSPECTION_ORDER: {
-            entitySet: "InspectionOrders",
-            label: "Inspection Order",
-            idField: "ID",
-            displayId: "orderNumber",
-            filterStateField: null,
-            searchFields: ["orderNumber", "inspector"],
-            orderby: "orderNumber",
-            selectFields: ["ID","orderNumber","inspectionType","status","plannedDate","completedAt","inspector","inspectorOrg","overallConditionRating","structuralAdequacy","maintenanceUrgency","bridgeId","bridgeName"],
-            defaultFields: ["orderNumber","inspectionType","status","plannedDate","inspector"],
-            customAttrEntity: "INSPECTION_ORDER",
-            customAttrFetch: "entity",
-            fields: {
-                orderNumber:             { label: "Order No.",          type: "text",    width: "130px", editable: "new" },
-                inspectionType:          { label: "Insp. Type",         type: "text",    width: "120px" },
-                status:                  { label: "Status",             type: "select",  width: "120px", options: INSP_STATUS_OPT },
-                plannedDate:             { label: "Planned Date",       type: "date",    width: "110px" },
-                completedAt:             { label: "Completed At",       type: "text",    width: "130px" },
-                inspector:               { label: "Inspector",          type: "text",    width: "150px" },
-                inspectorOrg:            { label: "Inspector Org",      type: "text",    width: "150px" },
-                overallConditionRating:  { label: "Condition Rating",   type: "number",  width: "100px" },
-                structuralAdequacy:      { label: "Struct. Adequacy",   type: "text",    width: "120px" },
-                maintenanceUrgency:      { label: "Maint. Urgency",     type: "text",    width: "120px" },
-                bridgeId:                { label: "Bridge ID",          type: "text",    width: "110px", editable: false },
-                bridgeName:              { label: "Bridge Name",        type: "text",    width: "180px", editable: false }
-            }
-        },
+        // INSPECTION_ORDER mass-edit definition removed in cut-down BIS variant.
 
         PERMIT: {
             entitySet: "VehiclePermits",

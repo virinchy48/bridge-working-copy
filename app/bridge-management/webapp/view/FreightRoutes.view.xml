@@ -37,15 +37,9 @@
                 <HBox class="sapUiSmallMarginBottom" alignItems="Center">
                     <SearchField id="routeSearch" placeholder="Search by route code, name or state..."
                         width="24rem" search="onSearch" liveChange="onSearch"/>
+                    <!-- Items populated at runtime from Lookup table (ROUTE_CLASS category) -->
                     <Select id="routeClassFilter" width="12rem" change="onClassFilter"
-                        class="sapUiSmallMarginBegin">
-                        <core:Item key="" text="All Classes"/>
-                        <core:Item key="PBS" text="PBS (Performance-Based)"/>
-                        <core:Item key="HML" text="HML (Higher Mass Limits)"/>
-                        <core:Item key="B_DOUBLE" text="B-Double"/>
-                        <core:Item key="ROAD_TRAIN" text="Road Train"/>
-                        <core:Item key="GENERAL" text="General Freight"/>
-                    </Select>
+                        class="sapUiSmallMarginBegin"/>
                     <Select id="routeStateFilter" width="8rem" change="onStateFilter"
                         class="sapUiSmallMarginBegin"/>
                     <Text id="routeCount" text="Loading..." class="sapUiSmallMarginBegin sapUiSmallMarginTop"/>
@@ -137,21 +131,13 @@
                 <Label text="State"/>
                 <Select id="fRouteState"/>
                 <Label text="Route Class"/>
-                <Select id="fRouteClass">
-                    <core:Item key="PBS" text="PBS (Performance-Based Standards)"/>
-                    <core:Item key="HML" text="HML (Higher Mass Limits)"/>
-                    <core:Item key="B_DOUBLE" text="B-Double"/>
-                    <core:Item key="ROAD_TRAIN" text="Road Train"/>
-                    <core:Item key="GENERAL" text="General Freight"/>
-                </Select>
+                <!-- Items populated at runtime from Lookup table (ROUTE_CLASS) -->
+                <Select id="fRouteClass"/>
                 <Label text="Max Height (m)"/>
                 <Input id="fCorridorMaxHeight" placeholder="e.g. 4.3" type="Number"/>
                 <Label text="Status"/>
-                <Select id="fRouteStatus">
-                    <core:Item key="ACTIVE" text="Active"/>
-                    <core:Item key="SUSPENDED" text="Suspended"/>
-                    <core:Item key="UNDER_REVIEW" text="Under Review"/>
-                </Select>
+                <!-- Items populated at runtime from Lookup table (ROUTE_STATUS) -->
+                <Select id="fRouteStatus"/>
             </form:SimpleForm>
         </content>
         <beginButton>

@@ -1,0 +1,81 @@
+category,code,description,displayOrder,isActive
+NHVR_APPROVAL_CLASS,CLASS1,Class 1 — Special purpose vehicle,10,true
+NHVR_APPROVAL_CLASS,CLASS2,Class 2 — Higher mass / dimensions,20,true
+NHVR_APPROVAL_CLASS,CLASS3,Class 3 — Restricted access vehicle,30,true
+NHVR_APPROVAL_CLASS,CLASS4,Class 4 — Unique configuration,40,true
+NHVR_APPROVAL_CLASS,HML,HML — Higher Mass Limits,50,true
+NHVR_APPROVAL_CLASS,B_DOUBLE,B-Double,60,true
+NHVR_APPROVAL_CLASS,B_TRIPLE,B-Triple,70,true
+NHVR_APPROVAL_CLASS,NONE,Not assessed,80,true
+INSPECTION_STANDARD,AS5100_7_2017,AS 5100.7:2017,10,true
+INSPECTION_STANDARD,TFNSW_TMC_2012,TfNSW TMC 2012.01,20,true
+INSPECTION_STANDARD,TFNSW_TS01630,TfNSW TS 01630,30,true
+INSPECTION_STANDARD,NAASRA_BMS,NAASRA BMS,40,true
+INSPECTION_STANDARD,TFNSW_CAMTM_2022,TfNSW Culvert Manual 2022,50,true
+DEFECT_CLASSIFICATION,NONE,No defect observed,5,true
+DEFECT_CLASSIFICATION,D1,D1 — Cracking / Fracture,10,true
+DEFECT_CLASSIFICATION,D2,D2 — Spalling / Delamination,20,true
+DEFECT_CLASSIFICATION,D3,D3 — Corrosion / Section loss,30,true
+DEFECT_CLASSIFICATION,D4,D4 — Deformation / Buckling,40,true
+DEFECT_CLASSIFICATION,D5,D5 — Joint / Bearing failure,50,true
+DEFECT_CLASSIFICATION,D6,D6 — Settlement / Movement,60,true
+DEFECT_CLASSIFICATION,D7,D7 — Biological / Chemical attack,70,true
+DEFECT_CLASSIFICATION,D8,D8 — Drainage failure,80,true
+DEFECT_CLASSIFICATION,D9,D9 — Scour / Erosion,90,true
+DEFECT_CLASSIFICATION,D10,D10 — Impact damage,100,true
+DEFECT_CLASSIFICATION,D11,D11 — Surface defect / Wear,110,true
+DEFECT_CLASSIFICATION,D12,D12 — Fatigue,120,true
+DEFECT_CLASSIFICATION,D13,D13 — Other / Composite,130,true
+ROUTE_CLASS,GENERAL,General Freight,10,true
+ROUTE_CLASS,B_DOUBLE,B-Double,20,true
+ROUTE_CLASS,ROAD_TRAIN,Road Train,30,true
+ROUTE_CLASS,HML,HML — Higher Mass Limits,40,true
+ROUTE_CLASS,PBS,PBS — Performance Based Standards,50,true
+ROUTE_STATUS,ACTIVE,Active and operating,10,true
+ROUTE_STATUS,SUSPENDED,Temporarily suspended,20,true
+ROUTE_STATUS,UNDER_REVIEW,Under review / re-assessment,30,true
+ROUTE_STATUS,RETIRED,Retired / decommissioned,40,true
+PERMIT_DECISION,APPROVED,Approved,10,true
+PERMIT_DECISION,APPROVED_WITH_CONDITIONS,Approved with conditions,20,true
+PERMIT_DECISION,DENIED,Denied,30,true
+PERMIT_DECISION,PENDING,Pending — saved for review,40,true
+MEASUREMENT_UNIT,t,tonnes (t),10,true
+MEASUREMENT_UNIT,kN,kilonewtons (kN),20,true
+MEASUREMENT_UNIT,m,metres (m),30,true
+MEASUREMENT_UNIT,km,kilometres (km),40,true
+MEASUREMENT_UNIT,kph,kilometres per hour (kph),50,true
+MEASUREMENT_UNIT,mm,millimetres (mm),60,true
+RESTRICTION_DIRECTION,BOTH,Both directions,10,true
+RESTRICTION_DIRECTION,INCREASING,Increasing chainage,20,true
+RESTRICTION_DIRECTION,DECREASING,Decreasing chainage,30,true
+RESTRICTION_DIRECTION,NORTHBOUND,Northbound,40,true
+RESTRICTION_DIRECTION,SOUTHBOUND,Southbound,50,true
+RESTRICTION_DIRECTION,EASTBOUND,Eastbound,60,true
+RESTRICTION_DIRECTION,WESTBOUND,Westbound,70,true
+EXTERNAL_SYSTEM_TYPE,RMS,TfNSW (formerly RMS),60,true
+EXTERNAL_SYSTEM_TYPE,VICROADS,VicRoads,70,true
+EXTERNAL_SYSTEM_TYPE,MRWA,Main Roads WA,80,true
+EXTERNAL_SYSTEM_TYPE,TMR,Transport and Main Roads QLD,90,true
+EXTERNAL_SYSTEM_TYPE,DPTI,DPTI / DIT South Australia,100,true
+EXTERNAL_SYSTEM_TYPE,OTHER,Other / unspecified,110,true
+INSPECTION_TYPE,L1_ROUTINE,Level 1 — Routine general (2 yr),100,true
+INSPECTION_TYPE,L2_PRINCIPAL,Level 2 — Principal inspection (4 yr),110,true
+INSPECTION_TYPE,L3_SPECIAL,Level 3 — Special / underwater,120,true
+INSPECTION_TYPE,L4_EMERGENCY,Level 4 — Emergency,130,true
+INSPECTION_TYPE,RPA_DRONE,RPA / Drone (TS 00119:2024),140,true
+INSPECTION_TYPE,CULVERT_CDC,Culvert CDC,150,true
+INSPECTION_TYPE,DRIVE_BY,Drive-by visual,160,true
+ACCESS_METHOD,VISUAL,Visual — ground / platform,100,true
+ACCESS_METHOD,UBIV,Under-bridge inspection vehicle,110,true
+DEFECT_SEVERITY,NONE,No defect,5,true
+DEFECT_SEVERITY,MODERATE_REPAIR,Moderate — schedule repair,25,true
+DEFECT_SEVERITY,SEVERE_URGENT,Severe — urgent repair,35,true
+VEHICLE_CLASS,A_DOUBLE,A-Double,10,true
+VEHICLE_CLASS,B_DOUBLE,B-Double,20,true
+VEHICLE_CLASS,B_TRAIN,B-Train,30,true
+VEHICLE_CLASS,ROAD_TRAIN,Road Train,40,true
+VEHICLE_CLASS,PBS_1,PBS Level 1,50,true
+VEHICLE_CLASS,PBS_2,PBS Level 2,60,true
+VEHICLE_CLASS,PBS_3,PBS Level 3,70,true
+VEHICLE_CLASS,GENERAL,General access,80,true
+VEHICLE_CLASS,OVERSIZE,Oversize / overdimension,90,true

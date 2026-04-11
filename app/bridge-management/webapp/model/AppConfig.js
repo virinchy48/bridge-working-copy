@@ -12,11 +12,11 @@
 sap.ui.define([], function () {
     'use strict';
 
-    const LITE_FEATURES = ['defects','inspections','inspectionOrders','workOrders','permits','routeAssessment'];
+    const LITE_FEATURES = ['defects','inspections','permits','routeAssessment'];
 
     // Nav routes to intercept in lite mode
     const LITE_HIDDEN_ROUTES = ['DefectRegister','InspectionDashboard','InspectionCreate',
-                                 'InspectionCreateNew','WorkOrders','Permits','RouteAssessment'];
+                                 'InspectionCreateNew','Permits','RouteAssessment'];
 
     let _mode     = 'full';
     let _hidden   = [];

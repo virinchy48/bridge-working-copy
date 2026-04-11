@@ -1,0 +1,168 @@
+category,code,description,displayOrder,isActive
+CONDITION,EXCELLENT,Excellent — no defects,10,true
+CONDITION,VERY_GOOD,Very good — minor cosmetic only,20,true
+CONDITION,GOOD,Good — sound condition,30,true
+CONDITION,FAIR,Fair — minor repairs needed,40,true
+CONDITION,POOR,Poor — significant deterioration,50,true
+CONDITION,VERY_POOR,Very poor — major rehab needed,60,true
+CONDITION,CRITICAL,Critical — load posting likely,70,true
+CONDITION,FAILED,Failed — out of service,80,true
+CONDITION,UNKNOWN,Unknown — not yet assessed,90,true
+POSTING_STATUS,UNRESTRICTED,Open to all lawful loads,10,true
+POSTING_STATUS,POSTED,Load limits in effect,20,true
+POSTING_STATUS,REDUCED,Reduced capacity,30,true
+POSTING_STATUS,CLOSED,Bridge closed,40,true
+SCOUR_RISK,LOW,Low scour risk,10,true
+SCOUR_RISK,MEDIUM,Medium scour risk,20,true
+SCOUR_RISK,HIGH,High scour risk,30,true
+SCOUR_RISK,CRITICAL,Critical scour risk,40,true
+SCOUR_RISK,UNKNOWN,Not yet assessed,50,true
+RESTRICTION_TYPE,MASS_LIMIT,Mass limit (tonnes),10,true
+RESTRICTION_TYPE,AXLE_LIMIT,Axle group limit,20,true
+RESTRICTION_TYPE,HEIGHT_LIMIT,Clearance height limit,30,true
+RESTRICTION_TYPE,WIDTH_LIMIT,Vehicle width limit,40,true
+RESTRICTION_TYPE,LENGTH_LIMIT,Vehicle length limit,50,true
+RESTRICTION_TYPE,SPEED_LIMIT,Reduced speed on structure,60,true
+RESTRICTION_TYPE,LANE_CLOSURE,Lane closure,70,true
+RESTRICTION_TYPE,FULL_CLOSURE,Full closure,80,true
+RESTRICTION_STATUS,ACTIVE,Active and enforceable,10,true
+RESTRICTION_STATUS,PENDING,Awaiting approval,20,true
+RESTRICTION_STATUS,SUPERSEDED,Replaced by newer restriction,30,true
+RESTRICTION_STATUS,LIFTED,No longer in effect,40,true
+RESTRICTION_STATUS,EXPIRED,Past validity date,50,true
+PERMIT_TYPE,SINGLE_TRIP,Single-trip permit,10,true
+PERMIT_TYPE,PERIODIC,Periodic / annual permit,20,true
+PERMIT_TYPE,OVERSIZE,Oversize load,30,true
+PERMIT_TYPE,OVERMASS,Overmass load,40,true
+PERMIT_TYPE,CLASS_1,Class 1 special purpose,50,true
+PERMIT_STATUS,DRAFT,Draft — not yet submitted,10,true
+PERMIT_STATUS,SUBMITTED,Submitted for review,20,true
+PERMIT_STATUS,UNDER_REVIEW,Under NHVR review,30,true
+PERMIT_STATUS,APPROVED,Approved,40,true
+PERMIT_STATUS,REJECTED,Rejected,50,true
+PERMIT_STATUS,EXPIRED,Expired,60,true
+INSPECTION_STATUS,PLANNED,Planned — not yet started,10,true
+INSPECTION_STATUS,SCHEDULED,Scheduled with inspector,20,true
+INSPECTION_STATUS,IN_PROGRESS,Inspection in progress,30,true
+INSPECTION_STATUS,COMPLETED,Completed,40,true
+INSPECTION_STATUS,OVERDUE,Past due date,50,true
+INSPECTION_STATUS,CANCELLED,Cancelled,60,true
+INSPECTION_TYPE,ROUTINE,Routine periodic inspection,10,true
+INSPECTION_TYPE,PRINCIPAL,Principal (level 2) inspection,20,true
+INSPECTION_TYPE,DETAILED,Detailed (level 3) engineering inspection,30,true
+INSPECTION_TYPE,SPECIAL,Special / event-driven inspection,40,true
+INSPECTION_TYPE,UNDERWATER,Underwater inspection,50,true
+INSPECTION_TYPE,POST_EVENT,Post-event (flood/earthquake/impact),60,true
+DEFECT_SEVERITY,MINOR,Minor — cosmetic,10,true
+DEFECT_SEVERITY,MODERATE,Moderate — monitor,20,true
+DEFECT_SEVERITY,MAJOR,Major — schedule repair,30,true
+DEFECT_SEVERITY,CRITICAL,Critical — immediate action,40,true
+DEFECT_PRIORITY,LOW,Low priority,10,true
+DEFECT_PRIORITY,MEDIUM,Medium priority,20,true
+DEFECT_PRIORITY,HIGH,High priority,30,true
+DEFECT_PRIORITY,URGENT,Urgent — next inspection,40,true
+DEFECT_STATUS,OPEN,Open defect,10,true
+DEFECT_STATUS,IN_REPAIR,Repair in progress,20,true
+DEFECT_STATUS,REPAIRED,Repair completed,30,true
+DEFECT_STATUS,CLOSED,Closed — verified,40,true
+DEFECT_STATUS,DEFERRED,Deferred — accepted risk,50,true
+DEFECT_CATEGORY,CRACKING,Cracking,10,true
+DEFECT_CATEGORY,SPALLING,Spalling / concrete loss,20,true
+DEFECT_CATEGORY,CORROSION,Corrosion / rust staining,30,true
+DEFECT_CATEGORY,DEFORMATION,Deformation / movement,40,true
+DEFECT_CATEGORY,SCOUR,Scour at piers/abutments,50,true
+DEFECT_CATEGORY,DRAINAGE,Drainage failure,60,true
+DEFECT_CATEGORY,BEARING,Bearing defect,70,true
+DEFECT_CATEGORY,DECK_WEAR,Deck surface wear,80,true
+DEFECT_EXTENT,ISOLATED,Isolated single occurrence,10,true
+DEFECT_EXTENT,LOCALISED,Localised cluster,20,true
+DEFECT_EXTENT,WIDESPREAD,Widespread across element,30,true
+DEFECT_EXTENT,GLOBAL,Global — affects entire structure,40,true
+WORK_ORDER_STATUS,DRAFT,Draft / not yet issued,10,true
+WORK_ORDER_STATUS,APPROVED,Approved,20,true
+WORK_ORDER_STATUS,SCHEDULED,Scheduled,30,true
+WORK_ORDER_STATUS,IN_PROGRESS,Work in progress,40,true
+WORK_ORDER_STATUS,COMPLETED,Completed,50,true
+WORK_ORDER_STATUS,VERIFIED,Verified by inspector,60,true
+WORK_ORDER_STATUS,CANCELLED,Cancelled,70,true
+WORK_ORDER_PRIORITY,P1,P1 — emergency (24 hours),10,true
+WORK_ORDER_PRIORITY,P2,P2 — urgent (7 days),20,true
+WORK_ORDER_PRIORITY,P3,P3 — high (30 days),30,true
+WORK_ORDER_PRIORITY,P4,P4 — routine (90 days),40,true
+WORK_ORDER_PRIORITY,P5,P5 — backlog,50,true
+ASSET_CLASS,BRIDGE,Bridge,10,true
+ASSET_CLASS,CULVERT,Culvert,20,true
+ASSET_CLASS,UNDERPASS,Underpass,30,true
+ASSET_CLASS,OVERPASS,Overpass,40,true
+ASSET_CLASS,FOOTBRIDGE,Footbridge,50,true
+ASSET_CLASS,VIADUCT,Viaduct,60,true
+ASSET_CLASS,RETAINING_WALL,Retaining wall,70,true
+ASSET_CLASS,TUNNEL,Tunnel,80,true
+ELEMENT_GROUP,SUPERSTRUCTURE,Superstructure (girders / deck),10,true
+ELEMENT_GROUP,SUBSTRUCTURE,Substructure (piers / abutments),20,true
+ELEMENT_GROUP,FOUNDATION,Foundations / piles,30,true
+ELEMENT_GROUP,DECK,Deck surface,40,true
+ELEMENT_GROUP,RAILING,Railings / barriers,50,true
+ELEMENT_GROUP,BEARING,Bearings,60,true
+ELEMENT_GROUP,JOINT,Expansion joints,70,true
+ELEMENT_GROUP,DRAINAGE,Drainage system,80,true
+ELEMENT_GROUP,APPROACH,Approach / embankment,90,true
+RATING_METHOD,AS_5100,AS 5100 — Australian standard,10,true
+RATING_METHOD,AASHTO_LRFR,AASHTO LRFR,20,true
+RATING_METHOD,WORKING_STRESS,Working-stress method,30,true
+RATING_METHOD,LOAD_FACTOR,Load-factor method,40,true
+RATING_METHOD,FE_ANALYSIS,Finite-element analysis,50,true
+STRUCTURAL_ADEQUACY,ADEQUATE,Adequate for design loads,10,true
+STRUCTURAL_ADEQUACY,MARGINAL,Marginal — monitor,20,true
+STRUCTURAL_ADEQUACY,DEFICIENT,Structurally deficient,30,true
+STRUCTURAL_ADEQUACY,FAILED,Failed,40,true
+STRUCTURAL_RISK,LOW,Low,10,true
+STRUCTURAL_RISK,MEDIUM,Medium,20,true
+STRUCTURAL_RISK,HIGH,High,30,true
+STRUCTURAL_RISK,VERY_HIGH,Very High,40,true
+STRUCTURAL_RISK,CRITICAL,Critical,50,true
+RISK_BAND,LOW,Low risk band,10,true
+RISK_BAND,MEDIUM,Medium risk band,20,true
+RISK_BAND,HIGH,High risk band,30,true
+RISK_BAND,VERY_HIGH,Very high risk band,40,true
+RISK_BAND,CRITICAL,Critical risk band,50,true
+CAPACITY_STATUS,FULL,Full capacity,10,true
+CAPACITY_STATUS,REDUCED,Reduced capacity,20,true
+CAPACITY_STATUS,RESTRICTED,Restricted,30,true
+CAPACITY_STATUS,UNKNOWN,Unknown,40,true
+ACCESS_METHOD,DRIVE_ON,Drive on / off,10,true
+ACCESS_METHOD,WALK,Walk only,20,true
+ACCESS_METHOD,UNDERSIDE,Underside access,30,true
+ACCESS_METHOD,BOAT,Boat / underwater,40,true
+ACCESS_METHOD,DRONE,Drone inspection,50,true
+ACCESS_METHOD,ROPE_ACCESS,Rope-access (abseil),60,true
+INTERVENTION_TYPE,REPAIR,Repair,10,true
+INTERVENTION_TYPE,REHAB,Rehabilitation,20,true
+INTERVENTION_TYPE,REPLACE,Replacement,30,true
+INTERVENTION_TYPE,STRENGTHEN,Strengthening,40,true
+INTERVENTION_TYPE,MONITOR,Monitor only,50,true
+INTERVENTION_TYPE,DECOMMISSION,Decommission,60,true
+MAINTENANCE_URGENCY,IMMEDIATE,Immediate (within 24 h),10,true
+MAINTENANCE_URGENCY,SHORT_TERM,Short term (within 30 days),20,true
+MAINTENANCE_URGENCY,MEDIUM_TERM,Medium term (within 6 months),30,true
+MAINTENANCE_URGENCY,LONG_TERM,Long term (within 2 years),40,true
+MAINTENANCE_URGENCY,DEFERRED,Deferred,50,true
+PROGRAMME_STATUS,DRAFT,Draft programme,10,true
+PROGRAMME_STATUS,APPROVED,Approved,20,true
+PROGRAMME_STATUS,FUNDED,Funded,30,true
+PROGRAMME_STATUS,IN_DELIVERY,In delivery,40,true
+PROGRAMME_STATUS,COMPLETE,Completed,50,true
+PROGRAMME_STATUS,DEFERRED,Deferred,60,true
+EXTERNAL_SYSTEM_TYPE,S4_HANA,SAP S/4HANA backend,10,true
+EXTERNAL_SYSTEM_TYPE,ESRI,Esri ArcGIS,20,true
+EXTERNAL_SYSTEM_TYPE,BANC,BANC bridge data exchange,30,true
+EXTERNAL_SYSTEM_TYPE,GAZETTE,Government gazette feed,40,true
+EXTERNAL_SYSTEM_TYPE,WEATHER,Weather / flood feed,50,true
+STATE,NSW,New South Wales,10,true
+STATE,VIC,Victoria,20,true
+STATE,QLD,Queensland,30,true
+STATE,WA,Western Australia,40,true
+STATE,SA,South Australia,50,true
+STATE,TAS,Tasmania,60,true
+STATE,NT,Northern Territory,70,true
+STATE,ACT,Australian Capital Territory,80,true

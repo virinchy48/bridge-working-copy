@@ -18,22 +18,8 @@ type ExternalSystemType : String(50) enum {
     OTHER     = 'OTHER';
 }
 
-type InspectionOrderType : String(50) enum {
-    ROUTINE    = 'ROUTINE';
-    SPECIAL    = 'SPECIAL';
-    PRINCIPAL  = 'PRINCIPAL';
-    UNDERWATER = 'UNDERWATER';
-    POST_EVENT = 'POST_EVENT';
-    LOAD       = 'LOAD';
-}
-
-type InspectionOrderStatus : String(50) enum {
-    PLANNED        = 'PLANNED';
-    IN_PROGRESS    = 'IN_PROGRESS';
-    PENDING_REVIEW = 'PENDING_REVIEW';
-    COMPLETED      = 'COMPLETED';
-    CANCELLED      = 'CANCELLED';
-}
+// InspectionOrderType / InspectionOrderStatus types removed in cut-down BIS variant.
+// Inspection workflow now uses BridgeInspection (BHI) directly.
 
 type AccessMethod : String(50) enum {
     WALK         = 'WALK';
@@ -236,9 +222,7 @@ type FreightRouteClass : String enum {
     GENERAL;
 }
 
-// ── From original schema.cds lines 1406-1407 ─────────────
-type WorkOrderPriority : String enum { HIGH; MEDIUM; LOW; }
-type WorkOrderStatus   : String enum { CREATED; IN_PROGRESS; COMPLETED; CANCELLED; }
+// WorkOrderPriority / WorkOrderStatus types removed in cut-down BIS variant.
 
 // ── From original schema.cds lines 1468-1471 ─────────────
 type SensorType : String enum {

@@ -132,7 +132,6 @@
                 { "pattern": "Reports",                "name": "Reports",           "target": "Reports" },
                 { "pattern": "Upload",                 "name": "MassUpload",           "target": "MassUpload" },
                 { "pattern": "Admin",                  "name": "AdminConfig",          "target": "AdminConfig" },
-                { "pattern": "Inspections",            "name": "InspectionDashboard",  "target": "InspectionDashboard" },
                 { "pattern": "Defects",                "name": "DefectRegister",       "target": "DefectRegister" },
                 { "pattern": "BridgeNew",              "name": "BridgeNew",             "target": "BridgeNew" },
                 { "pattern": "BridgeEdit/{bridgeId}",  "name": "BridgeEdit",            "target": "BridgeEdit" },
@@ -143,7 +142,6 @@
                 { "pattern": "RouteAssessment", "name": "RouteAssessment", "target": "RouteAssessment" },
                 { "pattern": "FreightRoutes", "name": "FreightRoutes", "target": "FreightRoutes" },
                 { "pattern": "FreightRoutes/{routeId}", "name": "FreightRouteDetail", "target": "FreightRouteDetail" },
-                { "pattern": "WorkOrders", "name": "WorkOrders", "target": "WorkOrders" },
                 { "pattern": "IntegrationHub", "name": "integrationHub", "target": "IntegrationHub" },
                 { "pattern": "inspection/create/{bridgeId}", "name": "InspectionCreate", "target": "InspectionCreate" },
                 { "pattern": "inspection/create", "name": "InspectionCreateNew", "target": "InspectionCreate" },
@@ -191,10 +189,6 @@
                     "type": "XML", "viewLevel": 1,
                     "viewName": "nhvr.bridgemanagement.view.AdminConfig"
                 },
-                "InspectionDashboard": {
-                    "type": "XML", "viewLevel": 1,
-                    "viewName": "nhvr.bridgemanagement.view.InspectionDashboard"
-                },
                 "DefectRegister": {
                     "type": "XML", "viewLevel": 1,
                     "viewName": "nhvr.bridgemanagement.view.Defects"
@@ -235,11 +229,6 @@
                     "type": "XML", "viewLevel": 2,
                     "viewId": "FreightRouteDetail",
                     "viewName": "nhvr.bridgemanagement.view.FreightRouteDetail"
-                },
-                "WorkOrders": {
-                    "type": "XML", "viewLevel": 1,
-                    "viewId": "WorkOrders",
-                    "viewName": "nhvr.bridgemanagement.view.WorkOrders"
                 },
                 "IntegrationHub": {
                     "type": "XML", "viewLevel": 1,

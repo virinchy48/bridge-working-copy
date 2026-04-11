@@ -114,16 +114,7 @@ action massUploadVehicleClasses(csvData: LargeString) returns {
     errors       : LargeString;
 };
 
-// ── Mass Upload — Inspection Orders ───────────────────────
-@restrict: [{ to: ['BridgeManager','Admin'] }]
-action massUploadInspectionOrders(csvData: LargeString) returns {
-    status       : String;
-    totalRecords : Integer;
-    successCount : Integer;
-    updatedCount : Integer;
-    failureCount : Integer;
-    errors       : LargeString;
-};
+// massUploadInspectionOrders action removed in cut-down BIS variant.
 
 // ── Mass Upload — Bridge Defects ──────────────────────────
 @restrict: [{ to: ['BridgeManager','Admin'] }]
@@ -215,30 +206,11 @@ function getDashboardKPIs(jurisdiction: String) returns LargeString;
 function getConditionTrend(periods: Integer, jurisdiction: String) returns LargeString;
 
 // ── v2 Actions ────────────────────────────────────────────
-
-@restrict: [{ to: 'authenticated-user' }]
-action createInspectionOrder(
-    bridge_ID         : UUID,
-    orderNumber       : String,
-    inspectionType    : String,
-    plannedDate       : Date,
-    inspector         : String,
-    assignedInspector : String,
-    inspectorOrg      : String,
-    accessMethod      : String,
-    ratingMethod      : String,
-    priority          : String,
-    notes             : String
-) returns {
-    status  : String;
-    message : String;
-    ID      : UUID;
-};
+// createInspectionOrder removed in cut-down BIS variant.
 
 @restrict: [{ to: 'authenticated-user' }]
 action raiseDefect(
     bridge_ID          : UUID,
-    inspectionOrder_ID : UUID,
     defectCategory     : String,
     severity           : String,
     extent             : String,

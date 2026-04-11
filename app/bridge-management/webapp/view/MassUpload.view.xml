@@ -51,7 +51,6 @@
                         <core:Item key="restrictions"     text="Restrictions"/>
                         <core:Item key="routes"           text="Routes"/>
                         <core:Item key="vehicleClasses"   text="Vehicle Classes"/>
-                        <core:Item key="inspectionOrders" text="Inspection Orders"/>
                         <core:Item key="bridgeDefects"    text="Bridge Defects"/>
                         <core:Item key="lookups"          text="Lookup Values (Admin)"/>
                     </Select>
@@ -98,7 +97,8 @@
                             press="onBrowseFile" type="Emphasized" class="sapUiTinyMarginEnd"/>
                         <Text id="selectedFileName" text="No file selected" class="sapUiSmallMarginBegin"/>
                         <core:HTML id="fileInputHolder"
-                            content="&lt;input type='file' id='nhvrFileInput' accept='.csv' style='display:none' /&gt;"/>
+                            content="&lt;input type='file' id='nhvrFileInput' accept='.csv' style='display:none' /&gt;"
+                            afterRendering="onFileInputRendered"/>
                     </HBox>
                 </VBox>
 

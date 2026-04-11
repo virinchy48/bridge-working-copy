@@ -22,63 +22,9 @@ entity InspectionRecords as projection on nhvr.InspectionRecord {
     bridge.name     as bridgeName @readonly
 };
 
-// ── v2 Entities ────────────────────────────────────────────
-
-@cds.redirection.target: true
-@cds.query.limit: { max: 2000, default: 100 }
-@restrict: [
-    { grant: ['READ'],            to: 'authenticated-user' },
-    { grant: ['CREATE','UPDATE'], to: ['BridgeManager','Admin'] },
-    { grant: ['DELETE'],          to: ['BridgeManager','Admin'] }
-]
-entity InspectionOrders as projection on nhvr.InspectionOrder {
-    *,
-    bridge.bridgeId as bridgeId @readonly,
-    bridge.name     as bridgeName @readonly,
-    measurementDocuments: redirected to MeasurementDocuments,
-    defects         : redirected to BridgeDefects
-} actions {
-    @restrict: [{ to: ['BridgeManager','Admin'] }]
-    action startInspection() returns {
-        status: String; message: String
-    };
-    @restrict: [{ to: ['BridgeManager','Admin'] }]
-    action completeInspection(
-        overallConditionRating  : Integer,
-        structuralAdequacy      : String,
-        maintenanceUrgency      : String,
-        recommendations         : LargeString,
-        reportRef               : String,
-        nextInspectionDue       : Date,
-        notes                   : LargeString
-    ) returns {
-        status: String; message: String
-    };
-};
-
-// ── Inspection Review / Approval (unbound — Phase 5.3) ────────
-@restrict: [{ to: ['BridgeManager','Admin'] }]
-action reviewInspection(
-    inspectionOrderId : UUID,
-    decision          : String,
-    notes             : String
-) returns {
-    status   : String;
-    decision : String;
-    message  : String;
-};
-
-@cds.redirection.target: true
-@restrict: [
-    { grant: ['READ'],                          to: 'authenticated-user' },
-    { grant: ['CREATE','UPDATE'],               to: ['BridgeManager','Admin'] },
-    { grant: ['DELETE'],                        to: ['BridgeManager','Admin'] }
-]
-entity MeasurementDocuments as projection on nhvr.MeasurementDocument {
-    *,
-    bridge.bridgeId as bridgeId @readonly,
-    bridge.name     as bridgeName @readonly
-};
+// InspectionOrders, MeasurementDocuments and WorkOrders projections were
+// removed in the cut-down BIS variant. Defects and inspections are still
+// supported via BridgeDefects and BridgeInspections below.
 
 @cds.redirection.target: true
 @restrict: [
@@ -98,17 +44,6 @@ entity BridgeDefects as projection on nhvr.BridgeDefect {
         status: String; message: String
     };
 };
-
-entity WorkOrders as projection on nhvr.WorkOrder {
-    key ID,
-    defect.ID  as defect_ID,
-    bridge.ID  as bridge_ID,
-    woNumber, priority, status, plannedDate,
-    assignedTo, estimatedCost, notes, createdAt, modifiedAt
-};
-
-@restrict: [{ to: ['BridgeManager','Admin'] }]
-action createWorkOrder(defectId : UUID, priority : String, plannedDate : Date, assignedTo : String, notes : String) returns WorkOrders;
 
 entity DefectClassifications as projection on nhvr.DefectClassification {
     key ID,
@@ -130,7 +65,7 @@ entity BridgeInspections as projection on nhvr.BridgeInspection {
     overallConditionRating, bridgeHealthIndex,
     primaryDefectCode, defectSeverity, inspectorNotes,
     followUpRequired, followUpPriority,
-    estimatedRepairCost, sapNotificationNo, sapWorkOrderNo,
+    estimatedRepairCost, sapNotificationNo,
     nextInspectionDue, reportGenerated, reportURL,
     createdAt, createdBy
 };

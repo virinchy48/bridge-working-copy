@@ -28,7 +28,6 @@ sap.ui.define([
         "FreightRoutes": "FREIGHT_ROUTES",
         "FreightRouteDetail": "FREIGHT_ROUTES",
         "VehicleCombinations": "VEHICLE_COMBINATIONS",
-        "WorkOrders": "WORK_ORDERS",
         "IntegrationHub": "INTEGRATION_HUB",
         "AnalyticsDashboard": "BRIDGE_IQ",
         "AdminConfig": "ADMIN_CONFIG",

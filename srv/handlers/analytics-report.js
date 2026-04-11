@@ -13,7 +13,7 @@ const LOG = cds.log('analytics-report');
 const DEFAULT_KNOWN_ROUTES = [
     'Home', 'Dashboard', 'ExecutiveDashboard', 'Bridges', 'BridgeDetail',
     'BridgeNew', 'BridgeEdit', 'Restrictions', 'MapView', 'Reports',
-    'AdminConfig', 'MassUpload', 'MassEdit', 'InspectionOrders',
+    'AdminConfig', 'MassUpload', 'MassEdit',
     'InspectionCreate', 'FreightRoutes', 'FreightRouteDetail',
     'Permits', 'VehicleClasses', 'RouteAssessment', 'DataQuality',
     'RiskPrioritisation', 'AnalyticsDashboard'

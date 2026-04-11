@@ -61,9 +61,10 @@ sap.ui.define([
             this._rebuildPermitViewsMenu();
 
             LookupService.load().then(function () {
-                LookupService.populateSelect(this.byId("permitStatusFilter"), "PERMIT_STATUS", "All Statuses");
-                LookupService.populateSelect(this.byId("permitTypeFilter"),   "PERMIT_TYPE",   "All Types");
-                LookupService.populateFormSelect(this.byId("permitTypeSelect"), "PERMIT_TYPE");
+                LookupService.populateSelect(this.byId("permitStatusFilter"),     "PERMIT_STATUS",   "All Statuses");
+                LookupService.populateSelect(this.byId("permitTypeFilter"),       "PERMIT_TYPE",     "All Types");
+                LookupService.populateFormSelect(this.byId("permitTypeSelect"),   "PERMIT_TYPE");
+                LookupService.populateFormSelect(this.byId("permitDecision"),     "PERMIT_DECISION");
             }.bind(this));
         },
 

@@ -41,17 +41,6 @@ module.exports = function registerCommonHelpers(srv) {
     }
 
     // ─────────────────────────────────────────────────────────
-    // HELPER: InspectionOrder lookup (raw SQL)
-    // ─────────────────────────────────────────────────────────
-    async function getInspectionOrder(id, db) {
-        const resolvedDb = db || await cds.connect.to('db');
-        const resolvedId = (id && typeof id === 'object') ? (id.ID || Object.values(id)[0]) : id;
-        return resolvedDb.run(
-            SELECT.one.from('nhvr.InspectionOrder').where({ ID: resolvedId })
-        );
-    }
-
-    // ─────────────────────────────────────────────────────────
     // HELPER: BridgeDefect lookup (raw SQL)
     // ─────────────────────────────────────────────────────────
     async function getBridgeDefect(id, db) {
@@ -210,7 +199,6 @@ module.exports = function registerCommonHelpers(srv) {
         getBridge,
         getBridgeByKey,
         getRestriction,
-        getInspectionOrder,
         getBridgeDefect,
         writeHistory,
         logAudit,

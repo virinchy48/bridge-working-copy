@@ -1,7 +1,7 @@
 // ============================================================
 // NHVR Mass Upload Controller — Universal CSV Import
 // Supports: Bridges, Restrictions, Routes, VehicleClasses,
-//           InspectionOrders, BridgeDefects, Lookups
+//           BridgeDefects, Lookups
 // ============================================================
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
@@ -154,41 +154,7 @@ sap.ui.define([
             }
         },
 
-        inspectionOrders: {
-            label:       "Inspection Orders",
-            action:      "massUploadInspectionOrders",
-            description: "Upload inspection work orders. Existing orders are matched by orderNumber and updated.",
-            hint:        "Required: bridgeId, orderNumber, plannedDate. Optional: inspectionType (ROUTINE|SPECIAL|PRINCIPAL|UNDERWATER|POST_EVENT|LOAD), inspector, inspectorOrg.",
-            headers: [
-                "bridgeId","orderNumber","inspectionType","status","plannedDate",
-                "inspector","inspectorOrg","accessMethod","ratingMethod",
-                "overallConditionRating","structuralAdequacy","maintenanceUrgency",
-                "reportRef","nextInspectionDue","notes"
-            ],
-            sample: "NSW-B-00123,INS-2024-00123,ROUTINE,PLANNED,2024-09-15,J.Smith,NSW Roads,WALK,VISUAL,,,,,2030-09-15,Annual routine inspection",
-            previewCols: [
-                { field: "bridgeId",      header: "Bridge ID" },
-                { field: "orderNumber",   header: "Order Number" },
-                { field: "inspectionType",header: "Type" },
-                { field: "status",        header: "Status" },
-                { field: "plannedDate",   header: "Planned Date" }
-            ],
-            validate: function (row, errors) {
-                if (!row.bridgeId)    errors.push("bridgeId required");
-                if (!row.orderNumber) errors.push("orderNumber required");
-                if (!row.plannedDate) errors.push("plannedDate required");
-                const validTypes = ["ROUTINE","SPECIAL","PRINCIPAL","UNDERWATER","POST_EVENT","LOAD"];
-                if (row.inspectionType && !validTypes.includes(row.inspectionType.toUpperCase()))
-                    errors.push(`inspectionType must be: ${validTypes.join("|")}`);
-                const validStatus = ["PLANNED","IN_PROGRESS","COMPLETED","CANCELLED"];
-                if (row.status && !validStatus.includes(row.status.toUpperCase()))
-                    errors.push(`status must be: ${validStatus.join("|")}`);
-                if (row.overallConditionRating) {
-                    const r = parseInt(row.overallConditionRating);
-                    if (isNaN(r) || r < 1 || r > 10) errors.push("overallConditionRating must be 1-10");
-                }
-            }
-        },
+        // inspectionOrders upload type removed in cut-down BIS variant.
 
         bridgeDefects: {
             label:       "Bridge Defects",
@@ -298,19 +264,45 @@ sap.ui.define([
         },
 
         // ── Drag & Drop / Browse ───────────────────────────────────
-        onDropZoneRendered: function () {
+        // Attach the change-listener to the hidden <input type="file">. This is
+        // idempotent: it can be called from afterRendering callbacks of either
+        // the drop-zone or the file-input holder, and from onBrowseFile as a
+        // last-resort fallback. Without this fallback, a race between the two
+        // <core:HTML> controls' afterRendering events could leave the listener
+        // unattached, breaking the entire Browse File flow silently.
+        _wireFileInput: function () {
             const fileInput = document.getElementById("nhvrFileInput");
-            if (fileInput && !fileInput._wired) {
-                fileInput._wired = true;
-                fileInput.addEventListener("change", (e) => {
-                    if (e.target.files && e.target.files[0]) this._processFile(e.target.files[0]);
-                });
-            }
+            if (!fileInput) return false;
+            if (fileInput._wired) return true;
+            fileInput._wired = true;
+            fileInput.addEventListener("change", (e) => {
+                if (e.target.files && e.target.files[0]) {
+                    this._processFile(e.target.files[0]);
+                    // Reset value so the same file can be re-selected after a fix
+                    e.target.value = "";
+                }
+            });
+            return true;
+        },
+
+        onDropZoneRendered: function () {
+            this._wireFileInput();
+        },
+
+        onFileInputRendered: function () {
+            this._wireFileInput();
         },
 
         onBrowseFile: function () {
+            // Belt-and-braces: wire the listener immediately before opening the
+            // OS file picker, in case neither afterRendering callback ran first.
+            this._wireFileInput();
             const fi = document.getElementById("nhvrFileInput");
-            if (fi) fi.click();
+            if (fi) {
+                fi.click();
+            } else {
+                MessageToast.show("File picker is not ready yet — please try again");
+            }
         },
 
         onFileDrop: function (e) {
@@ -460,7 +452,18 @@ sap.ui.define([
         },
 
         // ── Template Download ──────────────────────────────────────
+        // For most entity types we generate a 1-row CSV stub from
+        // ENTITY_CONFIG. For LOOKUPS specifically we serve a pre-built
+        // .xlsx that contains every active lookup row in the database,
+        // grouped by category, with column comments and a "Categories"
+        // summary sheet. This gives admins a true working starter file
+        // they can edit in Excel and re-upload — instead of an empty
+        // template they have to populate from scratch.
         onDownloadTemplate: function () {
+            if (this._uploadType === "lookups") {
+                this._downloadLookupsXlsxTemplate();
+                return;
+            }
             const cfg      = ENTITY_CONFIG[this._uploadType];
             const filename = `${this._uploadType}_template.csv`;
             const content  = [cfg.headers.join(","), cfg.sample].join("\n");
@@ -470,6 +473,31 @@ sap.ui.define([
             a.href = url; a.download = filename; a.click();
             URL.revokeObjectURL(url);
             MessageToast.show(`Template downloaded: ${filename}`);
+        },
+
+        _downloadLookupsXlsxTemplate: function () {
+            // Pre-built xlsx is generated by scripts/generate-lookups-template.py
+            // and served by the CDS static-asset middleware.
+            const url = "resources/templates/lookups-template.xlsx";
+            fetch(url, { credentials: "same-origin" })
+                .then(r => {
+                    if (!r.ok) throw new Error("HTTP " + r.status);
+                    return r.blob();
+                })
+                .then(blob => {
+                    const link = document.createElement("a");
+                    link.href = URL.createObjectURL(blob);
+                    link.download = "lookups-template.xlsx";
+                    link.click();
+                    URL.revokeObjectURL(link.href);
+                    MessageToast.show("Lookups Excel template downloaded — edit in Excel and re-upload via the same screen");
+                })
+                .catch(err => {
+                    MessageBox.error(
+                        "Couldn't download the lookups template (" + err.message + ").\n\n" +
+                        "Run scripts/generate-lookups-template.py to (re)build it from the current Lookup table."
+                    );
+                });
         },
 
         // ── Submit Upload ──────────────────────────────────────────
@@ -585,7 +613,17 @@ sap.ui.define([
                 const errorsEl = this.byId("resultErrors");
                 if (errorsEl) {
                     errorsEl.setVisible(!!(errors && errors.trim()));
-                    errorsEl.setText(errors ? `Errors:\n${escapeHtml(errors)}` : "");
+                    // resultErrors is a sap.m.TextArea — its API is setValue(),
+                    // not setText(). Calling setText here threw and routed the
+                    // whole upload into the .catch handler, surfacing the
+                    // misleading "Upload failed — check console for details"
+                    // toast even though the server-side insert succeeded.
+                    const text = errors ? `Errors:\n${escapeHtml(errors)}` : "";
+                    if (typeof errorsEl.setValue === "function") {
+                        errorsEl.setValue(text);
+                    } else if (typeof errorsEl.setText === "function") {
+                        errorsEl.setText(text);
+                    }
                 }
             }
         },

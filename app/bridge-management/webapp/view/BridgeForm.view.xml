@@ -133,18 +133,8 @@
                         <HBox wrap="Wrap" class="sapUiSmallMargin">
                             <VBox width="220px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
                                 <Label text="Structure Type" design="Bold" labelFor="fStructureType"/>
-                                <Select id="fStructureType">
-                                    <core:Item key="" text="— Select —"/>
-                                    <core:Item key="BEAM"         text="Beam"/>
-                                    <core:Item key="BOX_GIRDER"   text="Box Girder"/>
-                                    <core:Item key="ARCH"         text="Arch"/>
-                                    <core:Item key="TRUSS"        text="Truss"/>
-                                    <core:Item key="CABLE_STAYED" text="Cable Stayed"/>
-                                    <core:Item key="CULVERT"      text="Culvert"/>
-                                    <core:Item key="BASCULE"      text="Bascule"/>
-                                    <core:Item key="SUSPENSION"   text="Suspension"/>
-                                    <core:Item key="SLAB"         text="Slab"/>
-                                </Select>
+                                <!-- Items populated at runtime from Lookup table (STRUCTURE_TYPE category) -->
+                                <Select id="fStructureType"/>
                             </VBox>
                             <VBox width="200px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
                                 <Label text="Material" design="Bold" labelFor="fMaterial"/>
@@ -156,15 +146,8 @@
                             </VBox>
                             <VBox width="200px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
                                 <Label text="Design Load" design="Bold" labelFor="fDesignLoad"/>
-                                <Select id="fDesignLoad">
-                                    <core:Item key=""      text="— Select —"/>
-                                    <core:Item key="T44"    text="T44"/>
-                                    <core:Item key="M1600"  text="M1600"/>
-                                    <core:Item key="SM1600" text="SM1600"/>
-                                    <core:Item key="S1600"  text="S1600"/>
-                                    <core:Item key="Historic" text="Historic"/>
-                                    <core:Item key="Other"  text="Other"/>
-                                </Select>
+                                <!-- Items populated at runtime from Lookup table (DESIGN_LOAD category) -->
+                                <Select id="fDesignLoad"/>
                             </VBox>
                             <VBox width="220px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
                                 <Label text="Design Standard" design="Bold" labelFor="fDesignStandard"/>
@@ -221,24 +204,13 @@
                             </VBox>
                             <VBox width="200px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
                                 <Label text="Posting Status *" design="Bold" labelFor="fPostingStatus"/>
-                                <Select id="fPostingStatus">
-                                    <core:Item key="UNRESTRICTED"     text="Unrestricted"/>
-                                    <core:Item key="POSTED"           text="Posted"/>
-                                    <core:Item key="RESTRICTED"       text="Restricted"/>
-                                    <core:Item key="HEIGHT_RESTRICTED" text="Height Restricted"/>
-                                    <core:Item key="WEIGHT_RESTRICTED" text="Weight Restricted"/>
-                                    <core:Item key="CLOSED"           text="Closed"/>
-                                </Select>
+                                <!-- Items populated at runtime from Lookup table (POSTING_STATUS category) by BridgeForm.controller.js onInit -->
+                                <Select id="fPostingStatus"/>
                             </VBox>
                             <VBox width="180px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
                                 <Label text="Scour Risk" design="Bold" labelFor="fScourRisk"/>
-                                <Select id="fScourRisk">
-                                    <core:Item key=""         text="— Unknown —"/>
-                                    <core:Item key="LOW"      text="Low"/>
-                                    <core:Item key="MEDIUM"   text="Medium"/>
-                                    <core:Item key="HIGH"     text="High"/>
-                                    <core:Item key="CRITICAL" text="Critical"/>
-                                </Select>
+                                <!-- Items populated at runtime from Lookup table (SCOUR_RISK category) -->
+                                <Select id="fScourRisk"/>
                             </VBox>
                             <VBox width="200px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
                                 <Label text="Inspection Date" design="Bold" labelFor="fInspectionDate"/>
@@ -298,17 +270,8 @@
                             </VBox>
                             <VBox width="220px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
                                 <Label text="NHVR PBS Approval Class" design="Bold" labelFor="fNhvrApprovalClass"/>
-                                <Select id="fNhvrApprovalClass">
-                                    <core:Item key=""        text="— Not Assessed —"/>
-                                    <core:Item key="CLASS1"  text="Class 1"/>
-                                    <core:Item key="CLASS2"  text="Class 2"/>
-                                    <core:Item key="CLASS3"  text="Class 3"/>
-                                    <core:Item key="CLASS4"  text="Class 4"/>
-                                    <core:Item key="HML"     text="HML"/>
-                                    <core:Item key="B_DOUBLE" text="B-Double"/>
-                                    <core:Item key="B_TRIPLE" text="B-Triple"/>
-                                    <core:Item key="NONE"    text="None"/>
-                                </Select>
+                                <!-- Items populated at runtime from Lookup table (NHVR_APPROVAL_CLASS category) -->
+                                <Select id="fNhvrApprovalClass"/>
                             </VBox>
                             <VBox width="140px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
                                 <Label text="Importance Level (AS 1170)" design="Bold" labelFor="fImportanceLevel"/>
@@ -414,16 +377,8 @@
                             </VBox>
                             <VBox width="200px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
                                 <Label text="Primary External System" design="Bold" labelFor="fExtSystem"/>
-                                <Select id="fExtSystem">
-                                    <core:Item key=""         text="— None —"/>
-                                    <core:Item key="BANC"     text="BANC"/>
-                                    <core:Item key="RMS"      text="RMS/TfNSW"/>
-                                    <core:Item key="VICROADS" text="VicRoads"/>
-                                    <core:Item key="MRWA"     text="MRWA"/>
-                                    <core:Item key="TMR"      text="TMR QLD"/>
-                                    <core:Item key="DPTI"     text="DPTI SA"/>
-                                    <core:Item key="OTHER"    text="Other"/>
-                                </Select>
+                                <!-- Items populated at runtime from Lookup table (EXTERNAL_SYSTEM_TYPE category) -->
+                                <Select id="fExtSystem"/>
                             </VBox>
                             <VBox width="240px" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
                                 <Label text="Primary External ID" design="Bold" labelFor="fExtId"/>

@@ -96,9 +96,7 @@
                             <ToolbarSpacer/>
                             <Button text="Raise Defect" icon="sap-icon://add" press="onRaiseDefect" type="Emphasized"/>
                             <ToolbarSeparator/>
-                            <Button id="btnCreateWo" text="Create Work Order" icon="sap-icon://work-history"
-                                type="Default" press="onCreateWorkOrder" enabled="false"
-                                tooltip="Create a work order for the selected defect"/>
+                            <!-- Create Work Order button removed in cut-down BIS variant. -->
                             <Button id="btnAiClassify" text="AI Classify" icon="sap-icon://ai"
                                 type="Default" press="onAiClassifyDefect" enabled="false"
                                 tooltip="Run AI defect classification on the selected defect"/>
@@ -164,30 +162,7 @@
         </f:content>
     </f:DynamicPage>
 
-    <!-- ── Create Work Order Dialog ──────────────────────── -->
-    <Dialog id="createWoDialog" title="Create Work Order" contentWidth="28rem">
-        <content>
-            <form:SimpleForm editable="true" layout="ResponsiveGridLayout" columnsL="1" columnsM="1">
-                <Label text="Priority *"/>
-                <Select id="fWoPriority">
-                </Select>
-                <Label text="Planned Date"/>
-                <DatePicker id="fWoPlannedDate" valueFormat="yyyy-MM-dd" displayFormat="dd MMM yyyy"/>
-                <Label text="Assigned To"/>
-                <Input id="fWoAssignedTo" placeholder="e.g. Jane Smith or team name" maxLength="100"/>
-                <Label text="Estimated Cost (AUD)"/>
-                <Input id="fWoEstCost" placeholder="e.g. 15000" type="Number"/>
-                <Label text="Notes"/>
-                <TextArea id="fWoNotes" rows="3" placeholder="Describe the work required..." maxLength="500"/>
-            </form:SimpleForm>
-        </content>
-        <beginButton>
-            <Button text="Create Work Order" type="Emphasized" press="onSaveWorkOrder"/>
-        </beginButton>
-        <endButton>
-            <Button text="Cancel" press="onCloseWoDialog"/>
-        </endButton>
-    </Dialog>
+    <!-- Create Work Order Dialog removed in cut-down BIS variant. -->
 
     <!-- ── P14: AI Classify Result Dialog ────────────────── -->
     <Dialog id="aiClassifyDialog" title="AI Defect Classification Result" contentWidth="440px">

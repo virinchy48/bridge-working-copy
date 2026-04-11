@@ -51,8 +51,28 @@ sap.ui.define([
             ReferenceData.load();
 
             LookupService.load().then(function () {
-                LookupService.populateFormSelect(this.byId("fAssetClass"), "ASSET_CLASS");
-                LookupService.populateFormSelect(this.byId("fState"), "STATE");
+                // Single source of truth — every dropdown below is populated
+                // from the Lookup table at runtime. Previously these were
+                // hardcoded in BridgeForm.view.xml, which caused two failure
+                // modes:
+                //   1) Stale values (e.g. HEIGHT_RESTRICTED, WEIGHT_RESTRICTED)
+                //      were offered by the UI but rejected by the server's
+                //      enum guard in srv/handlers/bridges.js → "Save failed:
+                //      Invalid postingStatus".
+                //   2) Admin lookup uploads (via Mass Upload → Lookup Values)
+                //      had no effect on the form, defeating the whole point
+                //      of an admin-configurable lookup catalogue.
+                // To add or rename a value, upload via Mass Upload — no code
+                // change needed. The UI refreshes from the Lookup table on
+                // each form open (LookupService caches per session).
+                LookupService.populateFormSelect(this.byId("fAssetClass"),       "ASSET_CLASS");
+                LookupService.populateFormSelect(this.byId("fState"),            "STATE");
+                LookupService.populateFormSelect(this.byId("fPostingStatus"),    "POSTING_STATUS");
+                LookupService.populateFormSelect(this.byId("fScourRisk"),        "SCOUR_RISK", "— Unknown —");
+                LookupService.populateFormSelect(this.byId("fStructureType"),    "STRUCTURE_TYPE");
+                LookupService.populateFormSelect(this.byId("fDesignLoad"),       "DESIGN_LOAD");
+                LookupService.populateFormSelect(this.byId("fNhvrApprovalClass"),"NHVR_APPROVAL_CLASS", "— Not Assessed —");
+                LookupService.populateFormSelect(this.byId("fExtSystem"),        "EXTERNAL_SYSTEM_TYPE", "— None —");
             }.bind(this));
         },
 
@@ -608,13 +628,21 @@ sap.ui.define([
             const container = this.byId("dynAttrContainer");
             if (!container) return {};
             const vals = {};
-            const hbox = container.getItems()[0];
+            // The container's first child may be a placeholder <Text> (loaded
+            // from the XML before _renderDynAttrs runs) if attribute defs
+            // failed to load or the user clicked Save before they finished
+            // loading. Find the first child that actually exposes getItems()
+            // (i.e. the dynamic-attribute HBox) instead of blindly indexing.
+            const items = container.getItems ? container.getItems() : [];
+            const hbox  = items.find(it => it && typeof it.getItems === "function");
             if (!hbox) return vals;
 
             hbox.getItems().forEach(vbox => {
+                if (!vbox || typeof vbox.getItems !== "function") return;
                 const controls = vbox.getItems();
                 if (controls.length < 2) return;
                 const ctrl     = controls[1];
+                if (!ctrl || typeof ctrl.data !== "function") return;
                 const attrName = ctrl.data("attrName");
                 if (!attrName) return;
 
