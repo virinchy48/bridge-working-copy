@@ -67,21 +67,26 @@ module.exports = function registerRestrictionHandlers(srv, helpers) {
             errors.push('Restriction value must be greater than 0');
         }
         const validUnits = {
-            'HEIGHT': ['m'], 'MASS': ['t'], 'GROSS_MASS': ['t'], 'WIDTH': ['m'],
-            'LENGTH': ['m'], 'SPEED': ['km/h'], 'AXLE_LOAD': ['t'],
-            'AXLE_MASS': ['t'], 'COMBINATION_MASS': ['t'], 'WIND_SPEED': ['km/h']
+            'HEIGHT': ['m','M'], 'MASS': ['t','T'], 'GROSS_MASS': ['t','T'], 'WIDTH': ['m','M'],
+            'LENGTH': ['m','M'], 'SPEED': ['km/h','KPH'], 'AXLE_LOAD': ['t','T'],
+            'AXLE_MASS': ['t','T'], 'COMBINATION_MASS': ['t','T'], 'WIND_SPEED': ['km/h','KPH'],
+            'LOAD_RATING': ['kn','KN'], 'WEIGHT': ['t','T'], 'CLEARANCE': ['m','M']
         };
         if (data.restrictionType && data.unit) {
             const allowed = validUnits[data.restrictionType];
             if (allowed && !allowed.includes(data.unit))
                 errors.push(`Invalid unit "${data.unit}" for restriction type "${data.restrictionType}". Expected: ${allowed.join(', ')}`);
         }
-        // Restriction type enum validation
-        const VALID_RESTRICTION_TYPES = ['MASS','GROSS_MASS','HEIGHT','WIDTH','LENGTH','SPEED','AXLE_LOAD','AXLE_MASS','COMBINATION_MASS','VEHICLE_TYPE','WIND_SPEED','WEIGHT','CLEARANCE'];
+        // Restriction type validation — accept types from RestrictionTypeConfig table + legacy codes
+        const VALID_RESTRICTION_TYPES = [
+            'MASS','GROSS_MASS','HEIGHT','WIDTH','LENGTH','SPEED','AXLE_LOAD','AXLE_MASS',
+            'COMBINATION_MASS','VEHICLE_TYPE','WIND_SPEED','WEIGHT','CLEARANCE',
+            'LOAD_RATING','VEHICLE_CLASS','CLOSURE','LANE'
+        ];
         if (data.restrictionType && !VALID_RESTRICTION_TYPES.includes(data.restrictionType))
             errors.push(`Invalid restrictionType: '${data.restrictionType}'. Must be one of: ${VALID_RESTRICTION_TYPES.join(', ')}`);
-        // Status enum validation
-        const VALID_STATUSES = ['ACTIVE','INACTIVE','EXPIRED','SCHEDULED','DRAFT','SUPERSEDED'];
+        // Status enum validation — accept values from RESTRICTION_STATUS lookup + legacy codes
+        const VALID_STATUSES = ['ACTIVE','INACTIVE','EXPIRED','SCHEDULED','DRAFT','SUPERSEDED','PENDING','LIFTED'];
         if (data.status && !VALID_STATUSES.includes(data.status))
             errors.push(`Invalid status: '${data.status}'. Must be one of: ${VALID_STATUSES.join(', ')}`);
         // Direction enum validation

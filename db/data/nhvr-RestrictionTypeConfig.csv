@@ -1,0 +1,11 @@
+ID,code,displayLabel,defaultUnit,valueRequired,description,sortOrder,active,isSystem
+a1000001-0001-0001-0001-000000000001,GROSS_MASS,Gross Vehicle Mass,T,true,Maximum gross vehicle mass allowed,10,true,true
+a1000001-0001-0001-0001-000000000002,AXLE_MASS,Axle Mass Limit,T,true,Maximum axle mass allowed,20,true,true
+a1000001-0001-0001-0001-000000000003,HEIGHT,Height Restriction,M,true,Maximum vehicle height clearance,30,true,true
+a1000001-0001-0001-0001-000000000004,WIDTH,Width Restriction,M,true,Maximum vehicle width allowed,40,true,true
+a1000001-0001-0001-0001-000000000005,LENGTH,Length Restriction,M,true,Maximum vehicle length allowed,50,true,true
+a1000001-0001-0001-0001-000000000006,SPEED,Speed Restriction,KPH,true,Speed limit on bridge,60,true,true
+a1000001-0001-0001-0001-000000000007,LOAD_RATING,Load Rating,KN,true,Bridge load rating limit,70,true,true
+a1000001-0001-0001-0001-000000000008,VEHICLE_CLASS,Vehicle Class Restriction,,false,Restriction by vehicle classification,80,true,true
+a1000001-0001-0001-0001-000000000009,CLOSURE,Bridge Closure,,false,Full bridge closure,90,true,true
+a1000001-0001-0001-0001-000000000010,LANE,Lane Restriction,,false,Lane or traffic flow restriction,100,true,true
