@@ -372,7 +372,7 @@ sap.ui.define([
             const num  = (id) => { const v = get(id); return v === "" ? null : parseFloat(v); };
             const int_ = (id) => { const v = get(id); return v === "" ? null : parseInt(v); };
 
-            // Validation
+            // Validation — with field-level error indicators
             const errs = [];
             const name  = get("fName");
             const state = getSk("fState");
@@ -380,14 +380,42 @@ sap.ui.define([
             const lon   = num("fLongitude");
             const owner = get("fAssetOwner");
 
-            if (!name)  errs.push("Bridge Name is required");
-            else if (name.length > 200) errs.push("Bridge Name must not exceed 200 characters");
-            if (!state) errs.push("State is required");
-            if (!owner) errs.push("Asset Owner is required");
-            if (lat === null || lat === undefined) errs.push("Latitude is required");
-            else if (lat < -90 || lat > 90) errs.push("Latitude must be between -90 and 90");
-            if (lon === null || lon === undefined) errs.push("Longitude is required");
-            else if (lon < -180 || lon > 180) errs.push("Longitude must be between -180 and 180");
+            // Clear previous validation states
+            const valFields = ["fName", "fState", "fAssetOwner", "fLatitude", "fLongitude", "fPostingStatus"];
+            valFields.forEach(id => {
+                const c = this.byId(id);
+                if (c && c.setValueState) c.setValueState("None");
+            });
+
+            if (!name) {
+                errs.push("Bridge Name is required");
+                const c = this.byId("fName"); if (c && c.setValueState) { c.setValueState("Error"); c.setValueStateText("Bridge Name is required"); }
+            } else if (name.length > 200) {
+                errs.push("Bridge Name must not exceed 200 characters");
+                const c = this.byId("fName"); if (c && c.setValueState) { c.setValueState("Error"); c.setValueStateText("Max 200 characters"); }
+            }
+            if (!state) {
+                errs.push("State is required");
+                const c = this.byId("fState"); if (c && c.setValueState) { c.setValueState("Error"); c.setValueStateText("State is required"); }
+            }
+            if (!owner) {
+                errs.push("Asset Owner is required");
+                const c = this.byId("fAssetOwner"); if (c && c.setValueState) { c.setValueState("Error"); c.setValueStateText("Asset Owner is required"); }
+            }
+            if (lat === null || lat === undefined) {
+                errs.push("Latitude is required");
+                const c = this.byId("fLatitude"); if (c && c.setValueState) { c.setValueState("Error"); c.setValueStateText("Latitude is required"); }
+            } else if (lat < -90 || lat > 90) {
+                errs.push("Latitude must be between -90 and 90");
+                const c = this.byId("fLatitude"); if (c && c.setValueState) { c.setValueState("Error"); c.setValueStateText("Must be between -90 and 90"); }
+            }
+            if (lon === null || lon === undefined) {
+                errs.push("Longitude is required");
+                const c = this.byId("fLongitude"); if (c && c.setValueState) { c.setValueState("Error"); c.setValueStateText("Longitude is required"); }
+            } else if (lon < -180 || lon > 180) {
+                errs.push("Longitude must be between -180 and 180");
+                const c = this.byId("fLongitude"); if (c && c.setValueState) { c.setValueState("Error"); c.setValueStateText("Must be between -180 and 180"); }
+            }
 
             if (errs.length) {
                 errStrip.setText(errs.join(" · "));

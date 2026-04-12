@@ -33,6 +33,17 @@ sap.ui.define([
             this._loadKPIThresholds();
             this._trackPageView("Dashboard");
             this._load();
+
+            // Re-load data when navigating back to Dashboard via hash
+            var oRouter = this.getOwnerComponent().getRouter();
+            var oRoute  = oRouter.getRoute("Dashboard");
+            if (oRoute) {
+                oRoute.attachPatternMatched(this._onRouteMatched, this);
+            }
+        },
+
+        _onRouteMatched: function () {
+            this._load();
         },
 
         onAfterRendering: function () {
