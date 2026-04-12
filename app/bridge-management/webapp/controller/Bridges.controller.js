@@ -917,10 +917,17 @@ sap.ui.define([
 
         // sap.ui.table.Table cellClick — navigate to bridge detail on row click
         // (Link press in bridgeId column is handled by onBridgeIdPress directly)
+        // Use rowIndex + table binding to resolve correct bridge (avoids stale rowBindingContext)
         onBridgeCellClick: function (oEvent) {
-            var oRowContext = oEvent.getParameter("rowBindingContext");
-            if (!oRowContext) { return; }
-            var oData = oRowContext.getObject();
+            var iRowIndex = oEvent.getParameter("rowIndex");
+            var oTable    = this.byId("bridgeTable");
+            if (iRowIndex < 0 || !oTable) { return; }
+            var oBinding  = oTable.getBinding("rows");
+            if (!oBinding) { return; }
+            var aContexts = oBinding.getContexts(iRowIndex, 1);
+            var oCtx      = aContexts && aContexts[0];
+            if (!oCtx) { return; }
+            var oData = oCtx.getObject();
             if (oData && oData.bridgeId) {
                 this.getOwnerComponent().getRouter().navTo("BridgeDetail", {
                     bridgeId: encodeURIComponent(oData.bridgeId)

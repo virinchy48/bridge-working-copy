@@ -16,6 +16,11 @@
         <!-- ── Page Title ─────────────────────────────────────── -->
         <f:title>
             <f:DynamicPageTitle>
+                <f:navigationActions>
+                    <Button id="btnNavBack" text="Bridges" icon="sap-icon://nav-back"
+                        press="onNavToBridges" type="Default"
+                        tooltip="Back to Bridge list"/>
+                </f:navigationActions>
                 <f:heading>
                     <VBox>
                         <Title id="pageTitle" text="Loading…" level="H1"/>
@@ -53,8 +58,6 @@
                         press="onEditBridge" type="Default"/>
                     <Button icon="sap-icon://hint" type="Transparent" press="onInfoPressBridgeDetail"
                         tooltip="Bridge detail field guide"/>
-                    <Button text="Bridges" icon="sap-icon://nav-back"
-                        press="onNavToBridges" type="Transparent"/>
                 </f:actions>
             </f:DynamicPageTitle>
         </f:title>
@@ -93,7 +96,7 @@
 
         <!-- ── Tab Content ───────────────────────────────────── -->
         <f:content>
-            <IconTabBar id="detailTabs" class="nhvrApp" selectedKey="overview" expandable="false" select="onDetailTabSelect" tabDensityMode="Compact" headerMode="Inline">
+            <IconTabBar id="detailTabs" class="nhvrApp" selectedKey="overview" expandable="false" select="onDetailTabSelect" tabDensityMode="Cozy" headerMode="Inline">
                 <items>
 
                     <!-- ── TAB 1: Overview ──────────────────── -->

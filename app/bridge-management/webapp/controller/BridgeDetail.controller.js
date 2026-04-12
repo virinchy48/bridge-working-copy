@@ -293,6 +293,10 @@ sap.ui.define([
             this._setText("ovRoadRoute",     fmt(b.roadRoute));
             this._setText("ovRouteNumber",   fmt(b.routeNumber));
 
+            // Posting Status — KPI card with coloured state
+            const ovPost = this.byId("ovPostingStatus");
+            if (ovPost) { ovPost.setText(fmt(b.postingStatus)); ovPost.setState(postState[b.postingStatus] || "None"); }
+
             // Next Inspection Due — KPI card with overdue state
             const nextDueCtrl = this.byId("ovNextInspDue");
             if (nextDueCtrl) {
