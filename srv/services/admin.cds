@@ -73,6 +73,10 @@ entity MapConfigs as projection on nhvr.MapConfig;
 
 // ── v3 New Entity Projections ──────────────────────────────
 
+@restrict: [
+    { grant: ['READ'],                     to: ['BridgeManager','Admin'] },
+    { grant: ['CREATE','UPDATE','DELETE'], to: ['Admin'] }
+]
 entity JurisdictionAccesses as projection on nhvr.JurisdictionAccess {
     key ID, userRef, jurisdiction, accessLevel, grantedBy, expiresAt, createdAt
 };

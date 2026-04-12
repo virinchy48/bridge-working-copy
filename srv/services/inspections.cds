@@ -45,6 +45,10 @@ entity BridgeDefects as projection on nhvr.BridgeDefect {
     };
 };
 
+@restrict: [
+    { grant: ['READ'],                     to: 'authenticated-user' },
+    { grant: ['CREATE','UPDATE','DELETE'], to: ['BridgeManager','Admin'] }
+]
 entity DefectClassifications as projection on nhvr.DefectClassification {
     key ID,
     defect.ID as defect_ID,
@@ -56,6 +60,10 @@ entity DefectClassifications as projection on nhvr.DefectClassification {
 action classifyDefect(defectId: UUID, photoUrl: String, notes: String) returns DefectClassifications;
 
 
+@restrict: [
+    { grant: ['READ'],                     to: 'authenticated-user' },
+    { grant: ['CREATE','UPDATE','DELETE'], to: ['BridgeManager','Admin'] }
+]
 entity BridgeInspections as projection on nhvr.BridgeInspection {
     key ID,
     bridge.ID   as bridge_ID,
