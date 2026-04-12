@@ -76,6 +76,10 @@ action raiseDefectFromMeasurement(measurementDocId: UUID) returns {
 };
 
 
+@restrict: [
+    { grant: ['READ'],                     to: 'authenticated-user' },
+    { grant: ['CREATE','UPDATE','DELETE'], to: ['BridgeManager','Admin'] }
+]
 entity ScourAssessments as projection on nhvr.ScourAssessment {
     key ID,
     bridge.ID as bridge_ID,

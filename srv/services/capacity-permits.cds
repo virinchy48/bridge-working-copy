@@ -225,6 +225,10 @@ action assessRestriction(
     gazetteRef     : String;
 };
 
+@restrict: [
+    { grant: ['READ'],                     to: 'authenticated-user' },
+    { grant: ['CREATE','UPDATE','DELETE'], to: ['BridgeManager','Admin'] }
+]
 entity LoadRatingCertificates as projection on nhvr.LoadRatingCertificate {
     key ID,
     bridge.ID   as bridge_ID,
@@ -234,6 +238,10 @@ entity LoadRatingCertificates as projection on nhvr.LoadRatingCertificate {
     isCurrentCert, notes, createdAt, createdBy
 };
 
+@restrict: [
+    { grant: ['READ'],                     to: 'authenticated-user' },
+    { grant: ['CREATE','UPDATE','DELETE'], to: ['BridgeManager','Admin'] }
+]
 entity BridgeRouteAssignments as projection on nhvr.BridgeRouteAssignment {
     key ID,
     bridge.ID   as bridge_ID,

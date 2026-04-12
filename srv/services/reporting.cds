@@ -59,6 +59,7 @@ entity ActiveRestrictions as select from nhvr.Restriction {
 } where status = 'ACTIVE' and isActive = true;
 
 // ── Current User Info (all authenticated users) ───────────
+@restrict: [{ grant: 'READ', to: 'authenticated-user' }]
 function me() returns {
     id      : String;
     roles   : array of String;
@@ -66,6 +67,7 @@ function me() returns {
 };
 
 // ── App Configuration (lite/full mode + feature flags) ───────
+@restrict: [{ grant: 'READ', to: 'authenticated-user' }]
 function getAppConfig() returns {
     mode         : String;   // 'full' | 'lite'
     liteFeatures : String;   // JSON array of hidden feature keys in lite mode
@@ -183,6 +185,7 @@ action massDownloadBridges(
 };
 
 // ── Validation Action (all authenticated users) ────────────
+@restrict: [{ to: 'authenticated-user' }]
 action validateRestriction(
     bridgeId        : String,
     vehicleClassCode: String,
@@ -403,6 +406,7 @@ function getInspectionStatusReport(
     status          : String;
 };
 
+@restrict: [{ grant: ['READ'], to: 'authenticated-user' }]
 entity BridgePortfolioReport as SELECT from nhvr.Bridge {
     key bridgeId, name, rmsStructureNumber, bancId, technicalObjectCode,
     region, state, lga, lgaBridgeId, roadRoute, routeNumber,
@@ -468,8 +472,10 @@ entity NHVRRouteReport as SELECT from nhvr.Bridge {
 /**
  * Health check function — returns service status.
  * Used by load balancers, CI/CD pipelines, and SAP Cloud ALM.
- * No authentication required for shallow health checks.
+ * Scoped to authenticated users — public unauthenticated health is
+ * exposed by the CDS static middleware / ingress layer, not this action.
  */
+@restrict: [{ to: 'authenticated-user' }]
 function health() returns {
     status  : String;
     version : String;

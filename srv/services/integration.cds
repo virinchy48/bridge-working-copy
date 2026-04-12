@@ -3,6 +3,10 @@ using BridgeManagementService from '../service';
 
 extend service BridgeManagementService with {
 
+@restrict: [
+    { grant: ['READ'],                     to: 'authenticated-user' },
+    { grant: ['CREATE','UPDATE','DELETE'], to: ['BridgeManager','Admin'] }
+]
 entity SensorDevices as projection on nhvr.SensorDevice {
     key ID,
     bridge.ID as bridge_ID,
@@ -191,6 +195,7 @@ type IntegrationStatusItem {
     lastSyncAt    : Timestamp; lastSyncStatus : String;
     totalSynced   : Integer; lastError : String;
 }
+@restrict: [{ to: 'authenticated-user' }]
 function getIntegrationStatus() returns array of IntegrationStatusItem;
 
 // ═══════════════════════════════════════════════════════════
