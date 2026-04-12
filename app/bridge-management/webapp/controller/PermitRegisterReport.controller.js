@@ -52,7 +52,19 @@ sap.ui.define([
             })
             .then(function (j) {
                 const raw = j.value || [];
+                const nowMs = Date.now();
                 this._allPermits = raw.map(function (p) {
+                    const expiry = p.expiryDate || p.validToDate || "—";
+                    // isExpired is precomputed here rather than via an XML
+                    // expression binding — the UI5 expression parser does
+                    // not support the `new` keyword, so an earlier
+                    // `new Date(...)` binding crashed the cell template
+                    // build and left the table empty.
+                    let isExpired = false;
+                    if (expiry && expiry !== "—") {
+                        const t = Date.parse(expiry);
+                        if (!isNaN(t) && t < nowMs) isExpired = true;
+                    }
                     return {
                         ID                : p.ID,
                         permitNumber      : p.permitNumber      || p.ID || "—",
@@ -62,7 +74,8 @@ sap.ui.define([
                         vehicleConfig     : p.vehicleConfig     || p.vehicleDescription || "—",
                         routeDescription  : p.routeDescription  || p.route         || "—",
                         issueDate         : p.issueDate         || p.approvalDate   || "—",
-                        expiryDate        : p.expiryDate        || p.validToDate    || "—",
+                        expiryDate        : expiry,
+                        isExpired         : isExpired,
                         approvedBy        : p.approvedBy        || "—",
                         maxMass           : p.maxMass           || p.totalMass      || "—",
                         maxWidth          : p.maxWidth          || "—",
@@ -167,9 +180,13 @@ sap.ui.define([
                     });
                 }
                 if (f === "expiryDate") {
+                    // Bind `state` against the precomputed `isExpired` flag
+                    // (see _loadPermits). Using `new Date(...)` in a UI5
+                    // expression binding crashes the parser and leaves the
+                    // whole table empty — do the comparison in JS instead.
                     return new sap.m.ObjectStatus({
                         text: "{permitRegister>expiryDate}",
-                        state: "{= ${permitRegister>expiryDate} && ${permitRegister>expiryDate} !== '—' && new Date(${permitRegister>expiryDate}) < new Date() ? 'Error' : 'None' }"
+                        state: "{= ${permitRegister>isExpired} ? 'Error' : 'None' }"
                     });
                 }
                 return new sap.m.Text({ text: "{permitRegister>" + f + "}" });

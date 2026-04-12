@@ -445,15 +445,20 @@ sap.ui.define([
         },
 
         _captureVariantState: function () {
+            // Fallbacks harmonised to "" for lookup-populated dropdowns
+            // (filterState / Condition / Posting / Scour / RiskBand) so saved
+            // Variant state round-trips correctly. filterNhvr + filterFreight
+            // still use the "ALL" sentinel because their view items are
+            // hardcoded with key="ALL" (tri-state ALL/YES/NO).
             return {
                 search   : this.byId("searchField")    ? this.byId("searchField").getValue()        : "",
-                state    : this.byId("filterState")    ? this.byId("filterState").getSelectedKey()  : "ALL",
-                cond     : this.byId("filterCondition")? this.byId("filterCondition").getSelectedKey():"ALL",
-                posting  : this.byId("filterPosting")  ? this.byId("filterPosting").getSelectedKey(): "ALL",
-                scour    : this.byId("filterScour")    ? this.byId("filterScour").getSelectedKey()  : "ALL",
+                state    : this.byId("filterState")    ? this.byId("filterState").getSelectedKey()  : "",
+                cond     : this.byId("filterCondition")? this.byId("filterCondition").getSelectedKey():"",
+                posting  : this.byId("filterPosting")  ? this.byId("filterPosting").getSelectedKey(): "",
+                scour    : this.byId("filterScour")    ? this.byId("filterScour").getSelectedKey()  : "",
                 nhvr     : this.byId("filterNhvr")     ? this.byId("filterNhvr").getSelectedKey()   : "ALL",
                 freight  : this.byId("filterFreight")  ? this.byId("filterFreight").getSelectedKey(): "ALL",
-                riskBand : this.byId("filterRiskBand") ? this.byId("filterRiskBand").getSelectedKey():"ALL",
+                riskBand : this.byId("filterRiskBand") ? this.byId("filterRiskBand").getSelectedKey():"",
                 sortField: this._sortField,
                 sortDesc : this._sortDesc,
                 advCriteria: JSON.parse(JSON.stringify(this._advCriteria || []))

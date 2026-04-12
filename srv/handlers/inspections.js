@@ -1,6 +1,7 @@
 'use strict';
 const cds = require('@sap/cds');
-const LOG = cds.log('nhvr-inspections');
+// cds.log handle was previously cached as `LOG` but no longer referenced
+// after the WorkOrder/InspectionOrder cleanup. Removed to keep eslint clean.
 
 // Cut-down BIS variant: InspectionOrder, MeasurementDocument and WorkOrder
 // were removed. This handler now covers BridgeDefect lifecycle, the legacy

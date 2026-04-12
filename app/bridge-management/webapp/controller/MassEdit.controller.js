@@ -700,8 +700,13 @@ sap.ui.define([
 
         // ── Filter ────────────────────────────────────────────
         _applyFilter: function () {
+            // meFilterState is lookup-populated via LookupService at runtime
+            // (leading item has key=""), so the fallback when byId misses
+            // must also be "" — not the literal "ALL" — or the truthy check
+            // on the next line would filter by the sentinel and return zero
+            // rows. See earlier Bridges P1 regression for the same bug class.
             const cfg    = ENTITY_CONFIG[this._currentEntity];
-            const state  = this.byId("meFilterState") ? this.byId("meFilterState").getSelectedKey() : "ALL";
+            const state  = this.byId("meFilterState") ? this.byId("meFilterState").getSelectedKey() : "";
             const search = (this.byId("meSearch") ? this.byId("meSearch").getValue() : "").toLowerCase();
 
             let data = this._allRows;

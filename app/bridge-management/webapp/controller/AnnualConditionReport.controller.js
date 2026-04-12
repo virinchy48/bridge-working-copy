@@ -69,15 +69,20 @@ sap.ui.define([
         },
 
         onGenerateReport: function () {
+            // reportJurisdiction is lookup-populated via
+            // LookupService.populateSelect(..., "STATE", "All States") which
+            // uses an empty-string leading key. reportRouteType is still
+            // view-hardcoded with key="ALL". Handle both sentinels.
             var year  = this.byId("reportYear")         ? this.byId("reportYear").getSelectedKey()         : String(new Date().getFullYear());
-            var state = this.byId("reportJurisdiction") ? this.byId("reportJurisdiction").getSelectedKey() : "ALL";
+            var state = this.byId("reportJurisdiction") ? this.byId("reportJurisdiction").getSelectedKey() : "";
             var route = this.byId("reportRouteType")    ? this.byId("reportRouteType").getSelectedKey()    : "ALL";
 
             var page = this.byId("annualReportPage");
             if (page) { page.setBusy(true); }
 
             var h = { Accept: "application/json" };
-            var stateFilter = (state !== "ALL") ? ("&$filter=state eq '" + state + "'") : "";
+            // truthy check: works for both "" (lookup-driven) and undefined
+            var stateFilter = state ? ("&$filter=state eq '" + state + "'") : "";
             var routeFilter;
             if (route === "FREIGHT") {
                 routeFilter = stateFilter ? (stateFilter + " and freightRoute eq true") : "&$filter=freightRoute eq true";

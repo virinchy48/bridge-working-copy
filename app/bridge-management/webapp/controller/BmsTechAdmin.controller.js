@@ -172,39 +172,39 @@ sap.ui.define([
         },
 
         // ── Standards Profile ─────────────────────────────────────
+        // There is no `StandardsProfiles` entity in the current service
+        // projection, so we ship a small built-in list of the three
+        // standards that BIS actually supports. Previously the controller
+        // attempted an OData bindList() to "/StandardsProfiles" and
+        // fell through to this same fallback via a .catch — but that
+        // produced a noisy 404 in the console on every BmsTechAdmin mount.
+        // If a StandardsProfile entity is ever added to the service,
+        // replace the body of this method with the old bindList pattern.
 
         _loadStandardsProfiles: function () {
-            var oModel = this.getOwnerComponent().getModel();
-            oModel.bindList("/StandardsProfiles").requestContexts(0, 50)
-                .then(function (contexts) {
-                    var profiles = contexts.map(function (c) { return c.getObject(); });
-                    var oSelect  = this.byId("standardsProfileSelect");
-                    if (oSelect) {
-                        oSelect.destroyItems();
-                        profiles.forEach(function (p) {
-                            oSelect.addItem(new sap.ui.core.Item({
-                                key : p.profileCode,
-                                text: p.displayName + " (" + p.profileCode + ")"
-                            }));
-                            if (p.isDefault) {
-                                oSelect.setSelectedKey(p.profileCode);
-                                this._applyStandardsProfile(p);
-                            }
-                        }.bind(this));
-                    }
-                    this._oStdModel.setProperty("/profiles", profiles);
-                }.bind(this))
-                .catch(function () {
-                    // Populate with Australian default if entity not available
-                    var oSelect = this.byId("standardsProfileSelect");
-                    if (oSelect) {
-                        oSelect.addItem(new sap.ui.core.Item({ key: "AS5100", text: "AS 5100 (Australia)" }));
-                        oSelect.addItem(new sap.ui.core.Item({ key: "AASHTO", text: "AASHTO LRFD (USA)" }));
-                        oSelect.addItem(new sap.ui.core.Item({ key: "EN1991", text: "Eurocode EN 1991 (Europe)" }));
-                        oSelect.setSelectedKey("AS5100");
-                        this._applyStandardsProfile({ massUnit: "t", ratingStandard: "AS 5100.7", conditionScale: "1\u201310 (BIMM)", speedUnit: "km/h" });
-                    }
-                }.bind(this));
+            var oSelect = this.byId("standardsProfileSelect");
+            if (oSelect) {
+                oSelect.destroyItems();
+                oSelect.addItem(new sap.ui.core.Item({ key: "AS5100", text: "AS 5100 (Australia)" }));
+                oSelect.addItem(new sap.ui.core.Item({ key: "AASHTO", text: "AASHTO LRFD (USA)" }));
+                oSelect.addItem(new sap.ui.core.Item({ key: "EN1991", text: "Eurocode EN 1991 (Europe)" }));
+                oSelect.setSelectedKey("AS5100");
+                this._applyStandardsProfile({
+                    massUnit: "t",
+                    ratingStandard: "AS 5100.7",
+                    conditionScale: "1\u201310 (BIMM)",
+                    speedUnit: "km/h"
+                });
+            }
+            // Keep a simple model entry so anything else that binds
+            // against /profiles still works.
+            if (this._oStdModel) {
+                this._oStdModel.setProperty("/profiles", [
+                    { profileCode: "AS5100", displayName: "AS 5100 (Australia)", isDefault: true },
+                    { profileCode: "AASHTO", displayName: "AASHTO LRFD (USA)",  isDefault: false },
+                    { profileCode: "EN1991", displayName: "Eurocode EN 1991 (Europe)", isDefault: false }
+                ]);
+            }
         },
 
         _applyStandardsProfile: function (profile) {
