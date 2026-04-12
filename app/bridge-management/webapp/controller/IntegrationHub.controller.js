@@ -194,12 +194,14 @@ sap.ui.define([
         // ── Refresh integration status ─────────────────────────
         onRefreshStatus: function () {
             const that = this;
-            fetch(`${SRV}getIntegrationStatus`, {
-                method : 'POST',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                body   : JSON.stringify({})
+            // `getIntegrationStatus` is a CDS function (GET-only). POSTing
+            // returned 405; use the OData function-call syntax with GET.
+            fetch(`${SRV}getIntegrationStatus()`, {
+                method : 'GET',
+                headers: { Accept: 'application/json' },
+                credentials: 'include'
             })
-            .then(r => r.json())
+            .then(r => r.ok ? r.json() : Promise.reject(new Error(r.status + ' ' + r.statusText)))
             .then(data => {
                 const list = data && data.value || [];
                 const byCode = {};

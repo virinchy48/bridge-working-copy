@@ -86,7 +86,7 @@ sap.ui.define([
 
         _loadJurisdictionGrants: function () {
             var oModel = this.getOwnerComponent().getModel();
-            oModel.bindList("/JurisdictionAccess").requestContexts(0, 200)
+            oModel.bindList("/JurisdictionAccesses").requestContexts(0, 200)
                 .then(function (contexts) {
                     var grants = contexts.map(function (c) { return c.getObject(); });
                     this._oModel.setProperty("/jurisdictionGrants", grants);
@@ -130,7 +130,7 @@ sap.ui.define([
             }
 
             var oModel = this.getOwnerComponent().getModel();
-            var oListBinding = oModel.bindList("/JurisdictionAccess");
+            var oListBinding = oModel.bindList("/JurisdictionAccesses");
             oListBinding.create({
                 userRef       : userRef,
                 jurisdiction  : juris,
@@ -242,7 +242,7 @@ sap.ui.define([
 
         _loadMapConfig: function () {
             var oModel = this.getOwnerComponent().getModel();
-            oModel.bindList("/MapConfigurations", null, null, [
+            oModel.bindList("/MapConfigs", null, null, [
                 new sap.ui.model.Filter("configKey", "EQ", "DEFAULT")
             ]).requestContexts(0, 1)
                 .then(function (contexts) {

@@ -54,7 +54,10 @@ sap.ui.define([
 
                 // Initialize analytics (fire-and-forget — never blocks app start)
                 try {
-                    fetch("/bridge-management/me", { headers: { Accept: "application/json" } })
+                    // CDS `function me()` — must use OData function-call syntax
+                    // `me()` and plain GET, otherwise UI5 emits POST and the
+                    // server returns 405.
+                    fetch("/bridge-management/me()", { headers: { Accept: "application/json" }, credentials: "include" })
                         .then(function (r) { return r.ok ? r.json() : {}; })
                         .then(function (user) {
                             AnalyticsService.init({

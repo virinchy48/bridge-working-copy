@@ -267,7 +267,7 @@
                                            : ${status} === 'ERROR'   ? 'Error'
                                            : ${status} === 'PARTIAL' ? 'Warning'
                                            : 'None' }"/>
-                                <Text text="{recordsSynced}" wrapping="false"/>
+                                <Text text="{recordsSuccess}" wrapping="false"/>
                                 <Text text="{= ${durationMs} ? (${durationMs} + 'ms') : '' }"/>
                                 <Text text="{errorMessage}" wrapping="false"
                                     maxLines="1" tooltip="{errorMessage}"/>

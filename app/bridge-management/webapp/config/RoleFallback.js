@@ -71,7 +71,6 @@ sap.ui.define([], function () {
         editBridge:         { visible: MGR_PLUS,  editable: MGR_PLUS,  enabled: MGR_PLUS },
         addBridge:          { visible: MGR_PLUS,  editable: MGR_PLUS,  enabled: MGR_PLUS },
         exportBridges:      { visible: ALL,       editable: ALL,       enabled: ALL },
-        newInspectionOrder: { visible: MGR_PLUS, editable: MGR_PLUS, enabled: MGR_PLUS },
         raiseDefect:        { visible: MGR_PLUS, editable: MGR_PLUS, enabled: MGR_PLUS },
         permits:            { visible: ALL,       editable: MGR_PLUS,    enabled: ALL },
 
