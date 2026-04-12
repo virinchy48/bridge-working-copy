@@ -6,20 +6,16 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/ui/dom/includeStylesheet",
-    "sap/m/MessageBox"
-], function (Controller, includeStylesheet, MessageBox) {
+    "sap/m/MessageBox",
+    "nhvr/bridgemanagement/util/AuthFetch"
+], function (Controller, includeStylesheet, MessageBox, AuthFetch) {
     "use strict";
 
     var BASE_PATH = "/bridge-management";
-    var IS_LOCAL_HOST = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-    var LOCAL_AUTH_HEADERS = IS_LOCAL_HOST ? { "Authorization": "Basic " + btoa("admin:admin") } : {};
+    // Auth is now handled centrally by AuthFetch.getJson() / _credOpts().
+    // The legacy createFetchOptions() helper was removed along with the raw
+    // fetch() call sites it served.
 
-    // Local CAP runs with mocked basic auth; deployed environments use session cookies.
-    function createFetchOptions() {
-        var requestOptions = { headers: Object.assign({ Accept: "application/json" }, LOCAL_AUTH_HEADERS) };
-        if (!IS_LOCAL_HOST) requestOptions.credentials = "include";
-        return requestOptions;
-    }
 
     return Controller.extend("nhvr.bridgemanagement.controller.Dashboard", {
 
@@ -50,10 +46,12 @@ sap.ui.define([
 
         // ── DATA FETCH ───────────────────────────────────────
         _fetch: function (url) {
-            return fetch(BASE_PATH + url, createFetchOptions())
-                .then(function (r) { return r.json(); })
+            return AuthFetch.getJson(BASE_PATH + url)
                 .then(function (j) { return j.value || []; })
-                .catch(function () { return []; });
+                .catch(function (err) {
+                    console.warn("[Dashboard] " + url + " load failed:", err.message);
+                    return [];
+                });
         },
 
         _load: function () {

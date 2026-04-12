@@ -80,6 +80,27 @@ sap.ui.define([], function () {
             return this.fetch(url, { method: "POST", body: JSON.stringify(body) });
         },
 
+        /**
+         * GET and parse JSON with proper error surfacing.
+         * Throws on non-OK responses (instead of letting r.json() silently
+         * blow up on an HTML error page). The thrown Error carries a
+         * `.status` field so callers can differentiate 401/403/etc.
+         */
+        getJson: function (url, extraHeaders) {
+            var headers = Object.assign({}, _baseHeaders(), extraHeaders || {});
+            var creds = _isLocalhost() ? "same-origin" : "include";
+            return fetch(url, { headers: headers, credentials: creds }).then(function (r) {
+                if (!r.ok) {
+                    var err = new Error("HTTP " + r.status + " " + r.statusText);
+                    err.status = r.status;
+                    throw err;
+                }
+                return r.json().catch(function () {
+                    throw new Error("Response was not valid JSON (server likely returned an HTML error page)");
+                });
+            });
+        },
+
         /** Convenience: PATCH JSON */
         patch: function (url, body) {
             return this.fetch(url, { method: "PATCH", body: JSON.stringify(body) });

@@ -10,11 +10,15 @@ sap.ui.define([
     "nhvr/bridgemanagement/model/CapabilityManager",
     "nhvr/bridgemanagement/util/AlvToolbarMixin",
     "nhvr/bridgemanagement/util/UserAnalytics",
-    "nhvr/bridgemanagement/util/LookupService"
-], function (Controller, JSONModel, MessageToast, MessageBox, ExcelExport, CapabilityManager, AlvToolbarMixin, UserAnalytics, LookupService) {
+    "nhvr/bridgemanagement/util/LookupService",
+    "nhvr/bridgemanagement/util/AuthFetch"
+], function (Controller, JSONModel, MessageToast, MessageBox, ExcelExport, CapabilityManager, AlvToolbarMixin, UserAnalytics, LookupService, AuthFetch) {
     "use strict";
 
     const BASE = "/bridge-management";
+
+    // Escape single quotes for OData v4 string literals ( ' → '' )
+    const _odataStr = (v) => String(v == null ? "" : v).replace(/'/g, "''");
 
     return Controller.extend("nhvr.bridgemanagement.controller.Defects", Object.assign({
 
@@ -56,11 +60,9 @@ sap.ui.define([
         },
 
         _loadDefects: function () {
-            const h = { Accept: "application/json" };
             const filters = this._buildFilters();
             const q = filters.length ? `&$filter=${encodeURIComponent(filters.join(" and "))}` : "";
-            fetch(`${BASE}/BridgeDefects?$orderby=detectedDate desc${q}`, { headers: h })
-                .then(r => r.json())
+            AuthFetch.getJson(`${BASE}/BridgeDefects?$orderby=detectedDate desc${q}`)
                 .then(j => {
                     const defects = j.value || [];
                     this._model.setProperty("/defects", defects);
@@ -69,7 +71,10 @@ sap.ui.define([
                         this._alvUpdateCount(defects.length, defects.length);
                     }
                 })
-                .catch(() => this._model.setProperty("/defects", []));
+                .catch(err => {
+                    console.warn("[Defects] BridgeDefects load failed:", err.message);
+                    this._model.setProperty("/defects", []);
+                });
         },
 
         _buildFilters: function () {
@@ -78,10 +83,10 @@ sap.ui.define([
             const severityVal = this.byId("severityFilter") ? this.byId("severityFilter").getSelectedKey() : "";
             const categoryVal = this.byId("categoryFilter") ? this.byId("categoryFilter").getSelectedKey() : "";
             const priorityVal = this.byId("priorityFilter") ? this.byId("priorityFilter").getSelectedKey() : "";
-            if (statusVal)   parts.push(`status eq '${statusVal}'`);
-            if (severityVal) parts.push(`severity eq '${severityVal}'`);
-            if (categoryVal) parts.push(`defectCategory eq '${categoryVal}'`);
-            if (priorityVal) parts.push(`priority eq '${priorityVal}'`);
+            if (statusVal)   parts.push(`status eq '${_odataStr(statusVal)}'`);
+            if (severityVal) parts.push(`severity eq '${_odataStr(severityVal)}'`);
+            if (categoryVal) parts.push(`defectCategory eq '${_odataStr(categoryVal)}'`);
+            if (priorityVal) parts.push(`priority eq '${_odataStr(priorityVal)}'`);
             return parts;
         },
 

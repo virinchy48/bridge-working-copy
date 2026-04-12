@@ -12,8 +12,9 @@ sap.ui.define([
     "sap/m/SuggestionItem",
     "nhvr/bridgemanagement/util/UserAnalytics",
     "nhvr/bridgemanagement/model/CapabilityManager",
-    "nhvr/bridgemanagement/util/LookupService"
-], function (Controller, JSONModel, MessageToast, MessageBox, SuggestionItem, UserAnalytics, CapabilityManager, LookupService) {
+    "nhvr/bridgemanagement/util/LookupService",
+    "nhvr/bridgemanagement/util/AuthFetch"
+], function (Controller, JSONModel, MessageToast, MessageBox, SuggestionItem, UserAnalytics, CapabilityManager, LookupService, AuthFetch) {
     "use strict";
 
     // ── Constants ──────────────────────────────────────────────
@@ -940,9 +941,31 @@ sap.ui.define([
             var self   = this;
             script.onload = function () { self._initMapLibreMap(); };
             script.onerror = function () {
-                console.error("Failed to load MapLibre GL JS");
+                // External CDN unreachable (firewall, offline, etc.).
+                // Show a graceful empty state instead of crashing the page.
+                console.warn("[RoutePlanner] MapLibre CDN unreachable — showing fallback");
+                self._showMapFallback(
+                    "Map tiles unavailable",
+                    "The MapLibre library could not be loaded from https://unpkg.com. " +
+                    "This is usually a network / firewall issue. All other route " +
+                    "assessment features still work — only the map preview is affected."
+                );
             };
             document.head.appendChild(script);
+        },
+
+        _showMapFallback: function (title, body) {
+            var mapDiv = document.getElementById("nhvr-rp-map");
+            if (!mapDiv) return;
+            // Minimal inline empty-state — no CSS deps, no external assets.
+            mapDiv.innerHTML =
+                '<div style="display:flex;flex-direction:column;align-items:center;' +
+                'justify-content:center;height:100%;min-height:400px;padding:24px;' +
+                'background:#f7f7f7;color:#32363a;font-family:inherit;text-align:center;">' +
+                '<div style="font-size:48px;margin-bottom:16px;">&#128205;</div>' +
+                '<div style="font-size:18px;font-weight:600;margin-bottom:8px;">' + title + '</div>' +
+                '<div style="font-size:14px;max-width:500px;color:#6a6d70;">' + body + '</div>' +
+                '</div>';
         },
 
         _initMapLibreMap: function () {
@@ -1129,8 +1152,7 @@ sap.ui.define([
 
         _loadBridgeGeoJSON: function () {
             var self = this;
-            fetch(BASE + "/Bridges?$select=ID,bridgeId,name,latitude,longitude,condition,conditionRating,postingStatus,state&$top=3000")
-                .then(function (r) { return r.json(); })
+            AuthFetch.getJson(BASE + "/Bridges?$select=ID,bridgeId,name,latitude,longitude,condition,conditionRating,postingStatus,state&$top=3000")
                 .then(function (data) {
                     var rows = (data.value || []);
                     var geojson = {
@@ -1160,7 +1182,7 @@ sap.ui.define([
                     }
                 })
                 .catch(function (e) {
-                    console.warn("Could not load bridge GeoJSON:", e.message);
+                    console.warn("[RoutePlanner] Could not load bridge GeoJSON:", e.message);
                 });
         },
 

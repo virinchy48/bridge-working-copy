@@ -28,6 +28,11 @@ sap.ui.define([
         return opts;
     }
 
+    // UUIDs flowing in from the URL must be validated before we paste them
+    // into an OData key predicate / $filter — a stray quote or a typo
+    // produces a 400 with no useful empty-state handling otherwise.
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
     return Controller.extend("nhvr.bridgemanagement.controller.FreightRouteDetail", {
 
         onInit: function () {
@@ -97,10 +102,15 @@ sap.ui.define([
         // ── Load route header info ────────────────────────────────────
         _loadRouteHeader: function () {
             if (!this._routeId) return;
-            fetch(`${BASE}/FreightRoutes('${this._routeId}')`, _credOpts())
-                .then(r => r.ok ? r.json() : null)
+            if (!UUID_RE.test(this._routeId)) {
+                this._showRouteNotFound("Invalid route identifier in URL");
+                return;
+            }
+            // routeId is a validated UUID — safe to paste into the key
+            // predicate. OData v4 represents UUIDs as unquoted GUIDs.
+            AuthFetch.getJson(`${BASE}/FreightRoutes(${this._routeId})`)
                 .then(route => {
-                    if (!route) { MessageToast.show("Route not found"); return; }
+                    if (!route) { this._showRouteNotFound("Route not found"); return; }
                     this._routeData = route;
                     this.byId("frdTitle").setText(`Route Assessment — ${route.routeCode}`);
                     this.byId("frdBreadcrumb").setText(route.routeCode);
@@ -116,20 +126,41 @@ sap.ui.define([
                     const statusState = route.status === "ACTIVE" ? "Success" : route.status === "SUSPENDED" ? "Error" : "None";
                     this.byId("frdStatus").setText(route.status || "—").setState(statusState);
                 })
-                .catch(() => MessageToast.show("Failed to load route info"));
+                .catch(err => {
+                    console.warn("[FreightRouteDetail] FreightRoutes load failed:", err.message);
+                    // A 404 here means the ID was syntactically valid but
+                    // the row doesn't exist — surface a clean empty state.
+                    this._showRouteNotFound(err.status === 404 ? "Route not found" : "Failed to load route info");
+                });
+        },
+
+        _showRouteNotFound: function (message) {
+            MessageToast.show(message || "Route not found");
+            const title = this.byId("frdTitle");
+            if (title) title.setText("Route Assessment — Not Found");
+            const bc = this.byId("frdBreadcrumb");
+            if (bc) bc.setText("Unknown");
+            ["frdRouteCode","frdRouteName","frdState","frdCorridorMass","frdCorridorHeight","frdRouteClass","frdStatus","frdBridgeCount"].forEach(id => {
+                const c = this.byId(id);
+                if (c && c.setText) c.setText("—");
+            });
+            const assetCount = this.byId("assetCount");
+            if (assetCount) assetCount.setText(message || "Route not found");
         },
 
         // ── Load bridge count from FreightRouteBridges ─────────────────
         _loadRouteBridges: function () {
             if (!this._routeId) return;
-            fetch(`${BASE}/FreightRouteBridges?$filter=route_ID eq ${this._routeId}&$count=true&$top=0`, _credOpts())
-                .then(r => r.ok ? r.json() : null)
+            if (!UUID_RE.test(this._routeId)) return;
+            AuthFetch.getJson(`${BASE}/FreightRouteBridges?$filter=route_ID eq ${this._routeId}&$count=true&$top=0`)
                 .then(j => {
                     const count = j && j["@odata.count"] != null ? j["@odata.count"] : "?";
                     this.byId("frdBridgeCount").setText(count + " bridges");
                     this.byId("assetCount").setText(count + " bridges on route (run assessment to evaluate)");
                 })
-                .catch(() => {});
+                .catch(err => {
+                    console.warn("[FreightRouteDetail] FreightRouteBridges count failed:", err.message);
+                });
         },
 
         // ── Run Full Assessment ───────────────────────────────────────

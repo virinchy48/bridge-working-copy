@@ -13,6 +13,9 @@ sap.ui.define([
 
     const BASE = "/bridge-management";
 
+    // Escape single quotes for OData v4 string literals ( ' → '' )
+    const _odataStr = (v) => String(v == null ? "" : v).replace(/'/g, "''");
+
     var _IS_LOC = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
     var _AUTH_H = _IS_LOC ? { "Authorization": "Basic " + btoa("admin:admin") } : {};
     function _credOpts(extraHeaders) {
@@ -137,7 +140,7 @@ sap.ui.define([
         },
 
         _loadBridgeRestrictions: function (bridgeId) {
-            fetch(`${BASE}/Restrictions?$filter=bridgeId eq '${encodeURIComponent(bridgeId)}' and status eq 'ACTIVE'`, _credOpts())
+            fetch(`${BASE}/Restrictions?$filter=bridgeId eq '${_odataStr(bridgeId)}' and status eq 'ACTIVE'`, _credOpts())
                 .then(r => r.json())
                 .then(j => {
                     const restrictions = j.value || [];
@@ -190,8 +193,8 @@ sap.ui.define([
             // Load all bridges and their restrictions, then filter
             let bridgesUrl = `${BASE}/Bridges?$select=bridgeId,name,region,state,postingStatus,clearanceHeightM,conditionRating`;
             const filterParts = [];
-            if (state)  filterParts.push(`state eq '${state}'`);
-            if (region) filterParts.push(`contains(tolower(region),'${region.toLowerCase()}')`);
+            if (state)  filterParts.push(`state eq '${_odataStr(state)}'`);
+            if (region) filterParts.push(`contains(tolower(region),'${_odataStr(region.toLowerCase())}')`);
             if (filterParts.length) bridgesUrl += `&$filter=${encodeURIComponent(filterParts.join(" and "))}`;
 
             fetch(bridgesUrl, _credOpts())

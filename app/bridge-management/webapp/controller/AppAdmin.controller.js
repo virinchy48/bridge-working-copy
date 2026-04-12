@@ -2,8 +2,9 @@ sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/ui/model/json/JSONModel",
     "sap/m/MessageToast",
-    "sap/m/MessageBox"
-], function (Controller, JSONModel, MessageToast, MessageBox) {
+    "sap/m/MessageBox",
+    "nhvr/bridgemanagement/util/AuthFetch"
+], function (Controller, JSONModel, MessageToast, MessageBox, AuthFetch) {
     "use strict";
 
     var _IS_LOC = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
@@ -166,13 +167,14 @@ sap.ui.define([
                 })
                 .catch(() => {
                     // Backend action not yet implemented — show live bridge count as fallback
-                    fetch("/bridge-management/Bridges?$count=true&$top=0", _credOpts())
-                        .then(r => r.json())
+                    AuthFetch.getJson("/bridge-management/Bridges?$count=true&$top=0")
                         .then(j => {
                             this._oModel.setProperty("/usageBridgeCount", String(j["@odata.count"] ?? "—"));
                             this._oModel.setProperty("/usageLastRefresh", new Date().toLocaleString("en-AU"));
                         })
-                        .catch(() => {});
+                        .catch(err => {
+                            console.warn("[AppAdmin] Bridges count fallback failed:", err.message);
+                        });
                 });
         },
 

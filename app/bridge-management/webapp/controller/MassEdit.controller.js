@@ -20,11 +20,12 @@ sap.ui.define([
     "nhvr/bridgemanagement/model/CapabilityManager",
     "nhvr/bridgemanagement/util/UserAnalytics",
     "nhvr/bridgemanagement/util/ReferenceData",
-    "nhvr/bridgemanagement/util/LookupService"
+    "nhvr/bridgemanagement/util/LookupService",
+    "nhvr/bridgemanagement/util/AuthFetch"
 ], function (
     Controller, JSONModel, MessageToast, MessageBox,
     Column, Text, Input, Select, DatePicker, CheckBox, Button,
-    ColumnListItem, CoreItem, CapabilityManager, UserAnalytics, ReferenceData, LookupService
+    ColumnListItem, CoreItem, CapabilityManager, UserAnalytics, ReferenceData, LookupService, AuthFetch
 ) {
     "use strict";
 
@@ -335,10 +336,12 @@ sap.ui.define([
         _fetchCustomAttrs: function () {
             const entity = this._currentEntity;
             const url = BASE + "/AttributeDefinitions?$filter=entityTarget eq '" + entity + "' and isActive eq true and massEditEnabled eq true&$expand=validValues&$orderby=displayOrder&$top=100";
-            return fetch(url, _credOpts())
-                .then(r => r.json())
+            return AuthFetch.getJson(url)
                 .then(j => j.value || [])
-                .catch(() => []);
+                .catch(err => {
+                    console.warn("[MassEdit] AttributeDefinitions load failed:", err.message);
+                    return [];
+                });
         },
 
         _loadCustomAttrValues: function (rows) {
@@ -353,8 +356,7 @@ sap.ui.define([
                 url = BASE + "/EntityAttributes?$filter=entityType eq '" + entity + "' and entityId in (" + ids + ")&$select=entityType,entityId,attribute_ID,value&$top=5000";
             }
 
-            return fetch(url, { headers: { Accept: "application/json" } })
-                .then(r => r.json())
+            return AuthFetch.getJson(url)
                 .then(j => {
                     const attrMap = {};
                     (j.value || []).forEach(av => {
@@ -372,7 +374,10 @@ sap.ui.define([
                         return extended;
                     });
                 })
-                .catch(() => rows);  // gracefully skip if EntityAttributes not yet deployed
+                .catch(err => {
+                    console.warn("[MassEdit] Custom attr values load failed:", err.message);
+                    return rows;  // gracefully skip if EntityAttributes not yet deployed
+                });
         },
 
         _updateCustomAttrInfo: function () {
@@ -913,10 +918,12 @@ sap.ui.define([
                     for (const ac of attrChanges) {
                         if (cfg.customAttrFetch === "bridge") {
                             // BridgeAttribute path
-                            const existing = await fetch(
-                                BASE + "/BridgeAttributes?$filter=bridge_ID eq " + entityId + " and attribute_ID eq " + ac.attr.ID,
-                                { headers: { Accept: "application/json" } }
-                            ).then(function (r) { return r.json(); }).then(function (j) { return (j.value || [])[0]; }).catch(function () { return null; });
+                            const existing = await AuthFetch.getJson(
+                                BASE + "/BridgeAttributes?$filter=bridge_ID eq " + entityId + " and attribute_ID eq " + ac.attr.ID
+                            ).then(function (j) { return (j.value || [])[0]; }).catch(function (err) {
+                                console.warn("[MassEdit] BridgeAttributes lookup failed:", err.message);
+                                return null;
+                            });
 
                             if (existing) {
                                 await fetch(BASE + "/BridgeAttributes(" + existing.ID + ")", {
@@ -930,10 +937,12 @@ sap.ui.define([
                             }
                         } else {
                             // EntityAttribute path
-                            const existing = await fetch(
-                                BASE + "/EntityAttributes?$filter=entityType eq '" + cfg.customAttrEntity + "' and entityId eq " + entityId + " and attribute_ID eq " + ac.attr.ID,
-                                { headers: { Accept: "application/json" } }
-                            ).then(function (r) { return r.json(); }).then(function (j) { return (j.value || [])[0]; }).catch(function () { return null; });
+                            const existing = await AuthFetch.getJson(
+                                BASE + "/EntityAttributes?$filter=entityType eq '" + cfg.customAttrEntity + "' and entityId eq " + entityId + " and attribute_ID eq " + ac.attr.ID
+                            ).then(function (j) { return (j.value || [])[0]; }).catch(function (err) {
+                                console.warn("[MassEdit] EntityAttributes lookup failed:", err.message);
+                                return null;
+                            });
 
                             if (existing) {
                                 await fetch(BASE + "/EntityAttributes(" + existing.ID + ")", {

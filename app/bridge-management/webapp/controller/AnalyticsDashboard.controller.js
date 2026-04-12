@@ -71,7 +71,9 @@ sap.ui.define([
         },
 
         onPeriodChange: function (oEvent) {
-            this._period = oEvent.getParameter("selectedItem").getKey();
+            const oItem = oEvent.getParameter("selectedItem");
+            if (!oItem) return;
+            this._period = oItem.getKey();
             this._loadAll();
         },
 
@@ -296,7 +298,9 @@ sap.ui.define([
         },
 
         onWorkflowTypeChange: function (oEvent) {
-            var sType = oEvent.getParameter("selectedItem").getKey();
+            var oItem = oEvent.getParameter("selectedItem");
+            if (!oItem) return;
+            var sType = oItem.getKey();
             this._fetchFunnels(this._getDateRange(), sType);
         }
 

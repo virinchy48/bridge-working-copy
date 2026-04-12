@@ -17,8 +17,9 @@ sap.ui.define([
     "nhvr/bridgemanagement/util/OfflineSync",
     "nhvr/bridgemanagement/util/HelpAssistantMixin",
     "nhvr/bridgemanagement/util/UserAnalytics",
-    "nhvr/bridgemanagement/util/NamedViews"
-], function (Controller, JSONModel, StandardListItem, CustomListItem, Button, HBox, Text, Icon, MessageToast, RoleManager, CapabilityManager, AppConfig, OfflineSync, HelpAssistantMixin, UserAnalytics, NamedViews) {
+    "nhvr/bridgemanagement/util/NamedViews",
+    "nhvr/bridgemanagement/util/AuthFetch"
+], function (Controller, JSONModel, StandardListItem, CustomListItem, Button, HBox, Text, Icon, MessageToast, RoleManager, CapabilityManager, AppConfig, OfflineSync, HelpAssistantMixin, UserAnalytics, NamedViews, AuthFetch) {
     "use strict";
 
     const BASE = "/bridge-management";
@@ -106,10 +107,7 @@ sap.ui.define([
 
         // ── Load current user info and adapt UI to role ───────────────
         _loadUserInfo: function () {
-            const requestHeaders = { Accept: "application/json" };
-
-            fetch(`${BASE}/me()`, { headers: requestHeaders })
-                .then(response => response.json())
+            AuthFetch.getJson(`${BASE}/me()`)
                 .then(info => {
                     const roles   = info.roles || [];
                     const isAdmin = roles.some(roleName => roleName === "Admin" || roleName === "NHVR_Admin" || roleName === "admin");
@@ -145,7 +143,8 @@ sap.ui.define([
                     const adminSection = this.byId("sectionAdmin");
                     if (adminSection) adminSection.setVisible(isAdmin);
                 })
-                .catch(() => {
+                .catch(err => {
+                    console.warn("[Home] me() load failed:", err.message);
                     // me() failed — default to showing Viewer access
                     const chip = this.byId("roleChip");
                     if (chip) { chip.setText("Viewer"); chip.addStyleClass("nhvrRoleBadgeViewer"); }

@@ -2,7 +2,12 @@
    NHVR Command Dashboard — Compact Design System
    Scoped under .nhvr-cmd-dash to coexist with SAP Horizon theme
    ═══════════════════════════════════════════════════════════════ */
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap');
+/* Removed `@import url('https://fonts.googleapis.com/...')` — the
+   Google Fonts CDN was unreachable in firewalled / offline environments
+   and there's no functional loss: the font-family rules below fall back
+   through '72' (SAP Horizon's default) and system-ui. If you want the
+   Instrument Sans / DM Mono aesthetic back, vendor the .woff2 files
+   locally and load them via @font-face instead of @import. */
 
 /* ── TOKENS: Dark (default) ─────────────────────────────── */
 .nhvr-cmd-dash {

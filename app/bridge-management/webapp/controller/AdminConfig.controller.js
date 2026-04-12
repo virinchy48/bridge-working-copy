@@ -12,6 +12,9 @@ sap.ui.define([
     "use strict";
 
     const BASE  = "/bridge-management";
+
+    // Escape single quotes for OData v4 string literals ( ' → '' )
+    const _odataStr = (v) => String(v == null ? "" : v).replace(/'/g, "''");
     const H     = { Accept: "application/json", "Content-Type": "application/json" };
     const CREDS = "include";  // send session cookies so CAP mocked auth (and XSUAA) doesn't return 403
 
@@ -224,7 +227,9 @@ sap.ui.define([
 
         // Data type change — show/hide valid values builder
         onAttrDataTypeChange: function (e) {
-            this._toggleValidValuesBox(e.getParameter("selectedItem").getKey());
+            const oItem = e.getParameter("selectedItem");
+            if (!oItem) return;
+            this._toggleValidValuesBox(oItem.getKey());
         },
 
         _toggleValidValuesBox: function (dataType) {
@@ -345,7 +350,7 @@ sap.ui.define([
 
         _loadRoleConfigs: function (role) {
             if (!role) return;
-            fetch(`${BASE}/RoleConfigs?$filter=role eq '${role}'&$orderby=sortOrder asc`, { headers: H, credentials: CREDS })
+            fetch(`${BASE}/RoleConfigs?$filter=role eq '${_odataStr(role)}'&$orderby=sortOrder asc`, { headers: H, credentials: CREDS })
                 .then(async r => {
                     if (!r.ok) { const b = await r.json().catch(() => ({})); throw new Error(_errMsg(r.status, b)); }
                     return r.json();
