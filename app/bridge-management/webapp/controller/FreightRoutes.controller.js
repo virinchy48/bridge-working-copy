@@ -11,7 +11,6 @@ sap.ui.define([
     "use strict";
 
     var BASE = "/bridge-management";
-    var H    = { Accept: "application/json" };
 
     return Controller.extend("nhvr.bridgemanagement.controller.FreightRoutes", {
 
@@ -39,13 +38,17 @@ sap.ui.define([
         },
 
         _loadFreightRoutes: function () {
-            fetch(`${BASE}/FreightRoutes?$orderby=routeCode`, { headers: H })
-                .then(r => r.ok ? r.json() : { value: [] })
+            AuthFetch.getJson(`${BASE}/FreightRoutes?$orderby=routeCode`)
                 .then(j => {
                     this._allRoutes = j.value || [];
                     this._applyFilters();
                 })
-                .catch(() => MessageToast.show("Failed to load freight routes"));
+                .catch(err => {
+                    console.warn("[FreightRoutes] FreightRoutes load failed:", err.message);
+                    this._allRoutes = [];
+                    this._applyFilters();
+                    MessageToast.show("Failed to load freight routes");
+                });
         },
 
         _applyFilters: function () {

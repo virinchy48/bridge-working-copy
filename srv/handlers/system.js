@@ -187,7 +187,9 @@ module.exports = function registerSystemHandlers(srv) {
         // PERMITS group
         'VehiclePermits'          : 'PERMITS',
         'ApprovedRoutes'          : 'PERMITS',
-        'RouteBridges'            : 'PERMITS',
+        // 'RouteBridges' is a containment target of ApprovedRoutes — it has
+        // no top-level EntitySet in $metadata (OData v4 containment mode),
+        // so the feature-map entry was dead. Removed.
 
         // ROUTE_ASSESSMENT group
         'ScourAssessments'        : 'ROUTE_ASSESSMENT',

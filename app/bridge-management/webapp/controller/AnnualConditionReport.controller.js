@@ -7,8 +7,9 @@ sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "sap/m/MessageToast",
     "sap/m/MessageBox",
-    "nhvr/bridgemanagement/util/LookupService"
-], function (Controller, JSONModel, MessageToast, MessageBox, LookupService) {
+    "nhvr/bridgemanagement/util/LookupService",
+    "nhvr/bridgemanagement/util/AuthFetch"
+], function (Controller, JSONModel, MessageToast, MessageBox, LookupService, AuthFetch) {
     "use strict";
 
     const BASE = "/bridge-management";
@@ -103,10 +104,11 @@ sap.ui.define([
                 });
 
             // Also load restrictions summary
-            fetch(BASE + "/Restrictions?$select=restrictionType,status,permitRequired,isTemporary&$top=5000", { headers: h })
-                .then(function (r) { return r.json(); })
+            AuthFetch.getJson(BASE + "/Restrictions?$select=restrictionType,status,permitRequired,isTemporary&$top=5000")
                 .then(function (j) { self._processRestrictionsSummary(j.value || []); })
-                .catch(function () {});
+                .catch(function (err) {
+                    console.warn("[AnnualConditionReport] Restrictions summary load failed:", err.message);
+                });
         },
 
         _processReportData: function (bridges, year) {

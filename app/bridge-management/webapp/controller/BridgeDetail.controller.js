@@ -22,6 +22,9 @@ sap.ui.define([
         return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
     }
 
+    // Escape single quotes for OData v4 string literals ( ' → '' )
+    const _odataStr = (v) => String(v == null ? "" : v).replace(/'/g, "''");
+
     const BASE = "/bridge-management";
 
     return Controller.extend("nhvr.bridgemanagement.controller.BridgeDetail", {
@@ -388,7 +391,7 @@ sap.ui.define([
         // ── Load Restrictions ─────────────────────────────────
         _loadRestrictions: function (bridgeId) {
             const h = { Accept: "application/json" };
-            fetch(`${BASE}/Restrictions?$filter=bridgeId eq '${bridgeId}'&$select=ID,restrictionType,value,unit,status,permitRequired,validFromDate,validToDate,vehicleClassName,gazetteRef,directionApplied,signageRequired,notes&$orderby=status,validFromDate`, { headers: h })
+            fetch(`${BASE}/Restrictions?$filter=bridgeId eq '${_odataStr(bridgeId)}'&$select=ID,restrictionType,value,unit,status,permitRequired,validFromDate,validToDate,vehicleClassName,gazetteRef,directionApplied,signageRequired,notes&$orderby=status,validFromDate`, { headers: h })
                 .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
                 .then(j => {
                     const rows = (j.value || []).map(r => ({
@@ -631,7 +634,9 @@ sap.ui.define([
         },
 
         onRestrictionFilterChange: function (e) {
-            const key  = e.getParameter("selectedItem").getKey();
+            const oItem = e.getParameter("selectedItem");
+            if (!oItem) return;
+            const key  = oItem.getKey();
             const all  = this._model.getProperty("/restrictions") || [];
             const data = key === "ALL" ? all : all.filter(r => r.status === key);
             this._renderTimeline(data);
@@ -897,7 +902,9 @@ sap.ui.define([
         },
 
         onHistoryFilterChange: function (e) {
-            const filter = e.getParameter("selectedItem").getKey();
+            const oItem = e.getParameter("selectedItem");
+            if (!oItem) return;
+            const filter = oItem.getKey();
             const gridVisible = this.byId("historyGridTable") && this.byId("historyGridTable").getVisible();
             if (gridVisible) {
                 const filtered = filter === "ALL"
@@ -1384,11 +1391,13 @@ sap.ui.define([
 
         // ── Defect Status Filter ──────────────────────────────
         onDefectStatusFilter: function (e) {
-            const key = e.getParameter("selectedItem").getKey();
+            const oItem = e.getParameter("selectedItem");
+            if (!oItem) return;
+            const key = oItem.getKey();
             const b = this._bridge;
             if (!b) return;
             const h = { Accept: "application/json" };
-            const filter = key ? `bridge_ID eq ${b.ID} and status eq '${key}'` : `bridge_ID eq ${b.ID}`;
+            const filter = key ? `bridge_ID eq ${b.ID} and status eq '${_odataStr(key)}'` : `bridge_ID eq ${b.ID}`;
             fetch(`${BASE}/BridgeDefects?$filter=${encodeURIComponent(filter)}&$orderby=detectedDate desc`, { headers: h })
                 .then(r => r.json())
                 .then(j => this._model.setProperty("/defects", j.value || []))
@@ -1759,7 +1768,7 @@ sap.ui.define([
             if (!this._bridgeId) return;
             const h = { Accept: "application/json" };
             // Load BridgeCapacity by bridgeId
-            fetch(`/bridge-management/BridgeCapacities?$filter=bridgeId eq '${this._bridgeId}'&$top=1`, { headers: h })
+            fetch(`/bridge-management/BridgeCapacities?$filter=bridgeId eq '${_odataStr(this._bridgeId)}'&$top=1`, { headers: h })
                 .then(r => r.json())
                 .then(j => {
                     const cap = (j.value || [])[0];

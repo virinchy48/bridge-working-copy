@@ -10,8 +10,9 @@ sap.ui.define([
     'sap/m/MessageBox',
     'sap/m/BusyDialog',
     'nhvr/bridgemanagement/model/CapabilityManager',
-    'nhvr/bridgemanagement/util/LookupService'
-], function (Controller, JSONModel, MessageToast, MessageBox, BusyDialog, CapabilityManager, LookupService) {
+    'nhvr/bridgemanagement/util/LookupService',
+    'nhvr/bridgemanagement/util/AuthFetch'
+], function (Controller, JSONModel, MessageToast, MessageBox, BusyDialog, CapabilityManager, LookupService, AuthFetch) {
     'use strict';
 
     const SRV = '/bridge-management/';
@@ -244,8 +245,7 @@ sap.ui.define([
         // ── Load backend configs ──────────────────────────────────
         _loadConfigs: function () {
             const that = this;
-            fetch(`${SRV}IntegrationConfigs?$filter=isActive eq true`)
-                .then(r => r.json())
+            AuthFetch.getJson(`${SRV}IntegrationConfigs?$filter=isActive eq true`)
                 .then(data => {
                     const cfgs = data && data.value || [];
                     cfgs.forEach(c => {
@@ -272,7 +272,10 @@ sap.ui.define([
                         }
                     });
                 })
-                .catch(() => {/* backend may not have IntegrationConfigs yet */});
+                .catch(err => {
+                    console.warn('[IntegrationHub] IntegrationConfigs load failed:', err.message);
+                    /* backend may not have IntegrationConfigs yet */
+                });
         },
 
         // ── Field Mapping ─────────────────────────────────────────
@@ -510,8 +513,7 @@ sap.ui.define([
             if (!cfg) { MessageBox.warning(`No launch config found for system '${sysCode}'.`); return; }
 
             // Fetch the bridge's ExternalRefs
-            fetch(`${SRV}BridgeExternalRefs?$filter=bridge/bridgeId eq '${encodeURIComponent(bridgeId)}' and systemType eq '${encodeURIComponent(cfg.externalRefType)}'`)
-                .then(r => r.json())
+            AuthFetch.getJson(`${SRV}BridgeExternalRefs?$filter=bridge/bridgeId eq '${encodeURIComponent(bridgeId)}' and systemType eq '${encodeURIComponent(cfg.externalRefType)}'`)
                 .then(data => {
                     const refs     = data && data.value || [];
                     const extId    = refs.length > 0 ? refs[0].externalId : null;
@@ -533,7 +535,10 @@ sap.ui.define([
                     this.byId('crossLaunchResolvedId').setText(extId);
                     this.byId('crossLaunchResolvedUrl').setHref(url).setText(url);
                 })
-                .catch(e => MessageBox.error('Could not look up external reference: ' + e.message));
+                .catch(e => {
+                    console.warn('[IntegrationHub] BridgeExternalRefs lookup failed:', e.message);
+                    MessageBox.error('Could not look up external reference: ' + e.message);
+                });
         },
 
         // Direct launch (called from bridge detail or test button in table)

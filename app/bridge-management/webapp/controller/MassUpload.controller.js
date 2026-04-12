@@ -243,7 +243,9 @@ sap.ui.define([
 
         // ── Entity type change ─────────────────────────────────────
         onUploadTypeChange: function (e) {
-            const key = e.getParameter("selectedItem").getKey();
+            const oItem = e.getParameter("selectedItem");
+            if (!oItem) return;
+            const key = oItem.getKey();
             this._uploadType = key;
             this._applyEntityConfig(key);
             this.onClearUpload();

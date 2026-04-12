@@ -21,6 +21,9 @@ sap.ui.define([
 
     const BASE = "/bridge-management";
 
+    // Escape single quotes for OData v4 string literals ( ' → '' )
+    const _odataStr = (v) => String(v == null ? "" : v).replace(/'/g, "''");
+
     return Controller.extend("nhvr.bridgemanagement.controller.Restrictions", Object.assign({
 
         _allRestrictions  : [],
@@ -301,7 +304,7 @@ sap.ui.define([
             var oInput = oEvent.getSource();
             oInput.destroySuggestionItems();
             if (!sQuery || sQuery.length < 2) return;
-            var q = encodeURIComponent(sQuery.toLowerCase());
+            var q = _odataStr(sQuery.toLowerCase());
             fetch(`${BASE}/Bridges?$select=ID,bridgeId,name&$filter=contains(tolower(name),'${q}') or contains(tolower(bridgeId),'${q}')&$top=20`, {
                 headers: { Accept: "application/json" }
             })
@@ -930,7 +933,9 @@ sap.ui.define([
         },
 
         onColSectionFilter: function (oEvent) {
-            this._colSectionFilter = oEvent.getParameter("selectedItem").getKey() || null;
+            var oItem = oEvent.getParameter("selectedItem");
+            if (!oItem) return;
+            this._colSectionFilter = oItem.getKey() || null;
             var list = this.byId("columnPickerList");
             var selectedKeys = TablePersonalisation.getSelectedKeys(list);
             var search = this.byId("colPickerSearch") ? this.byId("colPickerSearch").getValue() : "";
@@ -1049,13 +1054,13 @@ sap.ui.define([
 
             this._advRestCriteria.forEach((crit, idx) => {
                 const fieldSelect = new sap.m.Select({ width: "200px", selectedKey: crit.field,
-                    change: (e) => { this._advRestCriteria[idx].field = e.getParameter("selectedItem").getKey(); this._advRestCriteria[idx].value = ""; this._renderAdvRestCriteria(); }
+                    change: (e) => { const oSel = e.getParameter("selectedItem"); if (!oSel) return; this._advRestCriteria[idx].field = oSel.getKey(); this._advRestCriteria[idx].value = ""; this._renderAdvRestCriteria(); }
                 });
                 this._restFilterFields.forEach(f => fieldSelect.addItem(new sap.ui.core.Item({ key: f.key, text: f.label })));
 
                 const fieldDef = this._restFilterFields.find(f => f.key === crit.field) || { type: "text" };
                 const opSelect = new sap.m.Select({ width: "130px", selectedKey: crit.operator,
-                    change: (e) => { this._advRestCriteria[idx].operator = e.getParameter("selectedItem").getKey(); }
+                    change: (e) => { const oSel = e.getParameter("selectedItem"); if (!oSel) return; this._advRestCriteria[idx].operator = oSel.getKey(); }
                 });
                 const ops = fieldDef.type === "number"
                     ? [["eq","="],["gt",">"],["lt","<"],["gte","≥"],["lte","≤"]]
@@ -1065,13 +1070,13 @@ sap.ui.define([
                 let valueControl;
                 if (fieldDef.type === "select") {
                     valueControl = new sap.m.Select({ width: "160px", selectedKey: crit.value,
-                        change: (e) => { this._advRestCriteria[idx].value = e.getParameter("selectedItem").getKey(); }
+                        change: (e) => { const oSel = e.getParameter("selectedItem"); if (!oSel) return; this._advRestCriteria[idx].value = oSel.getKey(); }
                     });
                     valueControl.addItem(new sap.ui.core.Item({ key: "", text: "— Any —" }));
                     (fieldDef.options || []).forEach(o => valueControl.addItem(new sap.ui.core.Item({ key: o, text: o })));
                 } else if (fieldDef.type === "boolean") {
                     valueControl = new sap.m.Select({ width: "100px",
-                        change: (e) => { this._advRestCriteria[idx].value = e.getParameter("selectedItem").getKey() === "true"; }
+                        change: (e) => { const oSel = e.getParameter("selectedItem"); if (!oSel) return; this._advRestCriteria[idx].value = oSel.getKey() === "true"; }
                     });
                     valueControl.addItem(new sap.ui.core.Item({ key: "true", text: "Yes" }));
                     valueControl.addItem(new sap.ui.core.Item({ key: "false", text: "No" }));

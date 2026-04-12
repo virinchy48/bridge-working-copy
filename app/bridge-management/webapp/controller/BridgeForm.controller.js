@@ -13,6 +13,9 @@ sap.ui.define([
 
     const BASE = "/bridge-management";
 
+    // Escape single quotes for OData v4 string literals ( ' → '' )
+    const _odataStr = (v) => String(v == null ? "" : v).replace(/'/g, "''");
+
     var _IS_LOC = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
     var _AUTH_H = _IS_LOC ? { "Authorization": "Basic " + btoa("admin:admin") } : {};
     function _credOpts(extraHeaders) {
@@ -164,7 +167,7 @@ sap.ui.define([
         },
 
         _loadBridge: function (bridgeId) {
-            fetch(`${BASE}/Bridges?$filter=bridgeId eq '${bridgeId}'`, _credOpts())
+            fetch(`${BASE}/Bridges?$filter=bridgeId eq '${_odataStr(bridgeId)}'`, _credOpts())
                 .then(r => r.json())
                 .then(j => {
                     const b = (j.value || [])[0];
@@ -304,7 +307,9 @@ sap.ui.define([
 
         // ── State → Region cascade ─────────────────────────────
         onStateChanged: function (e) {
-            const state = e.getParameter("selectedItem").getKey();
+            const oItem = e.getParameter("selectedItem");
+            if (!oItem) return;
+            const state = oItem.getKey();
             this._populateRegions(state);
         },
 
@@ -571,7 +576,7 @@ sap.ui.define([
 
                 // If editing, load existing values
                 if (bridgeUUID) {
-                    return fetch(`${BASE}/BridgeAttributes?$filter=bridge_ID eq '${bridgeUUID}'&$expand=attribute($select=name)`, {
+                    return fetch(`${BASE}/BridgeAttributes?$filter=bridge_ID eq '${_odataStr(bridgeUUID)}'&$expand=attribute($select=name)`, {
                         headers: { Accept: "application/json" }
                     })
                     .then(r => r.ok ? r.json() : { value: [] })

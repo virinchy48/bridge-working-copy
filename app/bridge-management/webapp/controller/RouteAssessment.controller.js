@@ -18,13 +18,13 @@ sap.ui.define([
     "sap/m/Text",
     "sap/m/ObjectStatus",
     "nhvr/bridgemanagement/model/CapabilityManager",
-    "nhvr/bridgemanagement/util/UserAnalytics"
+    "nhvr/bridgemanagement/util/UserAnalytics",
+    "nhvr/bridgemanagement/util/AuthFetch"
 ], function (Controller, JSONModel, MessageToast, MessageBox,
-             Dialog, Button, VBox, Label, UIText, ObjectStatus, CapabilityManager, UserAnalytics) {
+             Dialog, Button, VBox, Label, UIText, ObjectStatus, CapabilityManager, UserAnalytics, AuthFetch) {
     "use strict";
 
     const BASE = "/bridge-management";
-    const H    = { Accept: "application/json" };
 
     return Controller.extend("nhvr.bridgemanagement.controller.RouteAssessment", {
 
@@ -84,8 +84,7 @@ sap.ui.define([
         _loadRoutes: function () {
             var self = this;
             // Load ApprovedRoutes for the dropdown display
-            fetch(BASE + "/ApprovedRoutes?$select=ID,routeId,routeName,routeStatus,routeGrossLimit_t,routeHeightLimit_m,routeWidthLimit_m,totalDistanceKm,limitingBridgeId,limitingConstraint,geojsonRoute&$orderby=routeName&$top=200", { headers: H })
-                .then(function (r) { return r.json(); })
+            AuthFetch.getJson(BASE + "/ApprovedRoutes?$select=ID,routeId,routeName,routeStatus,routeGrossLimit_t,routeHeightLimit_m,routeWidthLimit_m,totalDistanceKm,limitingBridgeId,limitingConstraint,geojsonRoute&$orderby=routeName&$top=200")
                 .then(function (j) {
                     var routes = j.value || [];
                     var select = self.byId("routeSelect");
@@ -101,22 +100,20 @@ sap.ui.define([
                     });
                     self._routeData = routes;
                 })
-                .catch(function (e) { console.error("ApprovedRoutes load failed", e); });
+                .catch(function (e) { console.warn("[RouteAssessment] ApprovedRoutes load failed:", e.message); });
 
             // Also load FreightRoutes for server-side assessment mapping
-            fetch(BASE + "/FreightRoutes?$select=ID,routeCode,name,state,routeClass,corridorMaxMass,corridorMaxHeight,status&$orderby=name&$top=500", { headers: H })
-                .then(function (r) { return r.json(); })
+            AuthFetch.getJson(BASE + "/FreightRoutes?$select=ID,routeCode,name,state,routeClass,corridorMaxMass,corridorMaxHeight,status&$orderby=name&$top=500")
                 .then(function (j) {
                     self._freightRouteData = j.value || [];
                 })
-                .catch(function (e) { console.error("FreightRoutes load failed", e); });
+                .catch(function (e) { console.warn("[RouteAssessment] FreightRoutes load failed:", e.message); });
         },
 
         // ── Load vehicle types into select ────────────────────
         _loadVehicleTypes: function () {
             var self = this;
-            fetch(BASE + "/VehicleTypes?$select=ID,nhvrClass,displayName,maxGVM_t,maxGCM_t,maxHeight_m,maxWidth_m,maxLength_m&$orderby=displayName&$top=200", { headers: H })
-                .then(function (r) { return r.json(); })
+            AuthFetch.getJson(BASE + "/VehicleTypes?$select=ID,nhvrClass,displayName,maxGVM_t,maxGCM_t,maxHeight_m,maxWidth_m,maxLength_m&$orderby=displayName&$top=200")
                 .then(function (j) {
                     var types = j.value || [];
                     var select = self.byId("vehicleTypeSelect");
@@ -130,7 +127,7 @@ sap.ui.define([
                     });
                     self._vehicleTypeData = types;
                 })
-                .catch(function (e) { console.error("VehicleTypes load failed", e); });
+                .catch(function (e) { console.warn("[RouteAssessment] VehicleTypes load failed:", e.message); });
         },
 
         // ── Route selected → prefill route info ───────────────
@@ -155,12 +152,14 @@ sap.ui.define([
                 });
                 // Load bridge count for route (via navigation property)
                 var self = this;
-                fetch(BASE + "/ApprovedRoutes(" + routeId + ")/bridges?$count=true&$top=0", { headers: H })
-                    .then(function (r) { return r.json(); })
+                AuthFetch.getJson(BASE + "/ApprovedRoutes(" + routeId + ")/bridges?$count=true&$top=0")
                     .then(function (j) {
                         self._model.setProperty("/routeInfo/bridgeCount", String(j["@odata.count"] || 0));
                     })
-                    .catch(function () { self._model.setProperty("/routeInfo/bridgeCount", "—"); });
+                    .catch(function (err) {
+                        console.warn("[RouteAssessment] ApprovedRoutes bridge count failed:", err.message);
+                        self._model.setProperty("/routeInfo/bridgeCount", "—");
+                    });
             }
         },
 
@@ -437,8 +436,7 @@ sap.ui.define([
 
             var self = this;
             // Fetch selected route with geometry fields for coordinate extraction
-            fetch(BASE + "/ApprovedRoutes(" + routeId + ")?$select=ID,routeId,routeName,startPoint,endPoint,geojsonRoute,routeGrossLimit_t,routeHeightLimit_m,routeWidthLimit_m,totalDistanceKm,routeStatus", { headers: H })
-                .then(function (r) { return r.json(); })
+            AuthFetch.getJson(BASE + "/ApprovedRoutes(" + routeId + ")?$select=ID,routeId,routeName,startPoint,endPoint,geojsonRoute,routeGrossLimit_t,routeHeightLimit_m,routeWidthLimit_m,totalDistanceKm,routeStatus")
                 .then(function (route) {
                     var coords = self._extractRouteCoords(route);
                     return Promise.all([
@@ -508,11 +506,9 @@ sap.ui.define([
             if (height > 0) filter += " and (routeHeightLimit_m eq null or routeHeightLimit_m ge " + height + ")";
             if (width > 0)  filter += " and (routeWidthLimit_m eq null or routeWidthLimit_m ge " + width + ")";
 
-            return fetch(
-                BASE + "/ApprovedRoutes?$filter=" + encodeURIComponent(filter) + "&$select=ID,routeId,routeName,routeStatus,routeGrossLimit_t,routeHeightLimit_m,routeWidthLimit_m,totalDistanceKm&$top=5&$orderby=routeName",
-                { headers: H }
+            return AuthFetch.getJson(
+                BASE + "/ApprovedRoutes?$filter=" + encodeURIComponent(filter) + "&$select=ID,routeId,routeName,routeStatus,routeGrossLimit_t,routeHeightLimit_m,routeWidthLimit_m,totalDistanceKm&$top=5&$orderby=routeName"
             )
-                .then(function (r) { return r.json(); })
                 .then(function (j) {
                     return (j.value || []).map(function (r) {
                         return {
@@ -531,7 +527,10 @@ sap.ui.define([
                         };
                     });
                 })
-                .catch(function () { return []; });
+                .catch(function (err) {
+                    console.warn("[RouteAssessment] Internal alternative routes load failed:", err.message);
+                    return [];
+                });
         },
 
         // ── Search OSRM for road alternatives ─────────────────

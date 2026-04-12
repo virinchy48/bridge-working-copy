@@ -40,6 +40,15 @@ sap.ui.define([
 
     var BASE = "/bridge-management";
 
+    // On localhost there is no AppRouter, so the CAP dev server needs an
+    // explicit Basic auth header. Mirrors the _credOpts() pattern used by
+    // the rest of the app. `sendBeacon` cannot attach arbitrary headers,
+    // so in dev we skip beacons and always use fetch with the header.
+    var _IS_LOC = typeof window !== "undefined" &&
+        (window.location.hostname === "localhost" ||
+         window.location.hostname === "127.0.0.1");
+    var _AUTH_H = _IS_LOC ? { "Authorization": "Basic " + btoa("admin:admin") } : {};
+
     // ── Helpers ──────────────────────────────────────────────────
     function _uuid() {
         if (typeof crypto !== "undefined" && crypto.randomUUID) {
@@ -129,21 +138,38 @@ sap.ui.define([
     function _sendChunk(events) {
         var payload = JSON.stringify({ events: events });
         var url = BASE + "/ingestEvents";
+        var headers = Object.assign(
+            { "Content-Type": "application/json" },
+            _AUTH_H
+        );
 
         try {
-            // Prefer sendBeacon (works on page unload)
-            if (navigator.sendBeacon) {
+            // On production (non-localhost) sendBeacon is the best option
+            // on page unload — it carries same-origin cookies and survives
+            // the navigation. On localhost we skip it because it can't
+            // attach an Authorization header and the CAP dev server needs
+            // one, so beacons would 401 silently.
+            if (!_IS_LOC && navigator.sendBeacon) {
                 var blob = new Blob([payload], { type: "application/json" });
                 var sent = navigator.sendBeacon(url, blob);
                 if (sent) return;
             }
-            // Fallback to fetch with keepalive
+            // Fallback: fetch with keepalive + credentials + optional
+            // Basic auth header. Swallow network errors (fire-and-forget)
+            // BUT log 4xx so a dev-mode auth regression is visible.
             fetch(url, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: headers,
                 body: payload,
+                credentials: "include",
                 keepalive: true
-            }).catch(function () { /* silent */ });
+            })
+            .then(function (r) {
+                if (!r.ok) {
+                    Logger.debug(TAG, "ingestEvents " + r.status + " (analytics non-fatal)");
+                }
+            })
+            .catch(function () { /* silent — network error */ });
         } catch (err) {
             Logger.warn(TAG, "Flush failed", err);
         }
@@ -182,7 +208,8 @@ sap.ui.define([
             // Fetch config from backend
             try {
                 fetch(BASE + "/AnalyticsConfigs?$filter=configKey eq 'GLOBAL'&$top=1", {
-                    headers: { Accept: "application/json" }
+                    headers: Object.assign({ Accept: "application/json" }, _AUTH_H),
+                    credentials: "include"
                 }).then(function (r) {
                     return r.ok ? r.json() : null;
                 }).then(function (data) {

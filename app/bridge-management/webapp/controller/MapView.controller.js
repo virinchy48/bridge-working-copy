@@ -43,6 +43,9 @@ sap.ui.define([
 
     const BASE = "/bridge-management";
 
+    // Escape single quotes for OData v4 string literals ( ' → '' )
+    const _odataStr = (v) => String(v == null ? "" : v).replace(/'/g, "''");
+
     // ── Fallback base layers (overridden by MapConfig from OData) ──
     const DEFAULT_BASE_LAYERS = {
         osm: {
@@ -274,7 +277,24 @@ sap.ui.define([
             });
 
             if (typeof L === "undefined") {
-                console.error("Leaflet.js not loaded — check index.html CDN");
+                // Leaflet CDN (cdnjs.cloudflare.com) didn't load — usually
+                // a firewall / offline / cert issue. Show a clean empty
+                // state instead of a console error + blank map container.
+                console.warn("[MapView] Leaflet.js not loaded — showing fallback");
+                var mapDiv = document.getElementById("nhvr-leaflet-map");
+                if (mapDiv) {
+                    mapDiv.innerHTML =
+                        '<div style="display:flex;flex-direction:column;align-items:center;' +
+                        'justify-content:center;height:100%;min-height:400px;padding:24px;' +
+                        'background:#f7f7f7;color:#32363a;font-family:inherit;text-align:center;">' +
+                        '<div style="font-size:48px;margin-bottom:16px;">&#128205;</div>' +
+                        '<div style="font-size:18px;font-weight:600;margin-bottom:8px;">Map unavailable</div>' +
+                        '<div style="font-size:14px;max-width:500px;color:#6a6d70;">' +
+                        'The Leaflet map library could not be loaded from cdnjs.cloudflare.com. ' +
+                        'This is usually a network / firewall issue. All other bridge data ' +
+                        'is still accessible from the Bridges list.' +
+                        '</div></div>';
+                }
                 return;
             }
 
@@ -978,7 +998,9 @@ sap.ui.define([
         // SYMBOLOGY
         // ══════════════════════════════════════════════════════════════
         onSymbologyChange: function (e) {
-            this._symbologyMode = e.getParameter("selectedItem").getKey();
+            const oItem = e.getParameter("selectedItem");
+            if (!oItem) return;
+            this._symbologyMode = oItem.getKey();
             const visible = this._displayBridges.length > 0 ? this._displayBridges : this._allBridges;
             this._renderActiveLayer(visible, null);
             this._updateLegend();
@@ -1073,7 +1095,9 @@ sap.ui.define([
         // BASE LAYER & REFERENCE LAYERS
         // ══════════════════════════════════════════════════════════════
         onBaseLayerChange: function (e) {
-            const key = e.getParameter("selectedItem").getKey();
+            const oItem = e.getParameter("selectedItem");
+            if (!oItem) return;
+            const key = oItem.getKey();
             const def = this._baseLayers[key];
             if (!def || !this._map) return;
             if (this._baseLayerObj) this._map.removeLayer(this._baseLayerObj);
@@ -1526,7 +1550,7 @@ sap.ui.define([
             if (!list) return;
             list.destroyItems();
             fetch(
-                `${BASE}/Bridges?$filter=bridgeId eq '${bridgeId}'` +
+                `${BASE}/Bridges?$filter=bridgeId eq '${_odataStr(bridgeId)}'` +
                 `&$expand=restrictions($filter=status eq 'ACTIVE';$select=restrictionType,value,unit,permitRequired)` +
                 `&$select=bridgeId`
             )

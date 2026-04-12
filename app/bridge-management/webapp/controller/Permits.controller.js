@@ -123,8 +123,7 @@ sap.ui.define([
             var oModel = this.getView().getModel("permits");
             oModel.setProperty("/loading", true);
 
-            AuthFetch.fetch(BASE + "VehiclePermits?$orderby=createdAt desc")
-                .then(function (r) { return r.json(); })
+            AuthFetch.getJson(BASE + "VehiclePermits?$orderby=createdAt desc")
                 .then(function (data) {
                     var items = data.value || [];
                     this._allPermits = items;
@@ -157,8 +156,7 @@ sap.ui.define([
         },
 
         _loadBridgesForSelect: function () {
-            AuthFetch.fetch(BASE + "Bridges?$select=ID,bridgeId,name,state&$orderby=name&$top=200")
-                .then(function (r) { return r.json(); })
+            AuthFetch.getJson(BASE + "Bridges?$select=ID,bridgeId,name,state&$orderby=name&$top=200")
                 .then(function (data) {
                     this._bridges = data.value || [];
                     var oSelect = this.getView().byId("permitBridgeSelect");
@@ -171,12 +169,13 @@ sap.ui.define([
                         }));
                     });
                 }.bind(this))
-                .catch(function () {});
+                .catch(function (err) {
+                    console.warn("[Permits] Bridges lookup load failed:", err.message);
+                });
         },
 
         _loadVehicleTypesForSelect: function () {
-            AuthFetch.fetch(BASE + "VehicleTypes?$filter=active eq true&$orderby=vehicleCategory,code")
-                .then(function (r) { return r.json(); })
+            AuthFetch.getJson(BASE + "VehicleTypes?$filter=active eq true&$orderby=vehicleCategory,code")
                 .then(function (data) {
                     this._vehicleTypes = data.value || [];
                     var oSelect = this.getView().byId("permitVehicleTypeSelect");
@@ -189,7 +188,9 @@ sap.ui.define([
                         }));
                     });
                 }.bind(this))
-                .catch(function () {});
+                .catch(function (err) {
+                    console.warn("[Permits] VehicleTypes lookup load failed:", err.message);
+                });
         },
 
         // ── Filtering ─────────────────────────────────────────────────────────

@@ -43,6 +43,25 @@ sap.ui.define([
         init: function () {
             UIComponent.prototype.init.apply(this, arguments);
 
+            // ── Dev-only: inject Basic auth header into default OData v4 model ──
+            // In production the AppRouter handles auth; on localhost there's no
+            // AppRouter, so default bindList calls 401 against CAP. Mirror the
+            // _credOpts() pattern used by explicit fetch() calls.
+            var isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+            if (isLocalhost) {
+                var oModel = this.getModel();
+                if (oModel && typeof oModel.changeHttpHeaders === "function") {
+                    try {
+                        var current = (typeof oModel.getHttpHeaders === "function" ? oModel.getHttpHeaders() : null) || {};
+                        oModel.changeHttpHeaders(Object.assign({}, current, {
+                            Authorization: "Basic " + btoa("admin:admin")
+                        }));
+                    } catch (e) {
+                        // Non-fatal: proceed without header injection
+                    }
+                }
+            }
+
             // Initialize app mode and role config before routing so feature-gated
             // buttons render consistently even when users land on deep links.
             var oRouter = this.getRouter();

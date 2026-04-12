@@ -11,8 +11,9 @@ sap.ui.define([
     "nhvr/bridgemanagement/util/ExcelExport",
     "nhvr/bridgemanagement/util/UserAnalytics",
     "nhvr/bridgemanagement/util/ReferenceData",
-    "nhvr/bridgemanagement/util/LookupService"
-], function (Controller, JSONModel, MessageToast, MessageBox, ExcelExport, UserAnalytics, ReferenceData, LookupService) {
+    "nhvr/bridgemanagement/util/LookupService",
+    "nhvr/bridgemanagement/util/AuthFetch"
+], function (Controller, JSONModel, MessageToast, MessageBox, ExcelExport, UserAnalytics, ReferenceData, LookupService, AuthFetch) {
     "use strict";
 
     const BASE     = "/bridge-management";
@@ -766,80 +767,66 @@ sap.ui.define([
                     pageSize: 200, pageOffset: 0
                 };
                 const params = this._buildQsRequired(qf, ["assetClass","state","region","postingStatus","condition","conditionMin","conditionMax","yearBuiltFrom","yearBuiltTo","isActive","pageSize","pageOffset"]);
-                return fetch(BASE + "/getAssetRegister(" + params + ")", _credOpts())
-                    .then(function (r) { return r.json(); })
+                return AuthFetch.getJson(BASE + "/getAssetRegister(" + params + ")")
                     .then(function (j) { return j.value || []; });
             }
             if (fn === "getAssetSummary") {
                 const params = this._buildQsRequired({ assetClass: null, state: criteria.state, region: null }, ["assetClass","state","region"]);
-                return fetch(BASE + "/getAssetSummary(" + params + ")", _credOpts())
-                    .then(function (r) { return r.json(); })
+                return AuthFetch.getJson(BASE + "/getAssetSummary(" + params + ")")
                     .then(function (j) { return j.value || []; });
             }
             if (fn === "getConditionDistribution") {
                 const params = this._buildQsRequired({ assetClass: null, state: criteria.state, region: null }, ["assetClass","state","region"]);
-                return fetch(BASE + "/getConditionDistribution(" + params + ")", _credOpts())
-                    .then(function (r) { return r.json(); })
+                return AuthFetch.getJson(BASE + "/getConditionDistribution(" + params + ")")
                     .then(function (j) { return j.value || []; });
             }
             if (fn === "getRestrictionSummary") {
                 const rp = { assetClass: null, state: criteria.state, region: null, restrictionType: null, status: "ACTIVE" };
                 const params = this._buildQsRequired(rp, ["assetClass","state","region","restrictionType","status"]);
-                return fetch(BASE + "/getRestrictionSummary(" + params + ")", _credOpts())
-                    .then(function (r) { return r.json(); })
+                return AuthFetch.getJson(BASE + "/getRestrictionSummary(" + params + ")")
                     .then(function (j) { return j.value || []; });
             }
             if (fn === "getInspectionStatusReport") {
                 const ip = { assetClass: null, state: criteria.state, region: null, overdueOnly: false };
                 const params = this._buildQsRequired(ip, ["assetClass","state","region","overdueOnly"]);
-                return fetch(BASE + "/getInspectionStatusReport(" + params + ")", _credOpts())
-                    .then(function (r) { return r.json(); })
+                return AuthFetch.getJson(BASE + "/getInspectionStatusReport(" + params + ")")
                     .then(function (j) { return j.value || []; });
             }
             if (fn === "getBridgesExceedingCapacity") {
-                return fetch(BASE + "/getBridgesExceedingCapacity()", _credOpts())
-                    .then(function (r) { return r.json(); })
+                return AuthFetch.getJson(BASE + "/getBridgesExceedingCapacity()")
                     .then(function (j) { return j.value || []; });
             }
             if (fn === "getOverdueCapacityReviews") {
-                return fetch(BASE + "/getOverdueCapacityReviews(daysOverdue=0)", _credOpts())
-                    .then(function (r) { return r.json(); })
+                return AuthFetch.getJson(BASE + "/getOverdueCapacityReviews(daysOverdue=0)")
                     .then(function (j) { return j.value || []; });
             }
             if (fn === "RouteCompliance") {
-                return fetch(BASE + "/RouteCompliance?$orderby=closedCount desc,criticalCount desc", _credOpts())
-                    .then(function (r) { return r.json(); })
+                return AuthFetch.getJson(BASE + "/RouteCompliance?$orderby=closedCount desc,criticalCount desc")
                     .then(function (j) { return (j.value || []).filter(function (r) { return r.routeCode; }); });
             }
             if (fn === "VehicleAccess") {
-                return fetch(BASE + "/VehicleAccess?$orderby=bridgeName,vehicleClassName" + filterStr, _credOpts())
-                    .then(function (r) { return r.json(); })
+                return AuthFetch.getJson(BASE + "/VehicleAccess?$orderby=bridgeName,vehicleClassName" + filterStr)
                     .then(function (j) { return j.value || []; });
             }
             if (fn === "Restrictions") {
                 const stateF = criteria.state ? "&$filter=status eq 'ACTIVE' and bridge/state eq '" + criteria.state + "'" : "&$filter=status eq 'ACTIVE'";
-                return fetch(BASE + "/Restrictions?$top=500" + stateF, _credOpts())
-                    .then(function (r) { return r.json(); })
+                return AuthFetch.getJson(BASE + "/Restrictions?$top=500" + stateF)
                     .then(function (j) { return j.value || []; });
             }
             if (fn === "BridgeDefects") {
-                return fetch(BASE + "/BridgeDefects?$top=500&$orderby=severity,detectedDate desc", _credOpts())
-                    .then(function (r) { return r.json(); })
+                return AuthFetch.getJson(BASE + "/BridgeDefects?$top=500&$orderby=severity,detectedDate desc")
                     .then(function (j) { return j.value || []; });
             }
             if (fn === "BridgeConditionHistory") {
-                return fetch(BASE + "/BridgeHistory?$top=500&$orderby=changedAt desc", _credOpts())
-                    .then(function (r) { return r.json(); })
+                return AuthFetch.getJson(BASE + "/BridgeHistory?$top=500&$orderby=changedAt desc")
                     .then(function (j) { return j.value || []; });
             }
             if (fn === "FreightRoute") {
-                return fetch(BASE + "/FreightRoutes?$top=500", _credOpts())
-                    .then(function (r) { return r.json(); })
+                return AuthFetch.getJson(BASE + "/FreightRoutes?$top=500")
                     .then(function (j) { return j.value || []; });
             }
             // Fallback: generic entity set
-            return fetch(BASE + "/" + fn + "?$top=200" + filterStr, _credOpts())
-                .then(function (r) { return r.json(); })
+            return AuthFetch.getJson(BASE + "/" + fn + "?$top=200" + filterStr)
                 .then(function (j) { return j.value || []; });
         },
 
@@ -1058,7 +1045,9 @@ sap.ui.define([
 
         // ── State → Region cascade ─────────────────────────────
         onStateChanged: function (e) {
-            const state = e.getParameter("selectedItem").getKey();
+            const oItem = e.getParameter("selectedItem");
+            if (!oItem) return;
+            const state = oItem.getKey();
             const sel   = this.byId("filterRegion");
             if (!sel) return;
             while (sel.getItems().length > 0) sel.removeItem(0);
@@ -1105,8 +1094,7 @@ sap.ui.define([
         // ── Asset Summary → KPI strip + summary tab ───────────
         _loadAssetSummary: function (f) {
             const params = this._buildQsRequired(f, ["assetClass","state","region"]);
-            fetch(`${BASE}/getAssetSummary(${params})`, _credOpts())
-                .then(r => r.json())
+            AuthFetch.getJson(`${BASE}/getAssetSummary(${params})`)
                 .then(j => {
                     const dims = j.value || [];
                     let total = 0, bridges = 0, culverts = 0, other = 0;
@@ -1149,8 +1137,7 @@ sap.ui.define([
                 });
 
             const stateFilter = f.state ? `&$filter=status eq 'ACTIVE'${f.state ? " and bridge/state eq '" + f.state + "'" : ""}` : "&$filter=status eq 'ACTIVE'";
-            fetch(`${BASE}/Restrictions?$count=true&$top=0${stateFilter}`, _credOpts())
-                .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+            AuthFetch.getJson(`${BASE}/Restrictions?$count=true&$top=0${stateFilter}`)
                 .then(j => this._setKpi("kpiRestrictions", String(j["@odata.count"] || 0)))
                 .catch(function (err) {
                     console.warn("[NHVR] KPI restriction count failed:", err && err.message || err);
@@ -1193,8 +1180,7 @@ sap.ui.define([
                 ["assetClass","state","region","postingStatus","condition",
                  "conditionMin","conditionMax","yearBuiltFrom","yearBuiltTo",
                  "isActive","pageSize","pageOffset"]);
-            return fetch(`${BASE}/getAssetRegister(${params})`, _credOpts())
-                .then(r => r.json())
+            return AuthFetch.getJson(`${BASE}/getAssetRegister(${params})`)
                 .then(j => {
                     const rows = j.value || [];
                     this._totalCount = rows.length > 0 ? (rows[0]._totalCount || rows.length) : 0;
@@ -1235,7 +1221,9 @@ sap.ui.define([
         },
 
         onPageSizeChange: function (e) {
-            this._pageSize    = parseInt(e.getParameter("selectedItem").getKey());
+            const oItem = e.getParameter("selectedItem");
+            if (!oItem) return;
+            this._pageSize    = parseInt(oItem.getKey());
             this._pageOffset  = 0;
             this._currentPage = 1;
             this._loadAssetRegister(this._getFilters());
@@ -1255,8 +1243,7 @@ sap.ui.define([
 
         _loadConditionDistP: function (f) {
             const params = this._buildQsRequired(f, ["assetClass","state","region"]);
-            return fetch(`${BASE}/getConditionDistribution(${params})`, _credOpts())
-                .then(r => r.json())
+            return AuthFetch.getJson(`${BASE}/getConditionDistribution(${params})`)
                 .then(j => {
                     this._model.setProperty("/conditionDist", j.value || []);
                 });
@@ -1279,8 +1266,7 @@ sap.ui.define([
                          restrictionType: f.restrictionType, status: f.restrictionStatus };
             const params = this._buildQsRequired(rp,
                 ["assetClass","state","region","restrictionType","status"]);
-            return fetch(`${BASE}/getRestrictionSummary(${params})`, _credOpts())
-                .then(r => r.json())
+            return AuthFetch.getJson(`${BASE}/getRestrictionSummary(${params})`)
                 .then(j => {
                     let rows = j.value || [];
                     if (f.restrictionPermit === "true")  rows = rows.filter(r => r.permitRequired === true);
@@ -1308,8 +1294,7 @@ sap.ui.define([
 
         _loadInspectionStatusP: function (f) {
             const params = this._buildQsRequired(f, ["assetClass","state","region","overdueOnly"]);
-            return fetch(`${BASE}/getInspectionStatusReport(${params})`, _credOpts())
-                .then(r => r.json())
+            return AuthFetch.getJson(`${BASE}/getInspectionStatusReport(${params})`)
                 .then(j => {
                     this._model.setProperty("/inspections", j.value || []);
                 });
@@ -1439,12 +1424,16 @@ sap.ui.define([
         },
 
         onVehicleBridgeFilter: function (e) {
-            this._applyVehicleFilter(e.getParameter("selectedItem").getKey(),
+            const oItem = e.getParameter("selectedItem");
+            if (!oItem) return;
+            this._applyVehicleFilter(oItem.getKey(),
                 this.byId("vehicleFilterType").getSelectedKey());
         },
         onVehicleTypeFilter: function (e) {
+            const oItem = e.getParameter("selectedItem");
+            if (!oItem) return;
             this._applyVehicleFilter(this.byId("vehicleFilterBridge").getSelectedKey(),
-                e.getParameter("selectedItem").getKey());
+                oItem.getKey());
         },
         _applyVehicleFilter: function (bridge, type) {
             let data = this._vehicleData;
@@ -1555,10 +1544,12 @@ sap.ui.define([
         onLoadPortfolioReport: function () {
             const url = `${BASE}/BridgePortfolioReport?$top=500`;
             this._model.setProperty("/portfolioReport", []);
-            fetch(url, _credOpts())
-                .then(r => r.json())
+            AuthFetch.getJson(url)
                 .then(d => { this._model.setProperty("/portfolioReport", d.value || []); })
-                .catch(e => { sap.m.MessageToast.show("Portfolio report failed: " + e.message); });
+                .catch(err => {
+                    console.warn("[Reports] BridgePortfolioReport load failed:", err.message);
+                    sap.m.MessageToast.show("Portfolio report failed: " + err.message);
+                });
         },
 
         onExportPortfolioCSV: function () {
@@ -1568,10 +1559,12 @@ sap.ui.define([
         onLoadSafetyReport: function () {
             const url = `${BASE}/BridgeSafetyReport?$top=500`;
             this._model.setProperty("/safetyReport", []);
-            fetch(url, _credOpts())
-                .then(r => r.json())
+            AuthFetch.getJson(url)
                 .then(d => { this._model.setProperty("/safetyReport", d.value || []); })
-                .catch(e => { sap.m.MessageToast.show("Safety report failed: " + e.message); });
+                .catch(err => {
+                    console.warn("[Reports] BridgeSafetyReport load failed:", err.message);
+                    sap.m.MessageToast.show("Safety report failed: " + err.message);
+                });
         },
 
         onExportSafetyCSV: function () {
@@ -1581,10 +1574,12 @@ sap.ui.define([
         onLoadInvestmentReport: function () {
             const url = `${BASE}/BridgeInvestmentReport?$top=500`;
             this._model.setProperty("/investmentReport", []);
-            fetch(url, _credOpts())
-                .then(r => r.json())
+            AuthFetch.getJson(url)
                 .then(d => { this._model.setProperty("/investmentReport", d.value || []); })
-                .catch(e => { sap.m.MessageToast.show("Investment report failed: " + e.message); });
+                .catch(err => {
+                    console.warn("[Reports] BridgeInvestmentReport load failed:", err.message);
+                    sap.m.MessageToast.show("Investment report failed: " + err.message);
+                });
         },
 
         onExportInvestmentCSV: function () {
@@ -1594,10 +1589,12 @@ sap.ui.define([
         onLoadNHVRRouteReport: function () {
             const url = `${BASE}/NHVRRouteReport?$top=500`;
             this._model.setProperty("/nhvrRouteReport", []);
-            fetch(url, _credOpts())
-                .then(r => r.json())
+            AuthFetch.getJson(url)
                 .then(d => { this._model.setProperty("/nhvrRouteReport", d.value || []); })
-                .catch(e => { sap.m.MessageToast.show("NHVR route report failed: " + e.message); });
+                .catch(err => {
+                    console.warn("[Reports] NHVRRouteReport load failed:", err.message);
+                    sap.m.MessageToast.show("NHVR route report failed: " + err.message);
+                });
         },
 
         onExportNHVRRouteCSV: function () {

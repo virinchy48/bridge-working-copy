@@ -266,7 +266,9 @@ sap.ui.define([
 
         onColSectionFilter: function (oEvent) {
             // Select change — selectedItem key is the sectionLabel (empty = All)
-            var sSection = oEvent.getParameter("selectedItem").getKey() || null;
+            var oItem = oEvent.getParameter("selectedItem");
+            if (!oItem) return;
+            var sSection = oItem.getKey() || null;
             this._colSectionFilter = sSection;
 
             // Rebuild list with section filter (preserve current selections)
@@ -279,7 +281,9 @@ sap.ui.define([
         },
 
         onVariantSelected: function (oEvent) {
-            var key = oEvent.getParameter("selectedItem").getKey();
+            var oItem = oEvent.getParameter("selectedItem");
+            if (!oItem) return;
+            var key = oItem.getKey();
             if (key === TablePersonalisation.STANDARD_VARIANT) {
                 // Load defaults
                 var defaultKeys = BridgeAttrs.getDefaultVisibleColumns().map(function (a) { return a.key; });
@@ -1023,7 +1027,9 @@ sap.ui.define([
                     width: "200px",
                     selectedKey: crit.field,
                     change: (e) => {
-                        this._advCriteria[idx].field = e.getParameter("selectedItem").getKey();
+                        const oSel = e.getParameter("selectedItem");
+                        if (!oSel) return;
+                        this._advCriteria[idx].field = oSel.getKey();
                         this._advCriteria[idx].value = "";
                         this._renderAdvCriteria();
                     }
@@ -1037,7 +1043,7 @@ sap.ui.define([
                 const opSelect = new sap.m.Select({
                     width: "130px",
                     selectedKey: crit.operator,
-                    change: (e) => { this._advCriteria[idx].operator = e.getParameter("selectedItem").getKey(); }
+                    change: (e) => { const oSel = e.getParameter("selectedItem"); if (!oSel) return; this._advCriteria[idx].operator = oSel.getKey(); }
                 });
                 const ops = fieldDef.type === "number"
                     ? [["eq","="],["gt",">"],["lt","<"],["gte","≥"],["lte","≤"],["ne","≠"]]
@@ -1047,14 +1053,14 @@ sap.ui.define([
                 let valueControl;
                 if (fieldDef.type === "select") {
                     valueControl = new sap.m.Select({ width: "180px", selectedKey: crit.value,
-                        change: (e) => { this._advCriteria[idx].value = e.getParameter("selectedItem").getKey(); }
+                        change: (e) => { const oSel = e.getParameter("selectedItem"); if (!oSel) return; this._advCriteria[idx].value = oSel.getKey(); }
                     });
                     valueControl.addItem(new sap.ui.core.Item({ key: "", text: "— Any —" }));
                     (fieldDef.options || []).forEach(o => valueControl.addItem(new sap.ui.core.Item({ key: o, text: o })));
                     valueControl.setSelectedKey(crit.value || "");
                 } else if (fieldDef.type === "boolean") {
                     valueControl = new sap.m.Select({ width: "120px", selectedKey: String(crit.value),
-                        change: (e) => { this._advCriteria[idx].value = e.getParameter("selectedItem").getKey() === "true"; }
+                        change: (e) => { const oSel = e.getParameter("selectedItem"); if (!oSel) return; this._advCriteria[idx].value = oSel.getKey() === "true"; }
                     });
                     valueControl.addItem(new sap.ui.core.Item({ key: "true",  text: "Yes" }));
                     valueControl.addItem(new sap.ui.core.Item({ key: "false", text: "No"  }));
