@@ -70,11 +70,12 @@ cds.on('bootstrap', (app) => {
         res.setHeader('Permissions-Policy', 'geolocation=(self), camera=(), microphone=()');
         res.setHeader('Content-Security-Policy',
             "default-src 'self'; " +
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://ui5.sap.com https://sapui5.hana.ondemand.com https://sdk.openui5.org https://unpkg.com https://cdnjs.cloudflare.com; " +
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://ui5.sap.com https://sapui5.hana.ondemand.com https://sdk.openui5.org https://unpkg.com https://cdnjs.cloudflare.com; " +
             "style-src 'self' 'unsafe-inline' https://ui5.sap.com https://sapui5.hana.ondemand.com https://sdk.openui5.org https://unpkg.com https://cdnjs.cloudflare.com; " +
             "font-src 'self' https://ui5.sap.com https://sapui5.hana.ondemand.com https://sdk.openui5.org data:; " +
             "img-src 'self' data: blob: https://*.tile.openstreetmap.org https://ui5.sap.com https://sapui5.hana.ondemand.com; " +
-            "connect-src 'self' https://api.openrouteservice.org https://*.hana.ondemand.com https://cdnjs.cloudflare.com;"
+            "connect-src 'self' https://api.openrouteservice.org https://*.hana.ondemand.com https://cdnjs.cloudflare.com https://raw.githubusercontent.com https://tiles.openfreemap.org https://services.arcgisonline.com; " +
+            "worker-src 'self' blob:;"
         );
         next();
     });
