@@ -1354,8 +1354,28 @@ sap.ui.define([
 
             var btnBanc = this.byId("btnOpenBanc");
             var btnSap  = this.byId("btnOpenSap");
+            var btnBnac = this.byId("btnOpenBnac");
             if (btnBanc) btnBanc.setVisible(!!this._bancUrl);
             if (btnSap)  btnSap.setVisible(!!this._sapUrl);
+            if (btnBnac) btnBnac.setVisible(!!this._bridge?.bnacObjectId);
+        },
+
+        onOpenBnac: function () {
+            if (this._bridge && this._bridge.bnacURL) {
+                window.open(this._bridge.bnacURL, "_blank", "noopener,noreferrer");
+            } else if (this._bridge && this._bridge.bnacObjectId) {
+                // Fallback: construct URL manually
+                MessageToast.show("Opening BNAC...");
+                var url = "https://bnac.austroads.com.au/assets/" + encodeURIComponent(this._bridge.bnacObjectId);
+                window.open(url, "_blank", "noopener,noreferrer");
+            } else {
+                MessageBox.information(
+                    "No BNAC Object ID recorded for this bridge.\n\n" +
+                    "To link this bridge to the Austroads BNAC catalogue, " +
+                    "use the BNAC Mass Load feature in BMS Admin or edit the bridge record.",
+                    { title: "BNAC Link Not Configured" }
+                );
+            }
         },
 
         onOpenBanc: function () {

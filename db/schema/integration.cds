@@ -220,4 +220,32 @@ extend Bridge with {
     annualMaintenanceCost: Decimal(12,2);
     lastMajorRehab      : Integer;
     nextMajorRehab      : Integer;
+    // ── BNAC Integration (April 2026) ────────────────────────
+    bnacObjectId        : String(100)  @title: 'BNAC Object ID';
+    bnacURL             : String(2000) @title: 'BNAC Asset URL' @Core.Computed;
+}
+
+// ── BNAC Environment URL Configuration ──────────────────────
+// One row per environment (DEV/TEST/PREPROD/PROD).
+// Maintained by BMS Admins via the BNAC Configuration admin screen.
+entity BnacEnvironmentConfig {
+    key environment : String(10);  // DEV, TEST, PREPROD, PROD
+        baseURL     : String(500)  @title: 'BNAC Base URL';
+        description : String(200)  @title: 'Description';
+        isActive    : Boolean default true @title: 'Active';
+        createdAt   : DateTime;
+        createdBy   : String(100);
+        modifiedAt  : DateTime;
+        modifiedBy  : String(100);
+}
+
+// Audit log for BNAC Object ID mass-load operations
+entity BnacMassLoadLog : cuid {
+    loadedAt     : DateTime;
+    loadedBy     : String(100);
+    fileName     : String(255) @title: 'Source File';
+    totalRows    : Integer     @title: 'Total Rows';
+    successCount : Integer     @title: 'Succeeded';
+    failCount    : Integer     @title: 'Failed';
+    errors       : LargeString @title: 'Error Detail (JSON)';
 }

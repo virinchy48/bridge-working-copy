@@ -30,7 +30,8 @@ module.exports = cds.service.impl(async function (srv) {
         './handlers/analytics-purge',
         './handlers/data-quality',
         './handlers/routing-engine',
-        './handlers/restriction-feed'
+        './handlers/restriction-feed',
+        './handlers/bnac'
     ], helpers);
 
     // System and integration handlers use their own internal dependency wiring.

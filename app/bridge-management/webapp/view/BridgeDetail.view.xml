@@ -38,6 +38,13 @@
                     </Breadcrumbs>
                 </f:breadcrumbs>
                 <f:actions>
+                    <Button id="btnOpenBnac"
+                        text="Show in BNAC"
+                        icon="sap-icon://chain-link"
+                        press="onOpenBnac"
+                        type="Transparent"
+                        visible="false"
+                        tooltip="Open in Bridge Asset National Catalogue (BNAC/Austroads)"/>
                     <Button id="btnOpenBanc"
                         text="View in BANC"
                         icon="sap-icon://open-command-field"

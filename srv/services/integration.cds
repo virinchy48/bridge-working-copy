@@ -203,4 +203,24 @@ function getIntegrationStatus() returns array of IntegrationStatusItem;
 //                     Route Assignments, Health Check
 // ═══════════════════════════════════════════════════════════
 
+// ── BNAC Integration (April 2026) ─────────────────────────────
+@restrict: [
+    { grant: ['READ'],                     to: 'authenticated-user' },
+    { grant: ['CREATE','UPDATE','DELETE'], to: ['Admin'] }
+]
+entity BnacConfig  as projection on nhvr.BnacEnvironmentConfig;
+
+@restrict: [{ grant: ['READ'], to: 'authenticated-user' }]
+entity BnacLoadLog as projection on nhvr.BnacMassLoadLog;
+
+@restrict: [{ to: ['BridgeManager','Admin'] }]
+action bnacMassLoad(
+    payload  : LargeString,
+    fileName : String(255)
+) returns {
+    success : Boolean;
+    message : String;
+    detail  : LargeString;
+};
+
 }

@@ -1,0 +1,5 @@
+environment,baseURL,description,isActive
+DEV,https://bnac-dev.austroads.com.au/assets/,BNAC Development environment,true
+TEST,https://bnac-test.austroads.com.au/assets/,BNAC Test environment,true
+PREPROD,https://bnac-preprod.austroads.com.au/assets/,BNAC Pre-production environment,true
+PROD,https://bnac.austroads.com.au/assets/,BNAC Production environment,true
