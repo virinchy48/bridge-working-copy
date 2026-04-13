@@ -633,6 +633,7 @@ sap.ui.define([
             this._toggleTempFields(false);
 
             this.byId("editRestDialog").open();
+            this._loadRestrictionDynAttrs(null);
             this._applyRestrictionFieldRBAC();
         },
 
@@ -714,6 +715,7 @@ sap.ui.define([
             }
 
             this.byId("editRestDialog").open();
+            this._loadRestrictionDynAttrs(row.ID);
             this._applyRestrictionFieldRBAC();
         },
 
@@ -852,6 +854,7 @@ sap.ui.define([
                 AuthFetch.patch(`${BASE}/Restrictions(${this._editRestrictionId})`, body)
                 .then(async r => {
                     if (!r.ok) { const b = await r.json().catch(() => ({})); throw new Error(b.error?.message || `HTTP ${r.status}`); }
+                    this._saveRestrictionDynAttrs(this._editRestrictionId);
                     MessageToast.show("Restriction updated");
                     this.byId("editRestDialog").close();
                     this._editRestrictionId = null;
@@ -869,6 +872,8 @@ sap.ui.define([
                 AuthFetch.post(`${BASE}/Restrictions`, body)
                 .then(async r => {
                     if (!r.ok) { const b = await r.json().catch(() => ({})); throw new Error(b.error?.message || `HTTP ${r.status}`); }
+                    const created = await r.json().catch(() => ({}));
+                    if (created.ID) this._saveRestrictionDynAttrs(created.ID);
                     MessageToast.show("Restriction created");
                     this.byId("editRestDialog").close();
                     this._editRestrictionId = null;
@@ -881,6 +886,127 @@ sap.ui.define([
         onCancelEditRestriction: function () {
             this.byId("editRestDialog").close();
             this._editRestrictionId = null;
+        },
+
+        // ── Dynamic Attributes for RESTRICTION entity ─────────
+        _restrDynAttrDefs   : [],
+        _restrDynAttrValues : {},
+        _restrDynAttrIds    : {},
+
+        _loadRestrictionDynAttrs: function (restrictionId) {
+            this._restrDynAttrValues = {};
+            this._restrDynAttrIds    = {};
+            var that = this;
+
+            AuthFetch.getJson(BASE + "/AttributeDefinitions?$filter=isActive eq true and entityTarget eq 'RESTRICTION'&$expand=validValues&$orderby=displayOrder")
+                .then(function (j) {
+                    that._restrDynAttrDefs = j.value || [];
+                    if (that._restrDynAttrDefs.length === 0) { that._renderRestrictionDynAttrs(); return; }
+                    if (restrictionId) {
+                        return AuthFetch.getJson(BASE + "/EntityAttributes?$filter=entityType eq 'RESTRICTION' and entityId eq '" + restrictionId + "'&$expand=attribute($select=name)")
+                            .then(function (j2) {
+                                (j2.value || []).forEach(function (ea) {
+                                    var name = ea.attribute && ea.attribute.name;
+                                    if (name) { that._restrDynAttrValues[name] = ea.value; that._restrDynAttrIds[name] = ea.ID; }
+                                });
+                                that._renderRestrictionDynAttrs();
+                            });
+                    }
+                    that._renderRestrictionDynAttrs();
+                })
+                .catch(function () { that._renderRestrictionDynAttrs(); });
+        },
+
+        _renderRestrictionDynAttrs: function () {
+            var container = this.byId("glRestDynAttrContainer");
+            if (!container) return;
+            container.destroyItems();
+
+            if (!this._restrDynAttrDefs || this._restrDynAttrDefs.length === 0) {
+                container.setVisible(false);
+                return;
+            }
+            container.setVisible(true);
+
+            var title = new sap.m.Title({ text: "Custom Attributes", level: "H5" });
+            title.addStyleClass("sapUiSmallMarginTop sapUiTinyMarginBottom");
+            container.addItem(title);
+
+            var hbox = new sap.m.HBox({ wrap: "Wrap" });
+            var that = this;
+
+            this._restrDynAttrDefs.forEach(function (attr) {
+                var val = that._restrDynAttrValues[attr.name] || "";
+                var vbox = new sap.m.VBox({ width: "240px" }).addStyleClass("sapUiSmallMarginEnd sapUiSmallMarginBottom");
+                vbox.addItem(new sap.m.Label({
+                    text: (attr.isRequired ? "* " : "") + attr.label,
+                    design: attr.isRequired ? "Bold" : "Standard"
+                }));
+
+                var ctrl;
+                if (attr.dataType === "BOOLEAN") {
+                    ctrl = new sap.m.Switch({ state: val === "true", customTextOn: "Yes", customTextOff: "No" });
+                } else if (attr.dataType === "LOOKUP" && attr.validValues && attr.validValues.length > 0) {
+                    ctrl = new sap.m.Select({ width: "100%" });
+                    if (!attr.isRequired) ctrl.addItem(new sap.ui.core.Item({ key: "", text: "— Select —" }));
+                    attr.validValues.filter(function (v) { return v.isActive !== false; })
+                        .sort(function (a, b) { return (a.displayOrder || 0) - (b.displayOrder || 0); })
+                        .forEach(function (v) { ctrl.addItem(new sap.ui.core.Item({ key: v.value, text: v.label || v.value })); });
+                    ctrl.setSelectedKey(val || "");
+                } else if (attr.dataType === "INTEGER" || attr.dataType === "DECIMAL") {
+                    ctrl = new sap.m.Input({ type: "Number", value: val, placeholder: attr.defaultValue || "" });
+                } else {
+                    ctrl = new sap.m.Input({ value: val, placeholder: attr.defaultValue || "", maxLength: 2000 });
+                }
+                ctrl.data("attrName", attr.name);
+                ctrl.data("attrId", attr.ID);
+                vbox.addItem(ctrl);
+                hbox.addItem(vbox);
+            });
+            container.addItem(hbox);
+        },
+
+        _collectRestrictionDynAttrs: function () {
+            var container = this.byId("glRestDynAttrContainer");
+            if (!container) return {};
+            var vals = {};
+            var items = container.getItems ? container.getItems() : [];
+            var hbox = items.find(function (it) { return it && typeof it.getItems === "function" && !(it instanceof sap.m.Title); });
+            if (!hbox) return vals;
+            hbox.getItems().forEach(function (vbox) {
+                if (!vbox || typeof vbox.getItems !== "function") return;
+                var controls = vbox.getItems();
+                if (controls.length < 2) return;
+                var ctrl = controls[1];
+                if (!ctrl || typeof ctrl.data !== "function") return;
+                var name = ctrl.data("attrName");
+                if (!name) return;
+                var val;
+                if (ctrl instanceof sap.m.Switch)      val = String(ctrl.getState());
+                else if (ctrl instanceof sap.m.Select) val = ctrl.getSelectedKey();
+                else                                    val = ctrl.getValue();
+                vals[name] = { value: val, attrId: ctrl.data("attrId") };
+            });
+            return vals;
+        },
+
+        _saveRestrictionDynAttrs: function (restrictionId) {
+            var vals = this._collectRestrictionDynAttrs();
+            var that = this;
+            Object.entries(vals).forEach(function (entry) {
+                var attrName = entry[0], data = entry[1];
+                var existingId = that._restrDynAttrIds[attrName];
+                if (existingId) {
+                    AuthFetch.patch(BASE + "/EntityAttributes(" + existingId + ")", { value: data.value }).catch(function () {});
+                } else if (data.value) {
+                    AuthFetch.post(BASE + "/EntityAttributes", {
+                        entityType   : "RESTRICTION",
+                        entityId     : restrictionId,
+                        attribute_ID : data.attrId,
+                        value        : data.value
+                    }).catch(function () {});
+                }
+            });
         },
 
         // ── Column Chooser (dynamic, registry-driven) ─────────

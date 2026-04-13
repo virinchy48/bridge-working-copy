@@ -356,6 +356,10 @@
                 </VBox>
 
             </VBox>
+
+            <!-- Dynamic Attributes for RESTRICTION entity (auto-rendered from AttributeDefinitions) -->
+            <VBox id="glRestDynAttrContainer" visible="false"/>
+
         </content>
         <buttons>
             <Button id="glRestSaveBtn" text="Save" type="Emphasized" press="onSaveEditRestriction" icon="sap-icon://save"/>

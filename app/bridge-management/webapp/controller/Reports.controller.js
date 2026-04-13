@@ -729,6 +729,13 @@ sap.ui.define([
             const self = this;
             this._executeReport(report, criteria)
                 .then(function (rows) {
+                    // For bridge-related reports, merge dynamic attribute values
+                    if (report.id === "ASSET_REGISTER" && rows.length > 0) {
+                        return self._mergeDynAttrsForReport(rows).then(function () { return rows; });
+                    }
+                    return rows;
+                })
+                .then(function (rows) {
                     self._model.setProperty("/currentResults", rows);
                     if (runStrip) runStrip.setVisible(false);
                     const titleCtrl = self.byId("resultsCountTitle");
@@ -956,6 +963,50 @@ sap.ui.define([
                 template.addCell(cell);
             });
             table.bindItems({ path: "reports>/currentResults", template: template });
+        },
+
+        /** Merge dynamic attribute values into report rows and add extra columns */
+        _mergeDynAttrsForReport: function (rows) {
+            var table = this.byId("reportResultsTable");
+            return AuthFetch.getJson(BASE + "/AttributeDefinitions?$filter=isActive eq true and reportEnabled eq true and entityTarget eq 'BRIDGE'&$select=name,label&$orderby=displayOrder")
+                .then(function (j) {
+                    var attrDefs = j.value || [];
+                    if (attrDefs.length === 0) return;
+
+                    // Add dynamic columns to the table
+                    if (table) {
+                        attrDefs.forEach(function (attr) {
+                            table.addColumn(new sap.m.Column({
+                                header: new sap.m.Label({ text: "[Custom] " + attr.label }),
+                                width: "10em"
+                            }));
+                        });
+                    }
+
+                    // Fetch attribute values for all bridges in results
+                    var ids = rows.map(function (r) { return r.ID; }).filter(Boolean);
+                    if (ids.length === 0) return;
+
+                    var filterParts = ids.slice(0, 50).map(function (id) { return "bridge_ID eq '" + id + "'"; });
+                    return AuthFetch.getJson(BASE + "/BridgeAttributes?$filter=(" + filterParts.join(" or ") + ")&$expand=attribute($select=name)&$select=bridge_ID,value")
+                        .then(function (j2) {
+                            var lookup = {};
+                            (j2.value || []).forEach(function (ba) {
+                                var bId = ba.bridge_ID, name = ba.attribute && ba.attribute.name;
+                                if (bId && name) {
+                                    if (!lookup[bId]) lookup[bId] = {};
+                                    lookup[bId][name] = ba.value;
+                                }
+                            });
+                            rows.forEach(function (r) {
+                                var attrs = lookup[r.ID] || {};
+                                attrDefs.forEach(function (def) {
+                                    r["attr_" + def.name] = attrs[def.name] || "";
+                                });
+                            });
+                        });
+                })
+                .catch(function () { /* non-fatal */ });
         },
 
         // ── Load Live Counts ──────────────────────────────────

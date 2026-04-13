@@ -657,6 +657,7 @@ sap.ui.define([
                 .then(j => {
                     this._allBridges  = j.value || [];
                     this._currentSkip = this._allBridges.length;
+                    this._mergeDynAttrValues(this._allBridges);
                     this._applyFiltersAndSort();
                     this._updateKpis(this._allBridges);
                     this._updateLoadMoreBar();
@@ -666,6 +667,45 @@ sap.ui.define([
                     console.error("Bridge load failed", e);
                     if (tbl) tbl.setBusy(false);
                 });
+        },
+
+        /** Fetch BridgeAttribute values for loaded bridges and merge as attr_{name} properties */
+        _mergeDynAttrValues: function (bridges) {
+            if (!bridges || bridges.length === 0 || !this._dynAttrDefs || this._dynAttrDefs.length === 0) return;
+            var ids = bridges.map(b => b.ID).filter(Boolean);
+            if (ids.length === 0) return;
+            var filterParts = ids.map(id => "bridge_ID eq '" + id + "'");
+            // Batch in groups of 20 to avoid URL length limits
+            var batchSize = 20;
+            var that = this;
+            for (var i = 0; i < filterParts.length; i += batchSize) {
+                var batch = filterParts.slice(i, i + batchSize);
+                var url = BASE + "/BridgeAttributes?$filter=(" + batch.join(" or ") + ")&$expand=attribute($select=name)&$select=bridge_ID,value";
+                fetch(url, _credOpts())
+                    .then(function (r) { return r.ok ? r.json() : { value: [] }; })
+                    .then(function (j) {
+                        // Build lookup: bridge_ID → { attrName: value }
+                        var lookup = {};
+                        (j.value || []).forEach(function (ba) {
+                            var bId = ba.bridge_ID;
+                            var name = ba.attribute && ba.attribute.name;
+                            if (bId && name) {
+                                if (!lookup[bId]) lookup[bId] = {};
+                                lookup[bId][name] = ba.value;
+                            }
+                        });
+                        // Merge into bridge objects
+                        that._allBridges.forEach(function (b) {
+                            var attrs = lookup[b.ID] || {};
+                            Object.keys(attrs).forEach(function (name) {
+                                b["attr_" + name] = attrs[name];
+                            });
+                        });
+                        // Refresh model to show merged values
+                        that._applyFiltersAndSort();
+                    })
+                    .catch(function () { /* non-fatal */ });
+            }
         },
 
         _loadMoreBridges: function () {
@@ -1590,6 +1630,37 @@ sap.ui.define([
             // the existing binding and cause a blank first render of cells.
 
             this._columnsBuilt = true;
+
+            // Append dynamic attribute columns from AttributeDefinitions
+            this._appendDynamicAttrColumns(oTable, savedKeys);
+        },
+
+        /** Fetch active BRIDGE attribute definitions and add as table columns */
+        _appendDynamicAttrColumns: function (oTable, savedKeys) {
+            fetch(`${BASE}/AttributeDefinitions?$filter=isActive eq true and entityTarget eq 'BRIDGE'&$select=name,label,dataType,displayOrder&$orderby=displayOrder`, _credOpts())
+                .then(r => r.ok ? r.json() : { value: [] })
+                .then(j => {
+                    this._dynAttrDefs = j.value || [];
+                    this._dynAttrDefs.forEach(attr => {
+                        var colId = this.createId("dynCol_attr_" + attr.name);
+                        // Skip if column already exists
+                        if (sap.ui.getCore().byId(colId)) return;
+                        var bVisible = savedKeys.indexOf("attr_" + attr.name) >= 0;
+                        var oCol = new sap.ui.table.Column({
+                            id: colId,
+                            visible: bVisible,
+                            width: "150px",
+                            label: new sap.m.Label({ text: "[Custom] " + attr.label }),
+                            template: new sap.m.Text({ text: "{bridges>attr_" + attr.name + "}" }),
+                            sortProperty: "attr_" + attr.name,
+                            filterProperty: "attr_" + attr.name,
+                            resizable: true,
+                            tooltip: attr.label + " (Custom Attribute)"
+                        });
+                        oTable.addColumn(oCol);
+                    });
+                })
+                .catch(() => {});
         },
 
         _getColWidth: function (attr) {
