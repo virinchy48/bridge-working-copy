@@ -2673,16 +2673,16 @@ sap.ui.define([
         // ── Phase 5.1: Document Attachments ─────────────────────
         _loadAttachments: function (bridgeUUID) {
             var self = this;
-            var h = { Accept: "application/json" };
-            fetch(BASE + "/DocumentAttachments?$filter=bridge_ID eq " + bridgeUUID
+            AuthFetch.getJson(BASE + "/DocumentAttachments?$filter=bridge_ID eq '" + bridgeUUID + "'"
                 + "&$orderby=capturedAt desc"
-                + "&$select=ID,fileName,mimeType,fileSize_kb,title,documentType,uploadedBy,documentDate,capturedAt,description,externalUrl",
-                { headers: h })
-            .then(function (r) { return r.json(); })
+                + "&$select=ID,fileName,mimeType,fileSize_kb,title,documentType,uploadedBy,documentDate,capturedAt,description,externalUrl")
             .then(function (j) {
                 var items = j.value || [];
                 self._model.setProperty("/attachments", items);
                 self._model.setProperty("/attachmentCount", items.length);
+                // Update Documents tab badge count
+                var docsTab = self.byId("tabDocuments");
+                if (docsTab) docsTab.setCount(String(items.length));
             })
             .catch(function (e) {
                 console.warn("[NHVR] Attachments load failed:", e && e.message || e);
@@ -2783,7 +2783,8 @@ sap.ui.define([
                 if (!r.ok) return r.json().then(function (e) { throw new Error((e.error && e.error.message) || "Upload failed"); });
                 MessageToast.show("Document uploaded successfully");
                 self._uploadDialog.close();
-                self._loadAttachments(self._currentBridgeUUID);
+                // Brief delay to ensure backend commit completes before re-fetch
+                setTimeout(function () { self._loadAttachments(self._currentBridgeUUID); }, 500);
             }).catch(function (e) {
                 MessageBox.error("Upload failed: " + (e.message || e));
             });
