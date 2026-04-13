@@ -853,7 +853,7 @@ sap.ui.define([
 
         _doSave: async function (rows) {
             const cfg = ENTITY_CONFIG[this._currentEntity];
-            const h   = { Accept: "application/json", "Content-Type": "application/json" };
+            const h   = Object.assign({ Accept: "application/json", "Content-Type": "application/json" }, _AUTH_H);
             let saved = 0, failed = 0;
 
             for (const row of rows) {
@@ -894,9 +894,7 @@ sap.ui.define([
                     let entityId = row.ID;
 
                     if (row._isNew) {
-                        const r = await fetch(BASE + "/" + cfg.entitySet, {
-                            method: "POST", headers: h, body: JSON.stringify(stdBody)
-                        });
+                        const r = await AuthFetch.post(BASE + "/" + cfg.entitySet, stdBody);
                         if (!r.ok) throw new Error("POST HTTP " + r.status);
                         const created = await r.json();
                         entityId = created.ID;
@@ -905,9 +903,7 @@ sap.ui.define([
                         if (row.version !== undefined && row.version !== null) {
                             stdBody.version = row.version;
                         }
-                        const r = await fetch(BASE + "/" + cfg.entitySet + "(" + row.ID + ")", {
-                            method: "PATCH", headers: h, body: JSON.stringify(stdBody)
-                        });
+                        const r = await AuthFetch.patch(BASE + "/" + cfg.entitySet + "(" + row.ID + ")", stdBody);
                         if (r.status === 409) {
                             sap.m.MessageBox.warning(
                                 "This record was modified by another user. Please refresh the page and retry your changes.",
@@ -931,14 +927,9 @@ sap.ui.define([
                             });
 
                             if (existing) {
-                                await fetch(BASE + "/BridgeAttributes(" + existing.ID + ")", {
-                                    method: "PATCH", headers: h, body: JSON.stringify({ value: ac.value })
-                                });
+                                await AuthFetch.patch(BASE + "/BridgeAttributes(" + existing.ID + ")", { value: ac.value });
                             } else if (ac.value) {
-                                await fetch(BASE + "/BridgeAttributes", {
-                                    method: "POST", headers: h,
-                                    body: JSON.stringify({ bridge_ID: entityId, attribute_ID: ac.attr.ID, value: ac.value })
-                                });
+                                await AuthFetch.post(BASE + "/BridgeAttributes", { bridge_ID: entityId, attribute_ID: ac.attr.ID, value: ac.value });
                             }
                         } else {
                             // EntityAttribute path
@@ -950,14 +941,9 @@ sap.ui.define([
                             });
 
                             if (existing) {
-                                await fetch(BASE + "/EntityAttributes(" + existing.ID + ")", {
-                                    method: "PATCH", headers: h, body: JSON.stringify({ value: ac.value })
-                                });
+                                await AuthFetch.patch(BASE + "/EntityAttributes(" + existing.ID + ")", { value: ac.value });
                             } else if (ac.value) {
-                                await fetch(BASE + "/EntityAttributes", {
-                                    method: "POST", headers: h,
-                                    body: JSON.stringify({ entityType: cfg.customAttrEntity, entityId: entityId, attribute_ID: ac.attr.ID, value: ac.value })
-                                });
+                                await AuthFetch.post(BASE + "/EntityAttributes", { entityType: cfg.customAttrEntity, entityId: entityId, attribute_ID: ac.attr.ID, value: ac.value });
                             }
                         }
                     }

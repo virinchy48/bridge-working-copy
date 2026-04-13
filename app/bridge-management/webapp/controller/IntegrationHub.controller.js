@@ -197,12 +197,7 @@ sap.ui.define([
             const that = this;
             // `getIntegrationStatus` is a CDS function (GET-only). POSTing
             // returned 405; use the OData function-call syntax with GET.
-            fetch(`${SRV}getIntegrationStatus()`, {
-                method : 'GET',
-                headers: { Accept: 'application/json' },
-                credentials: 'include'
-            })
-            .then(r => r.ok ? r.json() : Promise.reject(new Error(r.status + ' ' + r.statusText)))
+            AuthFetch.getJson(`${SRV}getIntegrationStatus()`)
             .then(data => {
                 const list = data && data.value || [];
                 const byCode = {};
@@ -706,11 +701,7 @@ sap.ui.define([
         },
 
         _testConnection: function (systemCode) {
-            fetch(`${SRV}testIntegrationConnection`, {
-                method : 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body   : JSON.stringify({ systemCode })
-            })
+            AuthFetch.post(`${SRV}testIntegrationConnection`, { systemCode })
             .then(r => r.json())
             .then(data => {
                 const r   = data && data.value || data;
@@ -803,11 +794,8 @@ sap.ui.define([
         },
 
         _patchConfig: function (id, payload) {
-            return fetch(`${SRV}IntegrationConfigs(${id})`, {
-                method : 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body   : JSON.stringify(payload)
-            }).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); });
+            return AuthFetch.patch(`${SRV}IntegrationConfigs(${id})`, payload)
+                .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); });
         },
 
         // ── Row-level S/4HANA sync ────────────────────────────────
@@ -870,11 +858,7 @@ sap.ui.define([
         _callAction: function (actionName, params, busyMsg, onSuccess) {
             const that = this;
             this._showBusy(busyMsg || 'Processing…');
-            fetch(`${SRV}${actionName}`, {
-                method : 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body   : JSON.stringify(params || {})
-            })
+            AuthFetch.post(`${SRV}${actionName}`, params || {})
             .then(r => r.json())
             .then(data => {
                 that._hideBusy();
@@ -896,11 +880,7 @@ sap.ui.define([
         _callBridgeAction: function (bridgeId, actionName, params, busyMsg) {
             const that = this;
             this._showBusy(busyMsg || 'Processing…');
-            fetch(`${SRV}Bridges(${bridgeId})/${actionName}`, {
-                method : 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body   : JSON.stringify(params || {})
-            })
+            AuthFetch.post(`${SRV}Bridges(${bridgeId})/${actionName}`, params || {})
             .then(r => r.json())
             .then(data => {
                 that._hideBusy();

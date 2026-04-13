@@ -690,8 +690,8 @@ module.exports = function registerUploadHandlers(srv, helpers) {
                         await tx.run(UPDATE('nhvr.Bridge').set(record).where({ ID: existing.ID }));
                         await tx.run(INSERT.into('nhvr.AuditLog').entries({
                             ID: cds.utils.uuid(), entityName: 'Bridge', entityId: existing.ID,
-                            action: 'BULK_IMPORT_UPDATE', changedBy: req.user.id||'SYSTEM',
-                            changedAt: new Date().toISOString(), description: `Bulk import updated bridge ${row.bridgeId}`
+                            action: 'BULK_IMPORT_UPDATE', userId: req.user.id||'SYSTEM',
+                            timestamp: new Date().toISOString(), description: `Bulk import updated bridge ${row.bridgeId}`
                         }));
                         updated++;
                     } else {
@@ -699,8 +699,8 @@ module.exports = function registerUploadHandlers(srv, helpers) {
                         await tx.run(INSERT.into('nhvr.Bridge').entries(record));
                         await tx.run(INSERT.into('nhvr.AuditLog').entries({
                             ID: cds.utils.uuid(), entityName: 'Bridge', entityId: record.ID,
-                            action: 'BULK_IMPORT_CREATE', changedBy: req.user.id||'SYSTEM',
-                            changedAt: new Date().toISOString(), description: `Bulk import created bridge ${row.bridgeId}`
+                            action: 'BULK_IMPORT_CREATE', userId: req.user.id||'SYSTEM',
+                            timestamp: new Date().toISOString(), description: `Bulk import created bridge ${row.bridgeId}`
                         }));
                         created++;
                     }

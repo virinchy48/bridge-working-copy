@@ -510,14 +510,14 @@ sap.ui.define([
                 if (payload[k] === null && !this._editMode) delete payload[k];
             });
 
-            const h  = { Accept: "application/json", "Content-Type": "application/json" };
+            const h  = Object.assign({ Accept: "application/json", "Content-Type": "application/json" }, _AUTH_H);
             const url = this._editMode
                 ? `${BASE}/Bridges(${this._bridgeUUID})`
                 : `${BASE}/Bridges`;
             const method = this._editMode ? "PATCH" : "POST";
 
             this.getView().setBusy(true);
-            fetch(url, { method, headers: h, body: JSON.stringify(payload) })
+            fetch(url, { method, headers: h, body: JSON.stringify(payload), credentials: _IS_LOC ? "same-origin" : "include" })
                 .then(async r => {
                     if (r.ok || r.status === 201 || r.status === 204) return r.status === 204 ? {} : r.json();
                     const body = await r.json().catch(() => ({}));
@@ -591,9 +591,7 @@ sap.ui.define([
 
         /** Load active BRIDGE attribute definitions and render fields */
         _loadAndRenderDynAttrs: function (bridgeUUID) {
-            fetch(`${BASE}/AttributeDefinitions?$filter=isActive eq true and entityTarget eq 'BRIDGE'&$expand=validValues&$orderby=displayOrder`, {
-                headers: { Accept: "application/json" }
-            })
+            fetch(`${BASE}/AttributeDefinitions?$filter=isActive eq true and entityTarget eq 'BRIDGE'&$expand=validValues&$orderby=displayOrder`, _credOpts())
             .then(r => r.ok ? r.json() : { value: [] })
             .then(j => {
                 this._dynAttrDefs = j.value || [];
@@ -604,9 +602,7 @@ sap.ui.define([
 
                 // If editing, load existing values
                 if (bridgeUUID) {
-                    return fetch(`${BASE}/BridgeAttributes?$filter=bridge_ID eq '${_odataStr(bridgeUUID)}'&$expand=attribute($select=name)`, {
-                        headers: { Accept: "application/json" }
-                    })
+                    return fetch(`${BASE}/BridgeAttributes?$filter=bridge_ID eq '${_odataStr(bridgeUUID)}'&$expand=attribute($select=name)`, _credOpts())
                     .then(r => r.ok ? r.json() : { value: [] })
                     .then(j2 => {
                         (j2.value || []).forEach(ba => {
@@ -734,19 +730,20 @@ sap.ui.define([
         /** Save dynamic attribute values after bridge is saved/created */
         _saveDynAttrs: function (bridgeUUID) {
             const vals = this._collectDynAttrValues();
-            const H    = { Accept: "application/json", "Content-Type": "application/json" };
+            const H    = Object.assign({ Accept: "application/json", "Content-Type": "application/json" }, _AUTH_H);
+            const _creds = _IS_LOC ? "same-origin" : "include";
             Object.entries(vals).forEach(([attrName, data]) => {
                 const existingId = this._dynAttrIds[attrName];
                 if (existingId) {
                     // PATCH existing BridgeAttribute
                     fetch(`${BASE}/BridgeAttributes(${existingId})`, {
-                        method: "PATCH", headers: H,
+                        method: "PATCH", headers: H, credentials: _creds,
                         body: JSON.stringify({ value: data.value })
                     }).catch(() => {});
                 } else if (data.value) {
                     // POST new BridgeAttribute
                     fetch(`${BASE}/BridgeAttributes`, {
-                        method: "POST", headers: H,
+                        method: "POST", headers: H, credentials: _creds,
                         body: JSON.stringify({
                             bridge_ID   : bridgeUUID,
                             attribute_ID: data.attrId,
@@ -821,7 +818,7 @@ sap.ui.define([
                     title: "Delete Load Rating",
                     onClose: (action) => {
                         if (action !== sap.m.MessageBox.Action.OK) return;
-                        fetch(BASE + "/LoadRatings(" + data.ID + ")", { method: "DELETE" })
+                        fetch(BASE + "/LoadRatings(" + data.ID + ")", Object.assign({ method: "DELETE" }, _credOpts()))
                             .then(r => {
                                 if (!r.ok) throw new Error("HTTP " + r.status);
                                 sap.m.MessageToast.show("Load rating deleted.");
@@ -951,7 +948,8 @@ sap.ui.define([
 
             fetch(url, {
                 method,
-                headers: { "Content-Type": "application/json", Accept: "application/json" },
+                headers: Object.assign({ "Content-Type": "application/json", Accept: "application/json" }, _AUTH_H),
+                credentials: _IS_LOC ? "same-origin" : "include",
                 body: JSON.stringify(payload)
             })
             .then(r => {
@@ -990,7 +988,7 @@ sap.ui.define([
         _loadScourRisk: function (bridgeUUID) {
             var that = this;
             fetch(BASE + "/ScourAssessments?$filter=bridge_ID eq " + bridgeUUID +
-                "&$orderby=createdAt desc&$top=1", { headers: { Accept: "application/json" } })
+                "&$orderby=createdAt desc&$top=1", _credOpts())
                 .then(function (r) { return r.json(); })
                 .then(function (j) {
                     var items = j.value || [];
@@ -1096,7 +1094,8 @@ sap.ui.define([
             });
             fetch(BASE + "/assessScourRisk", {
                 method: "POST",
-                headers: { "Content-Type": "application/json", Accept: "application/json" },
+                headers: Object.assign({ "Content-Type": "application/json", Accept: "application/json" }, _AUTH_H),
+                credentials: _IS_LOC ? "same-origin" : "include",
                 body: body
             })
             .then(function (r) {
@@ -1118,7 +1117,7 @@ sap.ui.define([
         _loadSensorDevices: function (bridgeUUID) {
             var that = this;
             fetch(BASE + "/SensorDevices?$filter=bridge_ID eq " + bridgeUUID +
-                "&$orderby=installedAt desc", { headers: { Accept: "application/json" } })
+                "&$orderby=installedAt desc", _credOpts())
                 .then(function (r) { return r.json(); })
                 .then(function (j) {
                     var items = j.value || [];

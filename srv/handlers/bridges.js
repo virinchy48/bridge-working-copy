@@ -643,8 +643,8 @@ module.exports = function registerBridgeHandlers(srv, helpers) {
                     await db.run(INSERT.into('nhvr.AuditLog').entries({
                         ID: cds.utils.uuid(), entityName: 'Bridge',
                         entityId: existing.ID, action: 'BULK_IMPORT_UPDATE',
-                        changedBy: req.user.id || 'SYSTEM',
-                        changedAt: new Date().toISOString(),
+                        userId: req.user.id || 'SYSTEM',
+                        timestamp: new Date().toISOString(),
                         description: `Bulk import updated bridge ${row.bridgeId}`
                     }));
                     updated++;
@@ -654,8 +654,8 @@ module.exports = function registerBridgeHandlers(srv, helpers) {
                     await db.run(INSERT.into('nhvr.AuditLog').entries({
                         ID: cds.utils.uuid(), entityName: 'Bridge',
                         entityId: record.ID, action: 'BULK_IMPORT_CREATE',
-                        changedBy: req.user.id || 'SYSTEM',
-                        changedAt: new Date().toISOString(),
+                        userId: req.user.id || 'SYSTEM',
+                        timestamp: new Date().toISOString(),
                         description: `Bulk import created bridge ${row.bridgeId}`
                     }));
                     created++;

@@ -9,8 +9,9 @@ sap.ui.define([
     "sap/m/MessageToast",
     "sap/m/MessageBox",
     "nhvr/bridgemanagement/util/AlvToolbarMixin",
-    "nhvr/bridgemanagement/util/LookupService"
-], function (Controller, JSONModel, MessageToast, MessageBox, AlvToolbarMixin, LookupService) {
+    "nhvr/bridgemanagement/util/LookupService",
+    "nhvr/bridgemanagement/util/AuthFetch"
+], function (Controller, JSONModel, MessageToast, MessageBox, AlvToolbarMixin, LookupService, AuthFetch) {
     "use strict";
 
     const BASE = "/bridge-management";
@@ -43,13 +44,7 @@ sap.ui.define([
             const page = this.byId("permitRegisterPage");
             if (page) page.setBusy(true);
 
-            fetch(BASE + "/VehiclePermits?$orderby=issueDate desc&$top=2000", {
-                headers: { Accept: "application/json" }
-            })
-            .then(function (r) {
-                if (!r.ok) throw new Error("HTTP " + r.status);
-                return r.json();
-            })
+            AuthFetch.getJson(BASE + "/VehiclePermits?$orderby=issueDate desc&$top=2000")
             .then(function (j) {
                 const raw = j.value || [];
                 const nowMs = Date.now();

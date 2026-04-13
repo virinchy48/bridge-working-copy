@@ -32,12 +32,13 @@ sap.ui.define([
     "sap/m/MessageBox",
     "sap/ui/model/json/JSONModel",
     "nhvr/bridgemanagement/util/MapProviderFactory",
-    "nhvr/bridgemanagement/util/UserAnalytics"
+    "nhvr/bridgemanagement/util/UserAnalytics",
+    "nhvr/bridgemanagement/util/AuthFetch"
 ], function (
     Controller, StandardListItem, MessageToast,
     Dialog, Button, VBox, HBox, Label, Input, Switch,
     Text, Title, Select, Item, HTML, MessageBox, JSONModel,
-    MapProviderFactory, UserAnalytics
+    MapProviderFactory, UserAnalytics, AuthFetch
 ) {
     "use strict";
 
@@ -215,8 +216,7 @@ sap.ui.define([
 
         // ── Load OData MapConfig ──────────────────────────────────────
         _loadMapConfig: function (callback) {
-            fetch(`${BASE}/MapConfigs?$filter=configKey eq 'DEFAULT' and isActive eq true&$top=1`)
-                .then(r => r.json())
+            AuthFetch.getJson(`${BASE}/MapConfigs?$filter=configKey eq 'DEFAULT' and isActive eq true&$top=1`)
                 .then(j => {
                     const cfg = (j.value || [])[0];
                     if (cfg) {
@@ -262,10 +262,7 @@ sap.ui.define([
             // Load configured map provider (non-blocking — Leaflet init continues below as default)
             var self = this;
             this._mapProvider = null;
-            fetch("/bridge-management/getMapApiConfig()", {
-                headers: { "Accept": "application/json" },
-                credentials: "include"
-            }).then(function (r) { return r.json(); })
+            AuthFetch.getJson("/bridge-management/getMapApiConfig()")
             .then(function (config) {
                 self._configuredProvider = config.provider || "osm-leaflet";
                 // Store config for later use
@@ -1266,14 +1263,13 @@ sap.ui.define([
         // BRIDGE DATA & RENDERING
         // ══════════════════════════════════════════════════════════════
         _loadBridges: function () {
-            fetch(
+            AuthFetch.getJson(
                 `${BASE}/Bridges?$top=9999&$select=bridgeId,name,region,state,condition,conditionRating,` +
                 `postingStatus,structureType,clearanceHeightM,spanLengthM,yearBuilt,` +
                 `inspectionDate,latitude,longitude,route_ID,nhvrRouteAssessed,scourRisk,` +
                 `freightRoute,overMassRoute,highPriorityAsset,floodImpacted,` +
                 `sourceRefURL,gazetteRef,assetOwner`
             )
-            .then(r => r.json())
             .then(j => {
                 this._allBridges     = j.value || [];
                 this._displayBridges = [];
@@ -1287,8 +1283,7 @@ sap.ui.define([
         },
 
         _loadVehicleClasses: function () {
-            fetch(`${BASE}/VehicleClasses?$select=ID,name`)
-                .then(r => r.json())
+            AuthFetch.getJson(`${BASE}/VehicleClasses?$select=ID,name`)
                 .then(j => {
                     const sel = this.byId("filterVehicle");
                     if (!sel) return;
@@ -1534,8 +1529,7 @@ sap.ui.define([
 
             // Route
             if (b.route_ID) {
-                fetch(`${BASE}/Routes(${b.route_ID})?$select=routeCode,description`)
-                    .then(r => r.json())
+                AuthFetch.getJson(`${BASE}/Routes(${b.route_ID})?$select=routeCode,description`)
                     .then(j => setText("detRoute", `${j.routeCode} — ${j.description || ""}`))
                     .catch(() => setText("detRoute", "—"));
             } else {
@@ -1549,12 +1543,11 @@ sap.ui.define([
             const list = this.byId("detRestrictionList");
             if (!list) return;
             list.destroyItems();
-            fetch(
+            AuthFetch.getJson(
                 `${BASE}/Bridges?$filter=bridgeId eq '${_odataStr(bridgeId)}'` +
                 `&$expand=restrictions($filter=status eq 'ACTIVE';$select=restrictionType,value,unit,permitRequired)` +
                 `&$select=bridgeId`
             )
-            .then(r => r.json())
             .then(j => {
                 const rlist = (j.value && j.value[0] && j.value[0].restrictions) || [];
                 if (rlist.length === 0) {

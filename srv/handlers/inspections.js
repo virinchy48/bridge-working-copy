@@ -241,8 +241,8 @@ module.exports = function registerInspectionHandlers(srv, helpers) {
         if (alertLevel !== 'NORMAL') {
             await db.run(INSERT.into('nhvr.AuditLog').entries({
                 ID: cds.utils.uuid(), entityName: 'SensorReading', entityId: reading.ID,
-                action: 'ALERT', changedBy: 'system', changedAt: new Date().toISOString(),
-                changeDescription: `${alertLevel} alert: ${device.sensorType} reading ${value} ${unit || device.unit}`
+                action: 'ALERT', userId: 'system', timestamp: new Date().toISOString(),
+                description: `${alertLevel} alert: ${device.sensorType} reading ${value} ${unit || device.unit}`
             }));
         }
         return reading;

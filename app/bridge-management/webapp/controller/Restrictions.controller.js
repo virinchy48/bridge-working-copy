@@ -288,10 +288,7 @@ sap.ui.define([
 
         // ── VehicleClasses loader ─────────────────────────────
         _loadVehicleClasses: function () {
-            fetch(`${BASE}/VehicleClasses?$select=ID,code,name&$orderby=name`, {
-                headers: { Accept: "application/json" }
-            })
-            .then(r => r.json())
+            AuthFetch.getJson(`${BASE}/VehicleClasses?$select=ID,code,name&$orderby=name`)
             .then(j => {
                 this._model.setProperty("/vehicleClasses", j.value || []);
             })
@@ -305,10 +302,7 @@ sap.ui.define([
             oInput.destroySuggestionItems();
             if (!sQuery || sQuery.length < 2) return;
             var q = _odataStr(sQuery.toLowerCase());
-            fetch(`${BASE}/Bridges?$select=ID,bridgeId,name&$filter=contains(tolower(name),'${q}') or contains(tolower(bridgeId),'${q}')&$top=20`, {
-                headers: { Accept: "application/json" }
-            })
-            .then(r => r.json())
+            AuthFetch.getJson(`${BASE}/Bridges?$select=ID,bridgeId,name&$filter=contains(tolower(name),'${q}') or contains(tolower(bridgeId),'${q}')&$top=20`)
             .then(j => {
                 (j.value || []).forEach(function (b) {
                     oInput.addSuggestionItem(new sap.ui.core.Item({
@@ -328,10 +322,7 @@ sap.ui.define([
         },
 
         _loadRestrictionTypes: function () {
-            fetch(`${BASE}/RestrictionTypeConfigs?$filter=active eq true&$orderby=sortOrder&$select=code,displayLabel,defaultUnit`, {
-                headers: { Accept: "application/json" }
-            })
-            .then(r => r.json())
+            AuthFetch.getJson(`${BASE}/RestrictionTypeConfigs?$filter=active eq true&$orderby=sortOrder&$select=code,displayLabel,defaultUnit`)
             .then(j => {
                 this._restrictionTypes = j.value || [];
                 // Populate the type select in the dialog
@@ -349,9 +340,7 @@ sap.ui.define([
         _loadRestrictions: function () {
             const tbl = this.byId("restrictionsTable") || this.byId("restrictionTable");
             if (tbl) tbl.setBusy(true);
-            const h = { Accept: "application/json" };
-            fetch(`${BASE}/Restrictions?$select=*&$orderby=status,restrictionType`, { headers: h })
-                .then(r => r.json())
+            AuthFetch.getJson(`${BASE}/Restrictions?$select=*&$orderby=status,restrictionType`)
                 .then(j => {
                     const raw = j.value || [];
                     this._allRestrictions = raw.map(r => ({

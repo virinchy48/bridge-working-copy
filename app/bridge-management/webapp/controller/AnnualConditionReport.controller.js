@@ -95,8 +95,7 @@ sap.ui.define([
             var self = this;
             var url  = BASE + "/Bridges?$select=bridgeId,name,state,condition,conditionRating,conditionScore,postingStatus,scourRisk,inspectionDate,nextInspectionDueDate,freightRoute,nhvrRouteAssessed,roadRoute&$orderby=state,condition" + routeFilter + "&$top=5000";
 
-            fetch(url, { headers: h })
-                .then(function (r) { if (!r.ok) { throw new Error("HTTP " + r.status); } return r.json(); })
+            AuthFetch.getJson(url)
                 .then(function (j) {
                     var bridges = j.value || [];
                     self._processReportData(bridges, year);

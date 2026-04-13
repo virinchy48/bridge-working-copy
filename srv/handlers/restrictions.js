@@ -606,11 +606,9 @@ module.exports = function registerRestrictionHandlers(srv, helpers) {
                     entityName : 'LoadRating',
                     entityId   : result.ID,
                     action     : 'CREATE',
-                    fieldName  : 'maxGrossMass_t',
-                    newValue   : String(result.maxGrossMass_t ?? ''),
-                    changedBy  : req.user?.id || 'system',
-                    changedAt  : new Date().toISOString(),
-                    notes      : `Load rating created: ${result.ratingStandard || ''} by ${result.assessedBy || ''}`
+                    userId     : req.user?.id || 'system',
+                    timestamp  : new Date().toISOString(),
+                    description: `Load rating created: ${result.ratingStandard || ''} by ${result.assessedBy || ''} (maxGrossMass_t: ${result.maxGrossMass_t ?? ''})`
                 })
             );
         } catch (e) {
@@ -628,11 +626,9 @@ module.exports = function registerRestrictionHandlers(srv, helpers) {
                     entityName : 'LoadRating',
                     entityId   : req.params?.[0]?.ID || result.ID || '',
                     action     : 'UPDATE',
-                    fieldName  : 'status',
-                    newValue   : String(result.status ?? ''),
-                    changedBy  : req.user?.id || 'system',
-                    changedAt  : new Date().toISOString(),
-                    notes      : 'Load rating updated'
+                    userId     : req.user?.id || 'system',
+                    timestamp  : new Date().toISOString(),
+                    description: `Load rating updated (status: ${result.status ?? ''})`
                 })
             );
         } catch (e) {

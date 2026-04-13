@@ -332,11 +332,7 @@ sap.ui.define([
             var btn  = this.byId("btnAiClassify");
             if (btn) btn.setBusy(true);
 
-            fetch(BASE + "/classifyDefect", {
-                method : "POST",
-                headers: { "Content-Type": "application/json", Accept: "application/json" },
-                body   : JSON.stringify({ defectId: defect.ID, photoUrl: "", notes: "" })
-            })
+            AuthFetch.post(BASE + "/classifyDefect", { defectId: defect.ID, photoUrl: "", notes: "" })
             .then(function (r) {
                 if (!r.ok) return r.json().then(function (e) { throw new Error(e.error?.message || "HTTP " + r.status); });
                 return r.json();
@@ -422,12 +418,8 @@ sap.ui.define([
                     actions: [sap.m.MessageBox.Action.OK, sap.m.MessageBox.Action.CANCEL],
                     onClose: function (sAction) {
                         if (sAction !== sap.m.MessageBox.Action.OK) return;
-                        fetch("/bridge-management/BridgeDefects(" + oRow.ID + ")/nhvr.closeDefect",
-                            {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({ closureNotes: "Closed from Defect Register" })
-                            })
+                        AuthFetch.post("/bridge-management/BridgeDefects(" + oRow.ID + ")/nhvr.closeDefect",
+                            { closureNotes: "Closed from Defect Register" })
                         .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
                         .then(function () { sap.m.MessageToast.show("Defect closed."); that._loadDefects(); })
                         .catch(function (err) { sap.m.MessageBox.error("Close failed: " + err.message); });

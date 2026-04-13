@@ -6,8 +6,9 @@ sap.ui.define([
   "nhvr/bridgemanagement/model/CapabilityManager",
   "nhvr/bridgemanagement/model/RoleManager",
   "nhvr/bridgemanagement/util/DraftManager",
-  "nhvr/bridgemanagement/util/LookupService"
-], function (Controller, JSONModel, MessageToast, MessageBox, CapabilityManager, RoleManager, DraftManager, LookupService) {
+  "nhvr/bridgemanagement/util/LookupService",
+  "nhvr/bridgemanagement/util/AuthFetch"
+], function (Controller, JSONModel, MessageToast, MessageBox, CapabilityManager, RoleManager, DraftManager, LookupService, AuthFetch) {
   "use strict";
 
   return Controller.extend("nhvr.bridgemanagement.controller.InspectionCreate", {
@@ -190,15 +191,7 @@ sap.ui.define([
       if (!oPayload.bridge_ID) delete oPayload.bridge_ID;
 
       self.getView().setBusy(true);
-      fetch("/bridge-management/BridgeInspections", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
-        credentials: "same-origin",
-        body: JSON.stringify(oPayload)
-      })
+      AuthFetch.post("/bridge-management/BridgeInspections", oPayload)
       .then(function (r) {
         if (!r.ok) return r.text().then(function (t) { throw new Error(t); });
         return r.json();

@@ -470,8 +470,8 @@ module.exports = function registerReportHandlers(srv, helpers) {
         try {
             await db.run(INSERT.into('nhvr.AuditLog').entries({
                 ID: cds.utils.uuid(), entityName: 'ScourAssessment', entityId: data.ID,
-                action: existing?'UPDATE':'CREATE', changedBy: req.user?.id||'system',
-                changedAt: new Date().toISOString(), changeDescription: `Scour assessment: ${scourRiskLevel} (score ${score})`
+                action: existing?'UPDATE':'CREATE', userId: req.user?.id||'system',
+                timestamp: new Date().toISOString(), description: `Scour assessment: ${scourRiskLevel} (score ${score})`
             }));
         } catch (e) { LOG.warn('[NHVR] AuditLog write failed for ScourAssessment:', e.message); }
         try { await db.run(UPDATE('nhvr.Bridge').set({ scourRisk: scourRiskLevel }).where({ ID: bridgeId })); }
@@ -565,8 +565,8 @@ module.exports = function registerReportHandlers(srv, helpers) {
         try {
             await db.run(INSERT.into('nhvr.AuditLog').entries({
                 ID: cds.utils.uuid(), entityName: 'BridgeDeteriorationProfile', entityId: profile.ID,
-                action: 'CREATE', changedBy: req.user?.id||'system', changedAt: new Date().toISOString(),
-                changeDescription: `Deterioration profile computed: ${priorityBand} priority, ${serviceLife}yr remaining life`
+                action: 'CREATE', userId: req.user?.id||'system', timestamp: new Date().toISOString(),
+                description: `Deterioration profile computed: ${priorityBand} priority, ${serviceLife}yr remaining life`
             }));
         } catch (e) { LOG.warn('[NHVR] AuditLog write failed for DeteriorationProfile:', e.message); }
         return profile;
@@ -853,9 +853,8 @@ module.exports = function registerReportHandlers(srv, helpers) {
             const db = await cds.connect.to('db');
             await db.run(INSERT.into('nhvr.AuditLog').entries({
                 entityName: 'LoadRating', entityId: result.ID, action: 'CREATE',
-                fieldName: 'maxGrossMass_t', newValue: String(result.maxGrossMass_t??''),
-                changedBy: req.user?.id||'system', changedAt: new Date().toISOString(),
-                notes: `Load rating created: ${result.ratingStandard||''} by ${result.assessedBy||''}`
+                userId: req.user?.id||'system', timestamp: new Date().toISOString(),
+                description: `Load rating created: ${result.ratingStandard||''} by ${result.assessedBy||''} (maxGrossMass_t: ${result.maxGrossMass_t??''})`
             }));
         } catch (e) { LOG.warn('[NHVR] AuditLog write failed for LoadRating CREATE:', e.message); }
     });
@@ -865,8 +864,8 @@ module.exports = function registerReportHandlers(srv, helpers) {
             const db = await cds.connect.to('db');
             await db.run(INSERT.into('nhvr.AuditLog').entries({
                 entityName: 'LoadRating', entityId: req.params?.[0]?.ID||result.ID||'',
-                action: 'UPDATE', fieldName: 'status', newValue: String(result.status??''),
-                changedBy: req.user?.id||'system', changedAt: new Date().toISOString(), notes: 'Load rating updated'
+                action: 'UPDATE', userId: req.user?.id||'system', timestamp: new Date().toISOString(),
+                description: `Load rating updated (status: ${result.status??''})`
             }));
         } catch (e) { LOG.warn('[NHVR] AuditLog write failed for LoadRating UPDATE:', e.message); }
     });

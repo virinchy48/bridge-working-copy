@@ -199,8 +199,7 @@ sap.ui.define([
                 sFilter = "bridgeId eq '" + safeId + "'";
             }
             var sSelect = "ID,bridgeId,name,region,state,condition,conditionRating,conditionScore,conditionStandard,postingStatus,structureType,material,clearanceHeightM,spanLengthM,totalLengthM,widthM,numberOfSpans,numberOfLanes,yearBuilt,inspectionDate,nextInspectionDue,latitude,longitude,route_ID,lga,assetOwner,maintenanceAuthority,nhvrRouteAssessed,gazetteRef,nhvrRef,scourRisk,freightRoute,overMassRoute,highPriorityAsset,floodImpacted,aadtVehicles,designLoad,designStandard,sourceRefURL,openDataRef,remarks,roadRoute,routeNumber,dataSource,geometry,bancId,bancURL,primaryExternalSystem,primaryExternalId,primaryExternalURL,loadRating,vehicularGrossWeightLimitT,nhvrRouteApprovalClass,pbsLevelApproved,currentRiskScore,currentRiskBand,priorityRank,structuralDeficiencyFlag,functionallyObsoleteFlag,bridgeHealthIndex,currentReplacementCost,writtenDownValue,deferredMaintenanceValue,remainingUsefulLifeYrs,postedSpeedLimitKmh,waterwayHorizontalClearanceM,lastPrincipalInspDate,lastRoutineInspDate,nextInspectionDueDate,inspectionFrequencyYrs,version";
-            fetch(BASE + "/Bridges?$filter=" + sFilter + "&$select=" + sSelect, { headers: h })
-                .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+            AuthFetch.getJson(BASE + "/Bridges?$filter=" + sFilter + "&$select=" + sSelect)
                 .then(j => {
                     const b = (j.value || [])[0];
                     if (!b) { MessageBox.error("Bridge not found. It may have been removed or the ID is invalid."); return; }
@@ -395,8 +394,7 @@ sap.ui.define([
         // ── Load Restrictions ─────────────────────────────────
         _loadRestrictions: function (bridgeId) {
             const h = { Accept: "application/json" };
-            fetch(`${BASE}/Restrictions?$filter=bridgeId eq '${_odataStr(bridgeId)}'&$select=ID,restrictionType,value,unit,status,permitRequired,validFromDate,validToDate,vehicleClassName,gazetteRef,directionApplied,signageRequired,notes&$orderby=status,validFromDate`, { headers: h })
-                .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+            AuthFetch.getJson(`${BASE}/Restrictions?$filter=bridgeId eq '${_odataStr(bridgeId)}'&$select=ID,restrictionType,value,unit,status,permitRequired,validFromDate,validToDate,vehicleClassName,gazetteRef,directionApplied,signageRequired,notes&$orderby=status,validFromDate`)
                 .then(j => {
                     const rows = (j.value || []).map(r => ({
                         ID               : r.ID,
@@ -457,8 +455,7 @@ sap.ui.define([
         _loadAttributes: function (bridgeUUID) {
             if (!bridgeUUID) return;
             const h = { Accept: "application/json" };
-            fetch(`${BASE}/BridgeAttributes?$filter=bridge_ID eq ${bridgeUUID}&$select=value,attribute_ID&$expand=attribute`, { headers: h })
-                .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+            AuthFetch.getJson(`${BASE}/BridgeAttributes?$filter=bridge_ID eq ${bridgeUUID}&$select=value,attribute_ID&$expand=attribute`)
                 .then(j => {
                     const rows = (j.value || []).map(a => ({
                         attributeName: a.attribute ? (a.attribute.label || a.attribute.name) : a.attribute_ID,
@@ -477,8 +474,7 @@ sap.ui.define([
         // ── Load Route ────────────────────────────────────────
         _loadRoute: function (routeId) {
             const h = { Accept: "application/json" };
-            fetch(`${BASE}/Routes(${routeId})?$select=routeCode,description`, { headers: h })
-                .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+            AuthFetch.getJson(`${BASE}/Routes(${routeId})?$select=routeCode,description`)
                 .then(j => this._setText("hdrRoute", `${j.routeCode} — ${j.description || ""}` ))
                 .catch(function (err) {
                     console.warn("[NHVR] Route load failed:", err && err.message || err);
@@ -650,8 +646,7 @@ sap.ui.define([
         _loadHistory: function (bridgeId, bridgeUUID) {
             this._allEventLog = [];
             const h = { Accept: "application/json" };
-            fetch(`${BASE}/BridgeEventLog?$filter=bridge_ID eq ${bridgeUUID}&$orderby=timestamp desc&$top=200`, { headers: h })
-                .then(r => r.json())
+            AuthFetch.getJson(`${BASE}/BridgeEventLog?$filter=bridge_ID eq ${bridgeUUID}&$orderby=timestamp desc&$top=200`)
                 .then(j => {
                     this._allEventLog = (j.value || []).map(e => ({
                         ID                : e.ID,
@@ -901,6 +896,8 @@ sap.ui.define([
                 }
                 // Reset the override select
                 sel.setSelectedKey("");
+                // Refresh bridge data so all views are consistent
+                this._loadBridge();
             })
             .catch(err => MessageBox.error("Failed to update scour risk: " + err.message));
         },
@@ -1168,8 +1165,7 @@ sap.ui.define([
         // ── Inspection Records ────────────────────────────────
         _loadInspections: function (bridgeUUID) {
             const h = { Accept: "application/json" };
-            fetch(`${BASE}/Bridges(${bridgeUUID})/inspections?$orderby=inspectionDate desc`, { headers: h })
-                .then(r => r.json())
+            AuthFetch.getJson(`${BASE}/Bridges(${bridgeUUID})/inspections?$orderby=inspectionDate desc`)
                 .then(j => {
                     this._model.setProperty("/inspections", j.value || []);
                 })
@@ -1263,8 +1259,7 @@ sap.ui.define([
             const select = this.byId("vaVehicleClass");
             if (select && select.getItems().length === 0) {
                 const h = { Accept: "application/json" };
-                fetch(`${BASE}/VehicleClasses?$select=ID,code,name`, { headers: h })
-                    .then(r => r.json())
+                AuthFetch.getJson(`${BASE}/VehicleClasses?$select=ID,code,name`)
                     .then(j => {
                         (j.value || []).forEach(vc =>
                             select.addItem(new sap.ui.core.Item({ key: vc.code, text: `${vc.code} — ${vc.name}` }))
@@ -1312,8 +1307,7 @@ sap.ui.define([
         // ── Load Defects ──────────────────────────────────────
         _loadDefects: function (bridgeUUID) {
             const h = { Accept: "application/json" };
-            fetch(`${BASE}/BridgeDefects?$filter=bridge_ID eq ${bridgeUUID}&$orderby=detectedDate desc`, { headers: h })
-                .then(r => r.json())
+            AuthFetch.getJson(`${BASE}/BridgeDefects?$filter=bridge_ID eq ${bridgeUUID}&$orderby=detectedDate desc`)
                 .then(j => this._model.setProperty("/defects", j.value || []))
                 .catch(() => this._model.setProperty("/defects", []));
         },
@@ -1321,8 +1315,7 @@ sap.ui.define([
         // ── Load External References ──────────────────────────
         _loadExternalRefs: function (bridgeUUID, bridge) {
             const h = { Accept: "application/json" };
-            fetch(`${BASE}/BridgeExternalRefs?$filter=bridge_ID eq ${bridgeUUID}`, { headers: h })
-                .then(r => r.json())
+            AuthFetch.getJson(`${BASE}/BridgeExternalRefs?$filter=bridge_ID eq ${bridgeUUID}`)
                 .then(j => {
                     this._model.setProperty("/externalRefs", j.value || []);
                     // Update BANC summary fields
@@ -1402,8 +1395,7 @@ sap.ui.define([
             if (!b) return;
             const h = { Accept: "application/json" };
             const filter = key ? `bridge_ID eq ${b.ID} and status eq '${_odataStr(key)}'` : `bridge_ID eq ${b.ID}`;
-            fetch(`${BASE}/BridgeDefects?$filter=${encodeURIComponent(filter)}&$orderby=detectedDate desc`, { headers: h })
-                .then(r => r.json())
+            AuthFetch.getJson(`${BASE}/BridgeDefects?$filter=${encodeURIComponent(filter)}&$orderby=detectedDate desc`)
                 .then(j => this._model.setProperty("/defects", j.value || []))
                 .catch(() => {});
         },
@@ -1772,8 +1764,7 @@ sap.ui.define([
             if (!this._bridgeId) return;
             const h = { Accept: "application/json" };
             // Load BridgeCapacity by bridgeId
-            fetch(`/bridge-management/BridgeCapacities?$filter=bridgeId eq '${_odataStr(this._bridgeId)}'&$top=1`, { headers: h })
-                .then(r => r.json())
+            AuthFetch.getJson(`/bridge-management/BridgeCapacities?$filter=bridgeId eq '${_odataStr(this._bridgeId)}'&$top=1`)
                 .then(j => {
                     const cap = (j.value || [])[0];
                     this.byId("capNoDataBox").setVisible(!cap);
@@ -1876,8 +1867,7 @@ sap.ui.define([
         _loadBridgePermits: function () {
             if (!this._bridgeId) return;
             const h = { Accept: "application/json" };
-            fetch(`/bridge-management/getActivePermitsForBridge(bridgeId='${this._bridgeId}')`, { headers: h })
-                .then(r => r.json())
+            AuthFetch.getJson(`/bridge-management/getActivePermitsForBridge(bridgeId='${this._bridgeId}')`)
                 .then(j => {
                     const items = j.value || [];
                     const oModel = new sap.ui.model.json.JSONModel(items);
@@ -2247,8 +2237,7 @@ sap.ui.define([
         _loadRiskAssessments: function () {
             if (!this._bridge || !this._bridge.ID) return;
             const url = `${BASE}/BridgeRiskAssessments?$filter=bridge_ID eq ${this._bridge.ID}&$orderby=assessmentDate desc`;
-            fetch(url, { headers: { Accept: "application/json" } })
-                .then(r => r.json())
+            AuthFetch.getJson(url)
                 .then(d => {
                     const model = this.getView().getModel("riskAssessments");
                     if (model) model.setProperty("/items", d.value || []);
@@ -2259,8 +2248,7 @@ sap.ui.define([
         _loadInvestmentPlans: function () {
             if (!this._bridge || !this._bridge.ID) return;
             const url = `${BASE}/BridgeInvestmentPlans?$filter=bridge_ID eq ${this._bridge.ID}&$orderby=recommendedYear asc`;
-            fetch(url, { headers: { Accept: "application/json" } })
-                .then(r => r.json())
+            AuthFetch.getJson(url)
                 .then(d => {
                     const model = this.getView().getModel("investmentPlans");
                     if (model) model.setProperty("/items", d.value || []);
@@ -2391,6 +2379,7 @@ sap.ui.define([
                 Object.keys(payload).forEach(k => this._model.setProperty("/" + k, payload[k]));
                 MessageToast.show("Route approval details saved.");
                 if (dlg) dlg.close();
+                this._loadBridge();
             })
             .catch(e => MessageBox.error((e && e.error && e.error.message) || "Save failed"))
             .finally(() => { if (saveBtn) saveBtn.setBusy(false); });
@@ -2439,6 +2428,7 @@ sap.ui.define([
                 Object.keys(payload).forEach(k => this._model.setProperty("/" + k, payload[k]));
                 MessageToast.show("Load rating saved.");
                 if (dlg) dlg.close();
+                this._loadBridge();
             })
             .catch(e => MessageBox.error((e && e.error && e.error.message) || "Save failed"))
             .finally(() => { if (saveBtn) saveBtn.setBusy(false); });
@@ -2485,8 +2475,8 @@ sap.ui.define([
         _loadScourData: function (bridgeUUID) {
             if (!bridgeUUID) return;
             const h = { "Content-Type": "application/json" };
-            fetch(`${BASE}/ScourAssessments?$filter=bridge_ID eq ${bridgeUUID}&$orderby=createdAt desc&$top=1`, { headers: h })
-                .then(r => r.ok ? r.json() : null)
+            AuthFetch.getJson(`${BASE}/ScourAssessments?$filter=bridge_ID eq ${bridgeUUID}&$orderby=createdAt desc&$top=1`)
+                .catch(() => null)
                 .then(data => {
                     const sa = (data && data.value && data.value[0]) ? data.value[0] : null;
                     const levelCtrl = this.byId("scourRiskLevelStatus");
@@ -2581,6 +2571,8 @@ sap.ui.define([
                 const r = data?.value || data;
                 if (r?.success) {
                     sap.m.MessageToast.show(`${r.fieldsUpdated} fields updated from S/4HANA`);
+                    this._loadBridge();
+                    this._loadS4Mapping(b.ID);
                 } else {
                     sap.m.MessageBox.warning(r?.error?.message || JSON.stringify(r));
                 }
@@ -2596,6 +2588,7 @@ sap.ui.define([
             .then(data => {
                 const r = data?.value || data;
                 sap.m.MessageToast.show(r?.message || `PM Notification created: ${r?.notificationNumber}`);
+                this._loadS4Mapping(b.ID);
             })
             .catch(e => sap.m.MessageBox.error('Create notification failed: ' + e));
         },
@@ -2611,14 +2604,14 @@ sap.ui.define([
             .then(data => {
                 const r = data?.value || data;
                 sap.m.MessageToast.show(r?.message || `PM Order created: ${r?.orderNumber}`);
+                this._loadS4Mapping(b.ID);
             })
             .catch(e => sap.m.MessageBox.error('Create order failed: ' + e));
         },
 
         _loadS4Mapping: function (bridgeId) {
             const that = this;
-            fetch(`${BASE}/S4EquipmentMappings?$filter=bridge_ID eq ${bridgeId}&$top=1`)
-                .then(r => r.json())
+            AuthFetch.getJson(`${BASE}/S4EquipmentMappings?$filter=bridge_ID eq ${bridgeId}&$top=1`)
                 .then(data => {
                     const mapping = (data?.value || [])[0] || {};
                     const setTxt = (id, val) => {

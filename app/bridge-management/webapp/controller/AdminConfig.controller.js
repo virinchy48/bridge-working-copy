@@ -726,7 +726,7 @@ sap.ui.define([
         // MAP CONFIGURATION
         // ══════════════════════════════════════════════════════════════
         _loadMapConfig: function () {
-            fetch(`${BASE}/MapConfigs?$filter=configKey eq 'DEFAULT' and isActive eq true&$top=1`)
+            fetch(`${BASE}/MapConfigs?$filter=configKey eq 'DEFAULT' and isActive eq true&$top=1`, { headers: H, credentials: CREDS })
                 .then(r => r.json())
                 .then(j => {
                     const cfg = (j.value || [])[0];

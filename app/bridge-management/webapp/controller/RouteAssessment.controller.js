@@ -247,12 +247,7 @@ sap.ui.define([
                 vehicleClass:    vehicleClass
             };
 
-            fetch(BASE + "/assessFreightRouteVehicle", {
-                method: "POST",
-                headers: { "Content-Type": "application/json", "Accept": "application/json" },
-                credentials: "include",
-                body: JSON.stringify(payload)
-            })
+            AuthFetch.post(BASE + "/assessFreightRouteVehicle", payload)
             .then(function (r) {
                 if (!r.ok) {
                     return r.json().then(function (err) {
