@@ -15,6 +15,8 @@ sap.ui.define([
 ], function (Controller, JSONModel, MessageToast, MessageBox, BusyDialog, CapabilityManager, LookupService, AuthFetch) {
     'use strict';
 
+    var Log = sap.base.Log;
+
     const SRV = '/bridge-management/';
     const LS_MAP_CONFIG   = 'nhvr_map_config';
     const LS_FIELD_MAPS   = 'nhvr_field_mappings';
@@ -211,7 +213,7 @@ sap.ui.define([
                 that._updateStatusTile('banc',  byCode.BANC);
                 that._updateStatusTile('esri',  byCode.ESRI);
             })
-            .catch(() => {/* silently fail — backend may not have these endpoints yet */});
+            .catch(function (err) { Log.warning("[IntegrationHub] integration status load failed", err); });
         },
 
         _updateStatusTile: function (prefix, status) {

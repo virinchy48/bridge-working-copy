@@ -16,6 +16,8 @@ sap.ui.define([
 ], function (Controller, JSONModel, MessageToast, MessageBox, HelpAssistantMixin, CapabilityManager, UserAnalytics, LookupService, ReferenceData) {
     "use strict";
 
+    var Log = sap.base.Log;
+
     const BASE = "/bridge-management";
     const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
@@ -612,7 +614,7 @@ sap.ui.define([
                     if (busy) busy.setVisible(false);
                     if (btn)  btn.setEnabled(true);
                     MessageBox.error("Upload failed: " + err.message);
-                    console.error(err);
+                    Log.error("[MassUpload] upload failed", err);
                 });
                 return;
             }
@@ -664,7 +666,7 @@ sap.ui.define([
                     if (busy) busy.setVisible(false);
                     if (btn)  btn.setEnabled(true);
                     MessageBox.error("Upload failed: " + err.message);
-                    console.error(err);
+                    Log.error("[MassUpload] batch upload failed", err);
                 });
             };
 

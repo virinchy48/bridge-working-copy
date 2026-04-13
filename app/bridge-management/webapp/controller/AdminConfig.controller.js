@@ -11,6 +11,8 @@ sap.ui.define([
 ], function (Controller, JSONModel, MessageToast, MessageBox, StandardsAdapter, CapabilityManager, AuthFetch, UserAnalytics, LookupService) {
     "use strict";
 
+    var Log = sap.base.Log;
+
     const BASE  = "/bridge-management";
 
     // Escape single quotes for OData v4 string literals ( ' → '' )
@@ -247,7 +249,7 @@ sap.ui.define([
             fetch(`${BASE}/AttributeDefinitions(${attrId})/validValues?$orderby=displayOrder`, { headers: H, credentials: CREDS })
                 .then(r => r.ok ? r.json() : { value: [] })
                 .then(j => this.getView().getModel("attrValidValues").setProperty("/items", j.value || []))
-                .catch(() => {});
+                .catch(function (err) { Log.warning("[AdminConfig] valid values load failed", err); });
         },
 
         onAddValidValue: function () {
@@ -275,7 +277,7 @@ sap.ui.define([
                     // not as a standalone AttributeValidValues collection.
                     // The parent key is implicit, so we omit attribute_ID from
                     // the body.
-                    AuthFetch.post(`${BASE}/AttributeDefinitions(${attrId})/validValues`, { value: v.value, label: v.label || v.value, displayOrder: v.displayOrder || 0, isActive: true }).catch(() => {});
+                    AuthFetch.post(`${BASE}/AttributeDefinitions(${attrId})/validValues`, { value: v.value, label: v.label || v.value, displayOrder: v.displayOrder || 0, isActive: true }).catch(function (err) { Log.warning("[AdminConfig] POST valid value failed", err); });
                 }
             });
         },
@@ -495,7 +497,7 @@ sap.ui.define([
                     this._applyLookupFilter();
                     this._updateLookupTruncationBanner();
                 })
-                .catch(() => {});
+                .catch(function (err) { Log.warning("[AdminConfig] lookup data load failed", err); });
         },
 
         _updateLookupTruncationBanner: function () {

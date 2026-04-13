@@ -19,6 +19,8 @@ sap.ui.define([
 ], function (Controller, JSONModel, MessageToast, MessageBox, Item, ExcelExport, RestrictionAttrs, CsvExport, TablePersonalisation, AlvToolbarMixin, RoleManager, AuthFetch, UserAnalytics, LookupService) {
     "use strict";
 
+    var Log = sap.base.Log;
+
     const BASE = "/bridge-management";
 
     // Escape single quotes for OData v4 string literals ( ' → '' )
@@ -292,7 +294,7 @@ sap.ui.define([
             .then(j => {
                 this._model.setProperty("/vehicleClasses", j.value || []);
             })
-            .catch(() => {});
+            .catch(function (err) { Log.warning("[Restrictions] vehicle classes load failed", err); });
         },
 
         // ── Bridge autocomplete (suggestion input) ────────────
@@ -311,7 +313,7 @@ sap.ui.define([
                     }));
                 });
             })
-            .catch(() => {});
+            .catch(function (err) { Log.warning("[Restrictions] bridge suggestion load failed", err); });
         },
 
         onBridgeSuggestionSelected: function (oEvent) {
@@ -334,7 +336,7 @@ sap.ui.define([
                     });
                 }
             })
-            .catch(() => {}); // graceful fallback — static items remain
+            .catch(function (err) { Log.warning("[Restrictions] restriction types load failed", err); });
         },
 
         _loadRestrictions: function () {
@@ -986,14 +988,14 @@ sap.ui.define([
                 var attrName = entry[0], data = entry[1];
                 var existingId = that._restrDynAttrIds[attrName];
                 if (existingId) {
-                    AuthFetch.patch(BASE + "/EntityAttributes(" + existingId + ")", { value: data.value }).catch(function () {});
+                    AuthFetch.patch(BASE + "/EntityAttributes(" + existingId + ")", { value: data.value }).catch(function (err) { Log.warning("[Restrictions] PATCH EntityAttribute failed", err); });
                 } else if (data.value) {
                     AuthFetch.post(BASE + "/EntityAttributes", {
                         entityType   : "RESTRICTION",
                         entityId     : restrictionId,
                         attribute_ID : data.attrId,
                         value        : data.value
-                    }).catch(function () {});
+                    }).catch(function (err) { Log.warning("[Restrictions] POST EntityAttribute failed", err); });
                 }
             });
         },

@@ -61,6 +61,16 @@ cds.on('bootstrap', (app) => {
     // Trust the first proxy hop (SAP App Router) so req.ip resolves correctly
     app.set('trust proxy', 1);
 
+    // ── Health / liveness endpoint (PAC compliance) ───────────────────────────
+    app.get('/health', (_req, res) => {
+        res.json({
+            status: 'UP',
+            timestamp: new Date().toISOString(),
+            service: 'nhvr-bridge-app',
+            version: process.env.npm_package_version || '3.0.0'
+        });
+    });
+
     // ── Security headers middleware ────────────────────────────────────────────
     app.use(function securityHeaders(req, res, next) {
         res.setHeader('X-Content-Type-Options', 'nosniff');

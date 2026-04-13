@@ -11,6 +11,8 @@ sap.ui.define([
 ], function (Controller, JSONModel, MessageToast, MessageBox, CapabilityManager, LookupService) {
     "use strict";
 
+    var Log = sap.base.Log;
+
     const BASE = "/bridge-management";
 
     // Escape single quotes for OData v4 string literals ( ' → '' )
@@ -62,7 +64,7 @@ sap.ui.define([
                     this._filteredBridges = this._allBridges;
                     this._populateBridgeSelect(this._allBridges);
                 })
-                .catch(() => {});
+                .catch(function (err) { Log.warning("[VehicleCombinations] bridge list load failed", err); });
         },
 
         _populateBridgeSelect: function (bridges) {
@@ -260,7 +262,7 @@ sap.ui.define([
                     MessageToast.show(`Found ${total} bridge(s) accessible for this vehicle`);
                 })
                 .catch(err => {
-                    console.error("Vehicle search failed", err);
+                    Log.error("[VehicleCombinations] Vehicle search failed", err);
                     MessageToast.show("Search failed — check console");
                 });
         },

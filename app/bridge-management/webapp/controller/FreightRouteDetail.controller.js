@@ -18,6 +18,8 @@ sap.ui.define([
 ], function (Controller, JSONModel, MessageToast, MessageBox, BusyDialog, CapabilityManager, AuthFetch, UserAnalytics, LookupService) {
     "use strict";
 
+    var Log = sap.base.Log;
+
     const BASE = "/bridge-management";
 
     var _IS_LOC = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
@@ -127,7 +129,7 @@ sap.ui.define([
                     this.byId("frdStatus").setText(route.status || "—").setState(statusState);
                 })
                 .catch(err => {
-                    console.warn("[FreightRouteDetail] FreightRoutes load failed:", err.message);
+                    Log.warning("[FreightRouteDetail] FreightRoutes load failed: " + err.message);
                     // A 404 here means the ID was syntactically valid but
                     // the row doesn't exist — surface a clean empty state.
                     this._showRouteNotFound(err.status === 404 ? "Route not found" : "Failed to load route info");
@@ -159,7 +161,7 @@ sap.ui.define([
                     this.byId("assetCount").setText(count + " bridges on route (run assessment to evaluate)");
                 })
                 .catch(err => {
-                    console.warn("[FreightRouteDetail] FreightRouteBridges count failed:", err.message);
+                    Log.warning("[FreightRouteDetail] FreightRouteBridges count failed: " + err.message);
                 });
         },
 
@@ -618,7 +620,7 @@ sap.ui.define([
                     this.getView().getModel("altModel").setProperty("/alternatives", alts);
                     this._plotAlternativesOnMap();
                 }.bind(this))
-                .catch(function () {});
+                .catch(function (err) { Log.warning("[FreightRouteDetail] alternative route geometry fetch failed", err); });
         },
 
         _fetchValhallaGeometry: function (start, end, osrmAlts, alts) {

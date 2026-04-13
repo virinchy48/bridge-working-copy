@@ -17,6 +17,8 @@ sap.ui.define([
 ], function (Controller, JSONModel, MessageToast, MessageBox, StandardListItem, RoleManager, AppConfig, GeoLocation, AuthFetch, UserAnalytics, CapabilityManager, LookupService) {
     "use strict";
 
+    var Log = sap.base.Log;
+
     function escapeHtml(str) {
         if (str == null) return "";
         return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
@@ -1397,7 +1399,7 @@ sap.ui.define([
             const filter = key ? `bridge_ID eq ${b.ID} and status eq '${_odataStr(key)}'` : `bridge_ID eq ${b.ID}`;
             AuthFetch.getJson(`${BASE}/BridgeDefects?$filter=${encodeURIComponent(filter)}&$orderby=detectedDate desc`)
                 .then(j => this._model.setProperty("/defects", j.value || []))
-                .catch(() => {});
+                .catch(function (err) { Log.warning("[BridgeDetail] defects load failed", err); });
         },
 
         // ── Raise Defect ──────────────────────────────────────
@@ -1873,7 +1875,7 @@ sap.ui.define([
                     const oModel = new sap.ui.model.json.JSONModel(items);
                     this.getView().setModel(oModel, "capPermits");
                 })
-                .catch(() => {});
+                .catch(function (err) { Log.warning("[BridgeDetail] active permits load failed", err); });
         },
 
         onEditCapacity: function () {

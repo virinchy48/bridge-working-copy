@@ -11,6 +11,8 @@ sap.ui.define([
 ], function (Controller, MessageToast, MessageBox, RoleManager, ReferenceData, LookupService) {
     "use strict";
 
+    var Log = sap.base.Log;
+
     const BASE = "/bridge-management";
 
     // Escape single quotes for OData v4 string literals ( ' → '' )
@@ -618,7 +620,7 @@ sap.ui.define([
                     this._renderDynAttrs();
                 }
             })
-            .catch(() => {});
+            .catch(function (err) { Log.warning("[BridgeForm] dynamic attribute definitions load failed", err); });
         },
 
         /** Render dynamic attribute fields into #dynAttrContainer */
@@ -739,7 +741,7 @@ sap.ui.define([
                     fetch(`${BASE}/BridgeAttributes(${existingId})`, {
                         method: "PATCH", headers: H, credentials: _creds,
                         body: JSON.stringify({ value: data.value })
-                    }).catch(() => {});
+                    }).catch(function (err) { Log.warning("[BridgeForm] PATCH BridgeAttribute failed", err); });
                 } else if (data.value) {
                     // POST new BridgeAttribute
                     fetch(`${BASE}/BridgeAttributes`, {
@@ -749,7 +751,7 @@ sap.ui.define([
                             attribute_ID: data.attrId,
                             value       : data.value
                         })
-                    }).catch(() => {});
+                    }).catch(function (err) { Log.warning("[BridgeForm] POST BridgeAttribute failed", err); });
                 }
             });
         },
@@ -792,8 +794,8 @@ sap.ui.define([
                     const addBtn = this.byId("addLoadRatingBtn");
                     if (addBtn) addBtn.setVisible(true);
                 })
-                .catch(err => {
-                    console.warn("[NHVR] Failed to load load ratings:", err);
+                .catch(function (err) {
+                    Log.warning("[BridgeForm] Failed to load load ratings", err);
                 });
         },
 
@@ -1014,7 +1016,7 @@ sap.ui.define([
                         mitStatus.setState(mitStateMap[s.mitigationStatus] || "None");
                     }
                 })
-                .catch(function (e) { console.warn("[NHVR] Scour load failed:", e.message); });
+                .catch(function (e) { Log.warning("[BridgeForm] Scour load failed: " + e.message); });
         },
 
         onOpenScourDialog: function () {
@@ -1124,7 +1126,7 @@ sap.ui.define([
                     var model = new sap.ui.model.json.JSONModel({ value: items });
                     that.getView().setModel(model, "sensors");
                 })
-                .catch(function (e) { console.warn("[NHVR] Sensor load failed:", e.message); });
+                .catch(function (e) { Log.warning("[BridgeForm] Sensor load failed: " + e.message); });
         },
 
         // ── P09: Condition Forecast ───────────────────────────────

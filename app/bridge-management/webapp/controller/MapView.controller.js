@@ -42,6 +42,8 @@ sap.ui.define([
 ) {
     "use strict";
 
+    var Log = sap.base.Log;
+
     const BASE = "/bridge-management";
 
     // Escape single quotes for OData v4 string literals ( ' → '' )
@@ -1289,7 +1291,7 @@ sap.ui.define([
                     if (!sel) return;
                     (j.value || []).forEach(v => sel.addItem(new Item({ key: v.ID, text: v.name })));
                 })
-                .catch(() => {});
+                .catch(function (err) { Log.warning("[MapView] vehicle classes load failed", err); });
         },
 
         _plotMarkers    : function (bridges, hl) { this._renderActiveLayer(bridges, hl); },
@@ -1565,7 +1567,7 @@ sap.ui.define([
                     }))
                 );
             })
-            .catch(() => {});
+            .catch(function (err) { Log.warning("[MapView] restrictions load failed", err); });
         },
 
         onCloseDetail: function () {

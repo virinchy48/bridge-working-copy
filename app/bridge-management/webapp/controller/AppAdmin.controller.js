@@ -7,6 +7,8 @@ sap.ui.define([
 ], function (Controller, JSONModel, MessageToast, MessageBox, AuthFetch) {
     "use strict";
 
+    var Log = sap.base.Log;
+
     var _IS_LOC = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
     var _AUTH_H = _IS_LOC ? { "Authorization": "Basic " + btoa("admin:admin") } : {};
     function _credOpts(extraHeaders) {
@@ -68,7 +70,7 @@ sap.ui.define([
                     const mode = data.appMode || "full";
                     this._oModel.setProperty("/appMode", mode);
                 })
-                .catch(() => {});
+                .catch(function (err) { Log.warning("[AppAdmin] current user load failed", err); });
         },
 
         _loadTenants: function () {
@@ -173,7 +175,7 @@ sap.ui.define([
                             this._oModel.setProperty("/usageLastRefresh", new Date().toLocaleString("en-AU"));
                         })
                         .catch(err => {
-                            console.warn("[AppAdmin] Bridges count fallback failed:", err.message);
+                            Log.warning("[AppAdmin] Bridges count fallback failed: " + err.message);
                         });
                 });
         },

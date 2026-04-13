@@ -1,0 +1,23 @@
+{
+  "env": {
+    "node": true,
+    "es2020": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2020
+  },
+  "rules": {
+    "no-console": "warn",
+    "eqeqeq": ["error", "always"],
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "no-empty": ["error", { "allowEmptyCatch": false }],
+    "prefer-const": "warn"
+  },
+  "overrides": [
+    {
+      "files": ["app/**/*.js"],
+      "env": { "browser": true },
+      "globals": { "sap": "readonly" }
+    }
+  ]
+}

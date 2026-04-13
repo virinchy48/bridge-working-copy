@@ -19,6 +19,8 @@ sap.ui.define([
 ], function (Controller, JSONModel, MessageToast, ExcelExport, BridgeAttrs, CsvExport, CsvTemplate, RoleManager, TablePersonalisation, HelpAssistantMixin, AlvToolbarMixin, AuthFetch, UserAnalytics, LookupService) {
     "use strict";
 
+    var Log = sap.base.Log;
+
     const BASE = "/bridge-management";
 
     var _IS_LOC = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
@@ -648,7 +650,7 @@ sap.ui.define([
                     this._totalCount = j["@odata.count"] || 0;
                     this._updateLoadMoreBar();
                 })
-                .catch(() => { /* count fetch failure is non-fatal */ });
+                .catch(function (err) { Log.warning("[Bridges] count fetch failed", err); });
 
             // Fetch first page (with optional server filter)
             const firstUrl = `${BASE}/Bridges?$top=${this._pageSize}&$skip=0&$select=${selectStr}&$orderby=bridgeId${sfParam}`;
@@ -664,7 +666,7 @@ sap.ui.define([
                     if (tbl) tbl.setBusy(false);
                 })
                 .catch(e => {
-                    console.error("Bridge load failed", e);
+                    Log.error("[Bridges] Bridge load failed", e);
                     if (tbl) tbl.setBusy(false);
                 });
         },
@@ -704,7 +706,7 @@ sap.ui.define([
                         // Refresh model to show merged values
                         that._applyFiltersAndSort();
                     })
-                    .catch(function () { /* non-fatal */ });
+                    .catch(function (err) { Log.warning("[Bridges] dynamic attribute merge failed", err); });
             }
         },
 
@@ -734,7 +736,7 @@ sap.ui.define([
                     MessageToast.show(`Loaded ${this._allBridges.length} of ${this._totalCount} bridges`);
                 })
                 .catch(e => {
-                    console.error("Load more failed", e);
+                    Log.error("[Bridges] Load more failed", e);
                     if (tbl) tbl.setBusy(false);
                     if (btn) btn.setEnabled(true);
                 });
@@ -1398,7 +1400,7 @@ sap.ui.define([
                     });
                 });
             })
-            .catch(() => {});
+            .catch(function (err) { Log.warning("[Bridges] dynamic filter field load failed", err); });
         },
 
         onExportBridges: function () {
@@ -1660,7 +1662,7 @@ sap.ui.define([
                         oTable.addColumn(oCol);
                     });
                 })
-                .catch(() => {});
+                .catch(function (err) { Log.warning("[Bridges] dynamic column load failed", err); });
         },
 
         _getColWidth: function (attr) {
