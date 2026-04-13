@@ -428,8 +428,98 @@
                     </VBox>
                 </IconTabFilter>
 
-                <!-- Note: Jurisdiction Access, Standards Profile and Map Config
-                     have been moved to BMS Tech Admin → Tech Config. -->
+                <!-- ── TAB 7: BNAC Configuration ──────────────── -->
+                <IconTabFilter key="bnacConfig" icon="sap-icon://chain-link" text="BNAC">
+                    <VBox class="sapUiMediumMargin">
+                        <Toolbar>
+                            <Title text="BNAC Environment URLs" level="H3"/>
+                            <ToolbarSpacer/>
+                            <Button text="Refresh" icon="sap-icon://refresh" press=".onRefreshBnacConfig" type="Transparent"/>
+                        </Toolbar>
+                        <MessageStrip text="Configure the BNAC (Bridge Asset National Catalogue) base URL for each environment. The active environment is set by the BMS_ENVIRONMENT server variable."
+                            type="Information" showIcon="true" class="sapUiSmallMarginBottom"/>
+                        <Table id="bnacConfigTable"
+                            items="{bnacConfig>/items}"
+                            noDataText="No BNAC environments configured"
+                            class="sapUiTinyMarginTop">
+                            <columns>
+                                <Column width="10em"><Text text="Environment"/></Column>
+                                <Column><Text text="Base URL"/></Column>
+                                <Column width="12em"><Text text="Description"/></Column>
+                                <Column width="6em" hAlign="Center"><Text text="Active"/></Column>
+                                <Column width="8em" hAlign="End"><Text text="Actions"/></Column>
+                            </columns>
+                            <items>
+                                <ColumnListItem>
+                                    <cells>
+                                        <ObjectStatus text="{bnacConfig>environment}" state="{= ${bnacConfig>isActive} ? 'Success' : 'None' }" inverted="true"/>
+                                        <Input value="{bnacConfig>baseURL}" editable="true" change=".onBnacUrlChange"/>
+                                        <Input value="{bnacConfig>description}" editable="true" change=".onBnacUrlChange"/>
+                                        <CheckBox selected="{bnacConfig>isActive}" select=".onBnacUrlChange"/>
+                                        <Button icon="sap-icon://save" press=".onSaveBnacRow" tooltip="Save this row" type="Transparent"/>
+                                    </cells>
+                                </ColumnListItem>
+                            </items>
+                        </Table>
+
+                        <!-- ── BNAC Mass Load ────────────────────── -->
+                        <Toolbar class="sapUiMediumMarginTop">
+                            <Title text="BNAC Object ID — Mass Load" level="H3"/>
+                        </Toolbar>
+                        <MessageStrip text="Upload a CSV file with columns: bridgeId, bnacObjectId. Each bridge will be linked to its BNAC catalogue entry."
+                            type="Information" showIcon="true" class="sapUiSmallMarginBottom"/>
+                        <HBox alignItems="Center" class="sapUiSmallMarginBottom">
+                            <Button id="btnBrowseBnacCsv" text="Browse CSV" icon="sap-icon://upload"
+                                press=".onBrowseBnacCsv" type="Emphasized"/>
+                            <Text id="bnacFileName" text="No file selected" class="sapUiSmallMarginBegin"/>
+                            <Button id="btnLoadBnac" text="Load BNAC IDs" icon="sap-icon://accept"
+                                press=".onLoadBnacIds" type="Emphasized" enabled="false" class="sapUiSmallMarginBegin"/>
+                        </HBox>
+
+                        <!-- Hidden file input -->
+                        <core:HTML content="&lt;input type='file' id='nhvrBnacFileInput' accept='.csv' style='display:none'/&gt;"/>
+
+                        <!-- Results panel -->
+                        <VBox id="bnacLoadResultsPanel" visible="false" class="sapUiSmallMarginTop">
+                            <MessageStrip id="bnacLoadResultStrip" text="" type="Success" showIcon="true" class="sapUiSmallMarginBottom"/>
+                            <HBox class="sapUiSmallMarginBottom">
+                                <ObjectStatus id="bnacResTotal" text="Total: 0" class="sapUiSmallMarginEnd"/>
+                                <ObjectStatus id="bnacResSuccess" text="Success: 0" state="Success" class="sapUiSmallMarginEnd"/>
+                                <ObjectStatus id="bnacResFail" text="Failed: 0" state="Error"/>
+                            </HBox>
+                        </VBox>
+
+                        <!-- Load History -->
+                        <Toolbar class="sapUiMediumMarginTop">
+                            <Title text="Load History" level="H4"/>
+                        </Toolbar>
+                        <Table id="bnacLoadLogTable"
+                            items="{bnacLog>/items}"
+                            noDataText="No mass loads yet"
+                            growing="true" growingThreshold="10">
+                            <columns>
+                                <Column><Text text="Date"/></Column>
+                                <Column><Text text="File"/></Column>
+                                <Column><Text text="User"/></Column>
+                                <Column hAlign="Center"><Text text="Total"/></Column>
+                                <Column hAlign="Center"><Text text="Success"/></Column>
+                                <Column hAlign="Center"><Text text="Failed"/></Column>
+                            </columns>
+                            <items>
+                                <ColumnListItem>
+                                    <cells>
+                                        <Text text="{bnacLog>loadedAt}"/>
+                                        <Text text="{bnacLog>fileName}"/>
+                                        <Text text="{bnacLog>loadedBy}"/>
+                                        <ObjectNumber number="{bnacLog>totalRows}" emphasized="false"/>
+                                        <ObjectNumber number="{bnacLog>successCount}" state="Success"/>
+                                        <ObjectNumber number="{bnacLog>failCount}" state="{= ${bnacLog>failCount} > 0 ? 'Error' : 'None' }"/>
+                                    </cells>
+                                </ColumnListItem>
+                            </items>
+                        </Table>
+                    </VBox>
+                </IconTabFilter>
 
                 </items>
             </IconTabBar>

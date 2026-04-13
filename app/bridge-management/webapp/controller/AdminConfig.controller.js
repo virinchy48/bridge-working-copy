@@ -53,6 +53,8 @@ sap.ui.define([
             this.getView().setModel(new JSONModel({ menu: [], tabs: [], actions: [] }), "roleConfig");
             this.getView().setModel(new JSONModel({ tiles: [] }), "sectionTileConfig");
             this.getView().setModel(new JSONModel({ items: [] }), "attrValidValues");
+            this.getView().setModel(new JSONModel({ items: [] }), "bnacConfig");
+            this.getView().setModel(new JSONModel({ items: [] }), "bnacLog");
             this.getView().setModel(new JSONModel({ value: [] }), "jurisdictionAccess");
             // Map provider config model (MapProviderConfigs entity)
             this.getView().setModel(new JSONModel({
@@ -88,6 +90,8 @@ sap.ui.define([
             this._initStandardsProfile();
             this._loadMapConfig();
             this._loadMapProviderConfig();
+            this._loadBnacConfig();
+            this._loadBnacLog();
 
             LookupService.load().then(function () {
                 LookupService.populateSelect(this.byId("jaJurisdiction"), "STATE", "All Jurisdictions");
@@ -1046,5 +1050,123 @@ sap.ui.define([
                 MessageToast.show("No test URL configured for provider: " + provider);
             }
         }
+        // ═══════════════════════════════════════════════════════
+        // BNAC Configuration
+        // ═══════════════════════════════════════════════════════
+
+        _loadBnacConfig: function () {
+            AuthFetch.getJson(BASE + "/BnacConfig?$orderby=environment")
+                .then(function (j) { this.getView().getModel("bnacConfig").setProperty("/items", j.value || []); }.bind(this))
+                .catch(function (err) { Log.warning("[AdminConfig] BNAC config load failed", err); });
+        },
+
+        _loadBnacLog: function () {
+            AuthFetch.getJson(BASE + "/BnacLoadLog?$orderby=loadedAt desc&$top=20")
+                .then(function (j) { this.getView().getModel("bnacLog").setProperty("/items", j.value || []); }.bind(this))
+                .catch(function (err) { Log.warning("[AdminConfig] BNAC load log failed", err); });
+        },
+
+        onRefreshBnacConfig: function () {
+            this._loadBnacConfig();
+            this._loadBnacLog();
+            MessageToast.show("BNAC data refreshed");
+        },
+
+        onBnacUrlChange: function () {
+            // No-op — changes tracked via model binding
+        },
+
+        onSaveBnacRow: function (oEvent) {
+            var ctx = oEvent.getSource().getBindingContext("bnacConfig");
+            var item = ctx ? ctx.getObject() : null;
+            if (!item) return;
+            var payload = { baseURL: item.baseURL, description: item.description, isActive: item.isActive };
+            var self = this;
+            AuthFetch.patch(BASE + "/BnacConfig('" + item.environment + "')", payload)
+                .then(function (r) {
+                    if (r.ok || r.status === 200 || r.status === 204) {
+                        MessageToast.show(item.environment + " BNAC URL saved");
+                        self._loadBnacConfig();
+                    } else { throw new Error("HTTP " + r.status); }
+                })
+                .catch(function (err) { sap.m.MessageBox.error("Save failed: " + (err.message || err)); });
+        },
+
+        // ── BNAC Mass Load ──────────────────────────────────────
+
+        _bnacCsvData: null,
+
+        onBrowseBnacCsv: function () {
+            var fileInput = document.getElementById("nhvrBnacFileInput");
+            if (!fileInput) { MessageToast.show("File input not ready — try again"); return; }
+            var self = this;
+            fileInput.onchange = function () {
+                var file = fileInput.files[0];
+                if (!file) return;
+                self.byId("bnacFileName").setText(file.name);
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    self._bnacCsvData = { name: file.name, content: e.target.result };
+                    self.byId("btnLoadBnac").setEnabled(true);
+                };
+                reader.readAsText(file);
+            };
+            fileInput.click();
+        },
+
+        onLoadBnacIds: function () {
+            if (!this._bnacCsvData) { MessageToast.show("Select a CSV file first"); return; }
+            var lines = this._bnacCsvData.content.split("\n").map(function (l) { return l.trim(); }).filter(Boolean);
+            if (lines.length < 2) { MessageToast.show("CSV must have a header row + at least 1 data row"); return; }
+
+            // Parse CSV
+            var headers = lines[0].split(",").map(function (h) { return h.trim().toLowerCase(); });
+            var bridgeIdIdx = headers.indexOf("bridgeid");
+            var bnacIdx = headers.indexOf("bnacobjectid");
+            if (bridgeIdIdx < 0 || bnacIdx < 0) {
+                sap.m.MessageBox.error("CSV must contain columns: bridgeId, bnacObjectId");
+                return;
+            }
+
+            var payload = [];
+            for (var i = 1; i < lines.length; i++) {
+                var cols = lines[i].split(",").map(function (c) { return c.trim(); });
+                if (cols[bridgeIdIdx] && cols[bnacIdx]) {
+                    payload.push({ bridgeId: cols[bridgeIdIdx], bnacObjectId: cols[bnacIdx] });
+                }
+            }
+
+            if (payload.length === 0) { MessageToast.show("No valid rows found in CSV"); return; }
+
+            var self = this;
+            MessageToast.show("Loading " + payload.length + " BNAC IDs...");
+
+            AuthFetch.post(BASE + "/bnacMassLoad", {
+                payload: JSON.stringify(payload),
+                fileName: this._bnacCsvData.name
+            }).then(function (r) {
+                if (!r.ok) { return r.json().then(function (b) { throw new Error((b.error && b.error.message) || "HTTP " + r.status); }); }
+                return r.json();
+            }).then(function (result) {
+                // Show results
+                var panel = self.byId("bnacLoadResultsPanel");
+                if (panel) panel.setVisible(true);
+                var strip = self.byId("bnacLoadResultStrip");
+                if (strip) { strip.setText(result.message); strip.setType(result.success ? "Success" : "Warning"); }
+                self.byId("bnacResTotal").setText("Total: " + payload.length);
+                var detail = [];
+                try { detail = JSON.parse(result.detail || "[]"); } catch (_) {}
+                self.byId("bnacResSuccess").setText("Success: " + (payload.length - detail.length));
+                self.byId("bnacResFail").setText("Failed: " + detail.length);
+                // Refresh log
+                self._loadBnacLog();
+                self._bnacCsvData = null;
+                self.byId("btnLoadBnac").setEnabled(false);
+                self.byId("bnacFileName").setText("No file selected");
+            }).catch(function (err) {
+                sap.m.MessageBox.error("BNAC load failed: " + (err.message || err));
+            });
+        }
+
     });
 });
