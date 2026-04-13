@@ -33,16 +33,15 @@ sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "nhvr/bridgemanagement/util/MapProviderFactory",
     "nhvr/bridgemanagement/util/UserAnalytics",
-    "nhvr/bridgemanagement/util/AuthFetch"
+    "nhvr/bridgemanagement/util/AuthFetch",
+    "sap/base/Log"
 ], function (
     Controller, StandardListItem, MessageToast,
     Dialog, Button, VBox, HBox, Label, Input, Switch,
     Text, Title, Select, Item, HTML, MessageBox, JSONModel,
-    MapProviderFactory, UserAnalytics, AuthFetch
+    MapProviderFactory, UserAnalytics, AuthFetch, Log
 ) {
     "use strict";
-
-    var Log = sap.base.Log;
 
     const BASE = "/bridge-management";
 

@@ -12,11 +12,10 @@ sap.ui.define([
     "nhvr/bridgemanagement/model/CapabilityManager",
     "nhvr/bridgemanagement/util/UserAnalytics",
     "nhvr/bridgemanagement/util/LookupService",
-    "nhvr/bridgemanagement/util/ReferenceData"
-], function (Controller, JSONModel, MessageToast, MessageBox, HelpAssistantMixin, CapabilityManager, UserAnalytics, LookupService, ReferenceData) {
+    "nhvr/bridgemanagement/util/ReferenceData",
+    "sap/base/Log"
+], function (Controller, JSONModel, MessageToast, MessageBox, HelpAssistantMixin, CapabilityManager, UserAnalytics, LookupService, ReferenceData, Log) {
     "use strict";
-
-    var Log = sap.base.Log;
 
     const BASE = "/bridge-management";
     const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB

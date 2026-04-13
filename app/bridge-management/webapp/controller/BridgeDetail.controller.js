@@ -13,11 +13,10 @@ sap.ui.define([
     "nhvr/bridgemanagement/util/AuthFetch",
     "nhvr/bridgemanagement/util/UserAnalytics",
     "nhvr/bridgemanagement/model/CapabilityManager",
-    "nhvr/bridgemanagement/util/LookupService"
-], function (Controller, JSONModel, MessageToast, MessageBox, StandardListItem, RoleManager, AppConfig, GeoLocation, AuthFetch, UserAnalytics, CapabilityManager, LookupService) {
+    "nhvr/bridgemanagement/util/LookupService",
+    "sap/base/Log"
+], function (Controller, JSONModel, MessageToast, MessageBox, StandardListItem, RoleManager, AppConfig, GeoLocation, AuthFetch, UserAnalytics, CapabilityManager, LookupService, Log) {
     "use strict";
-
-    var Log = sap.base.Log;
 
     function escapeHtml(str) {
         if (str == null) return "";

@@ -11,11 +11,10 @@ sap.ui.define([
     'sap/m/BusyDialog',
     'nhvr/bridgemanagement/model/CapabilityManager',
     'nhvr/bridgemanagement/util/LookupService',
-    'nhvr/bridgemanagement/util/AuthFetch'
-], function (Controller, JSONModel, MessageToast, MessageBox, BusyDialog, CapabilityManager, LookupService, AuthFetch) {
+    'nhvr/bridgemanagement/util/AuthFetch',
+    'sap/base/Log'
+], function (Controller, JSONModel, MessageToast, MessageBox, BusyDialog, CapabilityManager, LookupService, AuthFetch, Log) {
     'use strict';
-
-    var Log = sap.base.Log;
 
     const SRV = '/bridge-management/';
     const LS_MAP_CONFIG   = 'nhvr_map_config';

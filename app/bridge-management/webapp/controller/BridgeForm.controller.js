@@ -7,11 +7,10 @@ sap.ui.define([
     "sap/m/MessageBox",
     "nhvr/bridgemanagement/model/RoleManager",
     "nhvr/bridgemanagement/util/ReferenceData",
-    "nhvr/bridgemanagement/util/LookupService"
-], function (Controller, MessageToast, MessageBox, RoleManager, ReferenceData, LookupService) {
+    "nhvr/bridgemanagement/util/LookupService",
+    "sap/base/Log"
+], function (Controller, MessageToast, MessageBox, RoleManager, ReferenceData, LookupService, Log) {
     "use strict";
-
-    var Log = sap.base.Log;
 
     const BASE = "/bridge-management";
 

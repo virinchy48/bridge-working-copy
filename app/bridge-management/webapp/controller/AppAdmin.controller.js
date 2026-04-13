@@ -3,11 +3,10 @@ sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "sap/m/MessageToast",
     "sap/m/MessageBox",
-    "nhvr/bridgemanagement/util/AuthFetch"
-], function (Controller, JSONModel, MessageToast, MessageBox, AuthFetch) {
+    "nhvr/bridgemanagement/util/AuthFetch",
+    "sap/base/Log"
+], function (Controller, JSONModel, MessageToast, MessageBox, AuthFetch, Log) {
     "use strict";
-
-    var Log = sap.base.Log;
 
     var _IS_LOC = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
     var _AUTH_H = _IS_LOC ? { "Authorization": "Basic " + btoa("admin:admin") } : {};

@@ -7,11 +7,10 @@ sap.ui.define([
     "sap/m/MessageToast",
     "sap/m/MessageBox",
     "nhvr/bridgemanagement/model/CapabilityManager",
-    "nhvr/bridgemanagement/util/LookupService"
-], function (Controller, JSONModel, MessageToast, MessageBox, CapabilityManager, LookupService) {
+    "nhvr/bridgemanagement/util/LookupService",
+    "sap/base/Log"
+], function (Controller, JSONModel, MessageToast, MessageBox, CapabilityManager, LookupService, Log) {
     "use strict";
-
-    var Log = sap.base.Log;
 
     const BASE = "/bridge-management";
 

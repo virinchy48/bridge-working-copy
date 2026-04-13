@@ -15,11 +15,10 @@ sap.ui.define([
     "nhvr/bridgemanagement/model/RoleManager",
     "nhvr/bridgemanagement/util/AuthFetch",
     "nhvr/bridgemanagement/util/UserAnalytics",
-    "nhvr/bridgemanagement/util/LookupService"
-], function (Controller, JSONModel, MessageToast, MessageBox, Item, ExcelExport, RestrictionAttrs, CsvExport, TablePersonalisation, AlvToolbarMixin, RoleManager, AuthFetch, UserAnalytics, LookupService) {
+    "nhvr/bridgemanagement/util/LookupService",
+    "sap/base/Log"
+], function (Controller, JSONModel, MessageToast, MessageBox, Item, ExcelExport, RestrictionAttrs, CsvExport, TablePersonalisation, AlvToolbarMixin, RoleManager, AuthFetch, UserAnalytics, LookupService, Log) {
     "use strict";
-
-    var Log = sap.base.Log;
 
     const BASE = "/bridge-management";
 
