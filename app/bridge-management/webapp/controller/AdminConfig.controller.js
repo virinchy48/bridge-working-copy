@@ -1049,7 +1049,8 @@ sap.ui.define([
             } else {
                 MessageToast.show("No test URL configured for provider: " + provider);
             }
-        }
+        },
+
         // ═══════════════════════════════════════════════════════
         // BNAC Configuration
         // ═══════════════════════════════════════════════════════
